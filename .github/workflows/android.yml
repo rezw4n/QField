@@ -215,55 +215,10 @@ jobs:
         # if: release or labeled PR
         if: ${{ matrix.all_files_access == 'OFF' && env.SENTRY_AUTH_TOKEN != '' }}
         env:
-          SENTRY_ORG_SLUG: opengisch
+          SENTRY_ORG_SLUG: nsdi
           SENTRY_PROJECT_SLUG: qfield
         run: |
           bundle exec fastlane run sentry_debug_files_upload path:${{ env.CMAKE_BUILD_DIR }}/src/app/android-build/build/intermediates/merged_native_libs/release
-
-
-  deploy_to_playstore:
-    name: deploy to play store
-    runs-on: ubuntu-20.04
-    needs: build
-    if: ${{ ( github.event_name == 'release' || ( github.event_name == 'push' && github.ref == 'refs/heads/master' ) ) }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        if: ${{ env.SENTRY_AUTH_TOKEN != '' }}
-
-      - name: Vars
-        id: vars
-        if: ${{ env.SENTRY_AUTH_TOKEN != '' }}
-        run: |
-          ./scripts/ci/env_gh.sh
-
-      - name: Download apks
-        if: ${{ env.SENTRY_AUTH_TOKEN != '' }}
-        run: |
-          wget https://sos-ch-dk-2.exo.io/qfieldapks/ci-builds/qfield-${{ env.CI_PACKAGE_FILE_SUFFIX }}-android-arm64.apk
-          wget https://sos-ch-dk-2.exo.io/qfieldapks/ci-builds/qfield-${{ env.CI_PACKAGE_FILE_SUFFIX }}-android-arm-neon.apk
-          wget https://sos-ch-dk-2.exo.io/qfieldapks/ci-builds/qfield-${{ env.CI_PACKAGE_FILE_SUFFIX }}-android-x64.apk
-          wget https://sos-ch-dk-2.exo.io/qfieldapks/ci-builds/qfield-${{ env.CI_PACKAGE_FILE_SUFFIX }}-android-x86.apk
-
-      - name: Upload to Google Play Store
-        if: ${{ env.SENTRY_AUTH_TOKEN != '' }}
-        run: |
-          pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib oauth2client
-
-          if [[ -n "${{ env.CI_TAG }}" ]]
-          then
-            RELEASE_MESSAGE="Find out what's new on https://github.com/opengisch/QField/releases/tag/${{ env.CI_TAG }}"
-          else
-            RELEASE_MESSAGE="Update from commit ${GITHUB_SHA}"
-          fi
-
-          ./scripts/basic_upload_apks_service_account.py ch.opengis.${{ env.APP_PACKAGE_NAME }} beta "${RELEASE_MESSAGE}" \
-              qfield-${{ env.CI_PACKAGE_FILE_SUFFIX }}-android-arm64.apk \
-              qfield-${{ env.CI_PACKAGE_FILE_SUFFIX }}-android-arm-neon.apk \
-              qfield-${{ env.CI_PACKAGE_FILE_SUFFIX }}-android-x64.apk \
-              qfield-${{ env.CI_PACKAGE_FILE_SUFFIX }}-android-x86.apk
-        env:
-          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
 
 
   comment_pr:
