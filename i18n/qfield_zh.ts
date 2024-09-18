@@ -2124,11 +2124,7 @@ The features geometries will be combined into feature &apos;%1&apos;, which will
     </message>
     <message>
         <source>Details stamping enabled</source>
-        <translation>详细水印已启用</translation>
-    </message>
-    <message>
-        <source>Details tamping disabled</source>
-        <translation>详细水印已禁用</translation>
+        <translation>戳记已启用</translation>
     </message>
     <message>
         <source>Latitude</source>
@@ -2149,6 +2145,10 @@ The features geometries will be combined into feature &apos;%1&apos;, which will
     <message>
         <source>Orientation</source>
         <translation>方向</translation>
+    </message>
+    <message>
+        <source>Details stamping disabled</source>
+        <translation>戳记已禁用</translation>
     </message>
 </context>
 <context>
@@ -3335,7 +3335,7 @@ Cancel to make a minimal device scan instead.</source>
     </message>
     <message>
         <source>Enable map rotation</source>
-        <translation>启用地图旋转</translation>
+        <translation>旋转地图</translation>
     </message>
     <message>
         <source>When switched on, the map can be rotated by the user.</source>
@@ -4917,7 +4917,7 @@ Cancel to make a minimal device scan instead.</source>
     </message>
     <message>
         <source>Enable Map Rotation</source>
-        <translation>启用地图旋转</translation>
+        <translation>旋转地图</translation>
     </message>
     <message>
         <source>Dashboard</source>
