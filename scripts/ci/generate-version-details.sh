@@ -19,13 +19,13 @@ if [[ -n ${CI_TAG} ]]; then
 	# ^-- SC2155: Declare and assign separately to avoid masking return values.
 
 	if [[ ${ALL_FILES_ACCESS} == "ON" ]]; then
-		export APP_NAME="QField~"
-		export APP_PACKAGE_NAME="qfield_all_access"
+		export APP_NAME="SmartField~"
+		export APP_PACKAGE_NAME="smartfield_all_access"
 	else
-		export APP_NAME="QField"
-		export APP_PACKAGE_NAME="qfield"
+		export APP_NAME="SmartField"
+		export APP_PACKAGE_NAME="smartfield"
 	fi
-	export APP_ICON="qfield_logo"
+	export APP_ICON="smartfield_logo"
 	export APP_VERSION="${CI_TAG}" # v1.2.3 or v1.2.3-rc4
 	export APP_VERSION_STR
 	export APK_VERSION_CODE
@@ -37,13 +37,13 @@ elif [[ ${CI_PULL_REQUEST} = false ]]; then
 	CUSTOM_APP_PACKAGE_NAME=$(echo ${NIGHTLY_PACKAGE_NAME} | awk '{print $NF}' FS=.)
 
 	if [[ ${ALL_FILES_ACCESS} == "ON" ]]; then
-		export APP_NAME="${CUSTOM_APP_NAME:-QField~ Dev}"
-		export APP_PACKAGE_NAME="${CUSTOM_APP_PACKAGE_NAME:-qfield_all_access_dev}"
+		export APP_NAME="${CUSTOM_APP_NAME:-SmartField~ Dev}"
+		export APP_PACKAGE_NAME="${CUSTOM_APP_PACKAGE_NAME:-smartfield_all_access_dev}"
 	else
-		export APP_NAME="${CUSTOM_APP_NAME:-QField Dev}"
-		export APP_PACKAGE_NAME="${CUSTOM_APP_PACKAGE_NAME:-qfield_dev}"
+		export APP_NAME="${CUSTOM_APP_NAME:-SmartField Dev}"
+		export APP_PACKAGE_NAME="${CUSTOM_APP_PACKAGE_NAME:-smartfield_dev}"
 	fi
-	export APP_ICON="qfield_logo_beta"
+	export APP_ICON="smartfield_logo_beta"
 	export APP_VERSION=""
 	# take 0 + (2020400 + number of CI runs) + arch(triplet) number
 	# 020204000 has no meaning - it's just where we had to start
@@ -58,14 +58,14 @@ elif [[ ${CI_PULL_REQUEST} = false ]]; then
 else
 	echo "Building pull request beta"
 	if [[ ${ALL_FILES_ACCESS} == "ON" ]]; then
-		export APP_NAME="QField~ Beta ${CI_PULL_REQUEST_NUMBER}"
-		export APP_PACKAGE_NAME="qfield_all_access_beta"
+		export APP_NAME="SmartField~ Beta ${CI_PULL_REQUEST_NUMBER}"
+		export APP_PACKAGE_NAME="smartfield_all_access_beta"
 	else
-		export APP_NAME="QField Beta ${CI_PULL_REQUEST_NUMBER}"
-		export APP_PACKAGE_NAME="qfield_beta"
+		export APP_NAME="SmartField Beta ${CI_PULL_REQUEST_NUMBER}"
+		export APP_PACKAGE_NAME="smartfield_beta"
 	fi
 
-	export APP_ICON="qfield_logo_pr"
+	export APP_ICON="smartfield_logo_pr"
 	export APP_VERSION=""
 	export APP_VERSION_STR="PR${CI_PULL_REQUEST_NUMBER} - ${APP_VERSION_NAME}"
 	export APK_VERSION_CODE="1"

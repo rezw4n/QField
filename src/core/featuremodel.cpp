@@ -146,11 +146,11 @@ void FeatureModel::setCurrentLayer( QgsVectorLayer *layer )
       }
     }
 
-    mGeometryLockedByDefault = mLayer->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked" ), false ).toBool();
-    const bool geometryLockedExpressionActive = mLayer->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked_expression_active" ), false ).toBool();
+    mGeometryLockedByDefault = mLayer->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked" ), false ).toBool();
+    const bool geometryLockedExpressionActive = mLayer->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked_expression_active" ), false ).toBool();
     if ( geometryLockedExpressionActive )
     {
-      mGeometryLockedExpression = mLayer->customProperty( QStringLiteral( "QFieldSync/geometry_locked_expression" ), QString() ).toString().trimmed();
+      mGeometryLockedExpression = mLayer->customProperty( QStringLiteral( "SmartFieldSync/geometry_locked_expression" ), QString() ).toString().trimmed();
     }
     else
     {
@@ -442,11 +442,11 @@ void FeatureModel::updateDefaultValues()
       QgsExpression exp( fields.at( i ).defaultValueDefinition().expression() );
       exp.prepare( &expressionContext );
       if ( exp.hasParserError() )
-        QgsMessageLog::logMessage( tr( "Default value expression for %1:%2 has parser error: %3" ).arg( mLayer->name(), fields.at( i ).name(), exp.parserErrorString() ), QStringLiteral( "QField" ) );
+        QgsMessageLog::logMessage( tr( "Default value expression for %1:%2 has parser error: %3" ).arg( mLayer->name(), fields.at( i ).name(), exp.parserErrorString() ), QStringLiteral( "SmartField" ) );
 
       QVariant value = exp.evaluate( &expressionContext );
       if ( exp.hasEvalError() )
-        QgsMessageLog::logMessage( tr( "Default value expression for %1:%2 has evaluation error: %3" ).arg( mLayer->name(), fields.at( i ).name(), exp.evalErrorString() ), QStringLiteral( "QField" ) );
+        QgsMessageLog::logMessage( tr( "Default value expression for %1:%2 has evaluation error: %3" ).arg( mLayer->name(), fields.at( i ).name(), exp.evalErrorString() ), QStringLiteral( "SmartField" ) );
 
       mFeature.setAttribute( i, value );
     }
@@ -500,7 +500,7 @@ bool FeatureModel::save()
 
       QgsFeature feat = mFeature;
       if ( !mLayer->updateFeature( feat, true ) )
-        QgsMessageLog::logMessage( tr( "Cannot update feature" ), QStringLiteral( "QField" ), Qgis::Warning );
+        QgsMessageLog::logMessage( tr( "Cannot update feature" ), QStringLiteral( "SmartField" ), Qgis::Warning );
 
       if ( mProject && mProject->topologicalEditing() )
       {
@@ -525,7 +525,7 @@ bool FeatureModel::save()
         }
         else
         {
-          QgsMessageLog::logMessage( tr( "Feature %1 could not be fetched after commit" ).arg( mFeature.id() ), QStringLiteral( "QField" ), Qgis::Warning );
+          QgsMessageLog::logMessage( tr( "Feature %1 could not be fetched after commit" ).arg( mFeature.id() ), QStringLiteral( "SmartField" ), Qgis::Warning );
         }
       }
       break;
@@ -533,22 +533,19 @@ bool FeatureModel::save()
 
     case MultiFeatureModel:
     {
-      // We need to copy these members as the first feature updated triggers a refresh of the selected features, leading to changes in feature model members
-      const QgsFeature referenceFeature = mFeature;
-      const QList<bool> attributesAllowEdit = mAttributesAllowEdit;
-      QList<QgsFeature> features = mFeatures;
-      for ( QgsFeature &feature : features )
+      for ( QgsFeature &feature : mFeatures )
       {
-        for ( int i = 0; i < referenceFeature.attributes().count(); i++ )
+        for ( int i = 0; i < mFeature.attributes().count(); i++ )
         {
-          if ( !attributesAllowEdit[i] )
+          if ( !mAttributesAllowEdit[i] )
             continue;
 
-          feature.setAttribute( i, referenceFeature.attributes().at( i ) );
+          feature.setAttribute( i, mFeature.attributes().at( i ) );
         }
+
         if ( !mLayer->updateFeature( feature ) )
         {
-          QgsMessageLog::logMessage( tr( "Cannot update feature" ), QStringLiteral( "QField" ), Qgis::Warning );
+          QgsMessageLog::logMessage( tr( "Cannot update feature" ), QStringLiteral( "SmartField" ), Qgis::Warning );
         }
       }
       rv &= commit();
@@ -783,7 +780,7 @@ bool FeatureModel::create()
 
   if ( !startEditing() )
   {
-    QgsMessageLog::logMessage( tr( "Cannot start editing on layer \"%1\" to create feature %2" ).arg( mLayer->name() ).arg( mFeature.id() ), QStringLiteral( "QField" ), Qgis::Critical );
+    QgsMessageLog::logMessage( tr( "Cannot start editing on layer \"%1\" to create feature %2" ).arg( mLayer->name() ).arg( mFeature.id() ), QStringLiteral( "SmartField" ), Qgis::Critical );
     return false;
   }
 
@@ -859,20 +856,20 @@ bool FeatureModel::create()
       }
       else
       {
-        QgsMessageLog::logMessage( tr( "Layer \"%1\" has been commited but the newly created feature %2 could not be fetched" ).arg( mLayer->name() ).arg( mFeature.id() ), QStringLiteral( "QField" ), Qgis::Critical );
+        QgsMessageLog::logMessage( tr( "Layer \"%1\" has been commited but the newly created feature %2 could not be fetched" ).arg( mLayer->name() ).arg( mFeature.id() ), QStringLiteral( "SmartField" ), Qgis::Critical );
         isSuccess = false;
       }
     }
     else
     {
       const QString msgs = mLayer->commitErrors().join( QStringLiteral( "\n" ) );
-      QgsMessageLog::logMessage( tr( "Layer \"%1\" cannot be commited with the newly created feature %2. Reason:\n%3" ).arg( mLayer->name() ).arg( mFeature.id() ).arg( msgs ), QStringLiteral( "QField" ), Qgis::Critical );
+      QgsMessageLog::logMessage( tr( "Layer \"%1\" cannot be commited with the newly created feature %2. Reason:\n%3" ).arg( mLayer->name() ).arg( mFeature.id() ).arg( msgs ), QStringLiteral( "SmartField" ), Qgis::Critical );
       isSuccess = false;
     }
   }
   else
   {
-    QgsMessageLog::logMessage( tr( "Feature %2 could not be added in layer \"%1\"" ).arg( mLayer->name() ).arg( mFeature.id() ), QStringLiteral( "QField" ), Qgis::Critical );
+    QgsMessageLog::logMessage( tr( "Feature %2 could not be added in layer \"%1\"" ).arg( mLayer->name() ).arg( mFeature.id() ), QStringLiteral( "SmartField" ), Qgis::Critical );
     isSuccess = false;
   }
 
@@ -896,7 +893,7 @@ bool FeatureModel::commit()
 {
   if ( !mLayer->commitChanges() )
   {
-    QgsMessageLog::logMessage( tr( "Could not save changes. Rolling back." ), QStringLiteral( "QField" ), Qgis::Critical );
+    QgsMessageLog::logMessage( tr( "Could not save changes. Rolling back." ), QStringLiteral( "SmartField" ), Qgis::Critical );
     mLayer->rollBack();
     return false;
   }
@@ -914,7 +911,7 @@ bool FeatureModel::startEditing()
 
   if ( !mLayer->startEditing() )
   {
-    QgsMessageLog::logMessage( tr( "Cannot start editing" ), QStringLiteral( "QField" ), Qgis::Warning );
+    QgsMessageLog::logMessage( tr( "Cannot start editing" ), QStringLiteral( "SmartField" ), Qgis::Warning );
     return false;
   }
 

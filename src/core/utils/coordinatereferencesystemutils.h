@@ -16,13 +16,13 @@
 #ifndef COORDINATEREFERENCESYSTEMUTILS_H
 #define COORDINATEREFERENCESYSTEMUTILS_H
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 
 #include <QObject>
 #include <qgscoordinatereferencesystem.h>
 #include <qgscoordinatetransformcontext.h>
 
-class QFIELD_CORE_EXPORT CoordinateReferenceSystemUtils : public QObject
+class SMARTFIELD_CORE_EXPORT CoordinateReferenceSystemUtils : public QObject
 {
     Q_OBJECT
 

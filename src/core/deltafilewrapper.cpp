@@ -16,9 +16,9 @@
  ***************************************************************************/
 
 #include "deltafilewrapper.h"
-#include "qfield.h"
+#include "smartfield.h"
 #include "utils/fileutils.h"
-#include "utils/qfieldcloudutils.h"
+#include "utils/smartcloudutils.h"
 
 #include <QDebug>
 #include <QFile>
@@ -54,13 +54,13 @@ DeltaFileWrapper::DeltaFileWrapper( const QgsProject *project, const QString &fi
 
 #if 0
 //  TODO enable this code once we have a single delta pointer stored per project and passed to the layer observer.
-//  Now both the qfieldcloudprojects model (Read only) and the layer observer (Read/Write) create their pointers to the deltafilewrapper
+//  Now both the smartcloudprojects model (Read only) and the layer observer (Read/Write) create their pointers to the deltafilewrapper
   if ( mErrorType == DeltaFileWrapper::ErrorTypes::NoError && sFileLocks()->contains( mFileName ) )
     mErrorType = DeltaFileWrapper::LockError;
 #endif
 
   if ( mErrorType == DeltaFileWrapper::ErrorTypes::NoError )
-    mCloudProjectId = QFieldCloudUtils::getProjectId( mProject->fileName() );
+    mCloudProjectId = SmartCloudUtils::getProjectId( mProject->fileName() );
 
   if ( mErrorType == DeltaFileWrapper::ErrorTypes::NoError && mCloudProjectId.isNull() )
     mErrorType = DeltaFileWrapper::ErrorTypes::NotCloudProjectError;
@@ -494,10 +494,11 @@ void DeltaFileWrapper::addPatch( const QString &localLayerId, const QString &sou
       { "sourcePk", oldFeature.attribute( sourcePkAttrName ).toString() },
       { "sourceLayerId", sourceLayerId },
       { "uuid", QUuid::createUuid().toString( QUuid::WithoutBraces ) },
-      { "exportId", QFieldCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastExportId" ) ).toString() },
-      { "clientId", QFieldCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastLocalExportId" ) ).toString() },
+      { "exportId", SmartCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastExportId" ) ).toString() },
+      { "clientId", SmartCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastLocalExportId" ) ).toString() },
     } );
 
+  const QStringList attachmentFieldsList = attachmentFieldNames( mProject, localLayerId );
   const QgsGeometry oldGeom = oldFeature.geometry();
   const QgsGeometry newGeom = newFeature.geometry();
   const QgsAttributes oldAttrs = oldFeature.attributes();
@@ -533,12 +534,12 @@ void DeltaFileWrapper::addPatch( const QString &localLayerId, const QString &sou
 #if _QGIS_VERSION_INT >= 33800
       case Qgis::FieldOrigin::Expression:
       case Qgis::FieldOrigin::Edit:
-      // TODO probably one day when QField supports editable joins we need to change that, if the other feature change is not a separate delta.
+      // TODO probably one day when SmartField supports editable joins we need to change that, if the other feature change is not a separate delta.
       case Qgis::FieldOrigin::Join:
 #else
       case QgsFields::OriginExpression:
       case QgsFields::OriginEdit:
-      // TODO probably one day when QField supports editable joins we need to change that, if the other feature change is not a separate delta.
+      // TODO probably one day when SmartField supports editable joins we need to change that, if the other feature change is not a separate delta.
       case QgsFields::OriginJoin:
 #endif
         ignoredFields++;
@@ -580,6 +581,9 @@ void DeltaFileWrapper::addPatch( const QString &localLayerId, const QString &sou
 
   QJsonObject tmpOldAttrs;
   QJsonObject tmpNewAttrs;
+  QJsonObject tmpOldFileChecksums;
+  QJsonObject tmpNewFileChecksums;
+
   for ( const QgsField &field : fields )
   {
     const QString name = field.name();
@@ -599,6 +603,30 @@ void DeltaFileWrapper::addPatch( const QString &localLayerId, const QString &sou
       tmpNewAttrs.insert( name, attributeToJsonValue( newVal ) );
 
       hasFeatureChanged = true;
+
+      if ( attachmentFieldsList.contains( name ) )
+      {
+        const QString homeDir = mProject->homePath();
+        const QString oldFileName = oldVal.toString();
+        const QString newFileName = newVal.toString();
+
+        // if the file name is an empty or null string, there is not much we can do
+        if ( !oldFileName.isEmpty() )
+        {
+          const QString oldFullFileName = QFileInfo( oldFileName ).isAbsolute() ? oldFileName : QStringLiteral( "%1/%2" ).arg( homeDir, oldFileName );
+          const QByteArray oldFileChecksum = FileUtils::fileChecksum( oldFullFileName, QCryptographicHash::Sha256 );
+          const QJsonValue oldFileChecksumJson = oldFileChecksum.isEmpty() ? QJsonValue::Null : QJsonValue( QString( oldFileChecksum.toHex() ) );
+          tmpOldFileChecksums.insert( oldFileName, oldFileChecksumJson );
+        }
+
+        if ( !newFileName.isEmpty() )
+        {
+          const QString newFullFileName = QFileInfo( newFileName ).isAbsolute() ? newFileName : QStringLiteral( "%1/%2" ).arg( homeDir, newFileName );
+          const QByteArray newFileChecksum = FileUtils::fileChecksum( newFullFileName, QCryptographicHash::Sha256 );
+          const QJsonValue newFileChecksumJson = newFileChecksum.isEmpty() ? QJsonValue::Null : QJsonValue( QString( newFileChecksum.toHex() ) );
+          tmpNewFileChecksums.insert( newFileName, newFileChecksumJson );
+        }
+      }
     }
     else if ( storeSnapshot )
     {
@@ -610,23 +638,20 @@ void DeltaFileWrapper::addPatch( const QString &localLayerId, const QString &sou
   if ( !hasFeatureChanged )
     return;
 
-  if ( !tmpOldAttrs.isEmpty() || !tmpNewAttrs.isEmpty() )
+  if ( tmpOldAttrs.length() > 0 || tmpNewAttrs.length() > 0 )
   {
     oldData.insert( QStringLiteral( "attributes" ), tmpOldAttrs );
+    if ( tmpOldFileChecksums.length() > 0 )
+      oldData.insert( QStringLiteral( "files_sha256" ), tmpOldFileChecksums );
+
     newData.insert( QStringLiteral( "attributes" ), tmpNewAttrs );
-
-    QJsonObject oldFileChecksums;
-    QJsonObject newFileChecksums;
-    std::tie( newFileChecksums, oldFileChecksums ) = addAttachments( localLayerId, tmpNewAttrs, tmpOldAttrs );
-    if ( !oldFileChecksums.isEmpty() )
-    {
-      oldData.insert( QStringLiteral( "files_sha256" ), oldFileChecksums );
-    }
-
-    if ( !newFileChecksums.isEmpty() )
-    {
-      newData.insert( QStringLiteral( "files_sha256" ), newFileChecksums );
-    }
+    if ( tmpNewFileChecksums.length() > 0 )
+      newData.insert( QStringLiteral( "files_sha256" ), tmpNewFileChecksums );
+  }
+  else
+  {
+    Q_ASSERT( tmpOldFileChecksums.isEmpty() );
+    Q_ASSERT( tmpNewFileChecksums.isEmpty() );
   }
 
   newData.insert( QStringLiteral( "is_snapshot" ), false );
@@ -637,42 +662,6 @@ void DeltaFileWrapper::addPatch( const QString &localLayerId, const QString &sou
   appendDelta( delta );
 }
 
-std::tuple<QJsonObject, QJsonObject> DeltaFileWrapper::addAttachments( const QString &localLayerId, const QJsonObject &newAttrs, const QJsonObject &oldAttrs )
-{
-  QJsonObject newFileChecksums;
-  QJsonObject oldFileChecksums;
-
-  const QStringList attachmentFieldsList = attachmentFieldNames( mProject, localLayerId );
-  const QStringList newAttrNames = newAttrs.keys();
-  for ( const QString &name : newAttrNames )
-  {
-    if ( attachmentFieldsList.contains( name ) )
-    {
-      const QString homeDir = mProject->homePath();
-      const QString oldFileName = oldAttrs.value( name ).toString();
-      const QString newFileName = newAttrs.value( name ).toString();
-
-      // if the file name is an empty or null string, there is not much we can do
-      if ( !oldFileName.isEmpty() )
-      {
-        const QString oldFullFileName = QFileInfo( oldFileName ).isAbsolute() ? oldFileName : QStringLiteral( "%1/%2" ).arg( homeDir, oldFileName );
-        const QByteArray oldFileChecksum = FileUtils::fileChecksum( oldFullFileName, QCryptographicHash::Sha256 );
-        const QJsonValue oldFileChecksumJson = oldFileChecksum.isEmpty() ? QJsonValue::Null : QJsonValue( QString( oldFileChecksum.toHex() ) );
-        oldFileChecksums.insert( oldFileName, oldFileChecksumJson );
-      }
-
-      if ( !newFileName.isEmpty() )
-      {
-        const QString newFullFileName = QFileInfo( newFileName ).isAbsolute() ? newFileName : QStringLiteral( "%1/%2" ).arg( homeDir, newFileName );
-        const QByteArray newFileChecksum = FileUtils::fileChecksum( newFullFileName, QCryptographicHash::Sha256 );
-        const QJsonValue newFileChecksumJson = newFileChecksum.isEmpty() ? QJsonValue::Null : QJsonValue( QString( newFileChecksum.toHex() ) );
-        newFileChecksums.insert( newFileName, newFileChecksumJson );
-      }
-    }
-  }
-
-  return std::make_tuple( newFileChecksums, oldFileChecksums );
-}
 
 void DeltaFileWrapper::addDelete( const QString &localLayerId, const QString &sourceLayerId, const QString &localPkAttrName, const QString &sourcePkAttrName, const QgsFeature &oldFeature )
 {
@@ -686,8 +675,8 @@ void DeltaFileWrapper::addDelete( const QString &localLayerId, const QString &so
       { "sourcePk", oldFeature.attribute( sourcePkAttrName ).toString() },
       { "sourceLayerId", sourceLayerId },
       { "uuid", QUuid::createUuid().toString( QUuid::WithoutBraces ) },
-      { "exportId", QFieldCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastExportId" ) ).toString() },
-      { "clientId", QFieldCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastLocalExportId" ) ).toString() },
+      { "exportId", SmartCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastExportId" ) ).toString() },
+      { "clientId", SmartCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastLocalExportId" ) ).toString() },
     } );
 
   const QStringList attachmentFieldsList = attachmentFieldNames( mProject, localLayerId );
@@ -713,11 +702,11 @@ void DeltaFileWrapper::addDelete( const QString &localLayerId, const QString &so
     }
   }
 
-  if ( !tmpOldAttrs.isEmpty() )
+  if ( tmpOldAttrs.length() > 0 )
   {
     oldData.insert( QStringLiteral( "attributes" ), tmpOldAttrs );
 
-    if ( !tmpOldFileChecksums.isEmpty() )
+    if ( tmpOldFileChecksums.length() > 0 )
     {
       oldData.insert( QStringLiteral( "files_sha256" ), tmpOldFileChecksums );
     }
@@ -744,13 +733,15 @@ void DeltaFileWrapper::addCreate( const QString &localLayerId, const QString &so
       { "sourcePk", newFeature.attribute( sourcePkAttrName ).toString() },
       { "sourceLayerId", sourceLayerId },
       { "uuid", QUuid::createUuid().toString( QUuid::WithoutBraces ) },
-      { "exportId", QFieldCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastExportId" ) ).toString() },
-      { "clientId", QFieldCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastLocalExportId" ) ).toString() },
+      { "exportId", SmartCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastExportId" ) ).toString() },
+      { "clientId", SmartCloudUtils::projectSetting( mCloudProjectId, QStringLiteral( "lastLocalExportId" ) ).toString() },
     } );
+  const QStringList attachmentFieldsList = attachmentFieldNames( mProject, localLayerId );
   const QgsAttributes newAttrs = newFeature.attributes();
   const QgsFields newFields = newFeature.fields();
   QJsonObject newData( { { "geometry", geometryToJsonValue( newFeature.geometry() ) } } );
   QJsonObject tmpNewAttrs;
+  QJsonObject tmpNewFileChecksums;
 
   for ( int idx = 0; idx < newAttrs.count(); ++idx )
   {
@@ -763,12 +754,12 @@ void DeltaFileWrapper::addCreate( const QString &localLayerId, const QString &so
 #if _QGIS_VERSION_INT >= 33800
       case Qgis::FieldOrigin::Expression:
       case Qgis::FieldOrigin::Edit:
-      // TODO probably one day when QField supports editable joins we need to change that, if the other feature change is not a separate delta.
+      // TODO probably one day when SmartField supports editable joins we need to change that, if the other feature change is not a separate delta.
       case Qgis::FieldOrigin::Join:
 #else
       case QgsFields::OriginExpression:
       case QgsFields::OriginEdit:
-      // TODO probably one day when QField supports editable joins we need to change that, if the other feature change is not a separate delta.
+      // TODO probably one day when SmartField supports editable joins we need to change that, if the other feature change is not a separate delta.
       case QgsFields::OriginJoin:
 #endif
         continue;
@@ -783,19 +774,30 @@ void DeltaFileWrapper::addCreate( const QString &localLayerId, const QString &so
     }
 
     tmpNewAttrs.insert( name, attributeToJsonValue( newVal ) );
+
+    if ( attachmentFieldsList.contains( name ) )
+    {
+      const QString newFileName = newVal.toString();
+      const QString newFullFileName = QFileInfo( newFileName ).isAbsolute() ? newFileName : QStringLiteral( "%1/%2" ).arg( mProject->homePath(), newFileName );
+      const QByteArray newFileChecksum = FileUtils::fileChecksum( newFullFileName, QCryptographicHash::Sha256 );
+      const QJsonValue newFileChecksumJson = newFileChecksum.isEmpty() ? QJsonValue::Null : QJsonValue( QString( newFileChecksum.toHex() ) );
+
+      tmpNewFileChecksums.insert( newFileName, newFileChecksumJson );
+    }
   }
 
-  if ( !tmpNewAttrs.isEmpty() )
+  if ( tmpNewAttrs.length() > 0 )
   {
     newData.insert( QStringLiteral( "attributes" ), tmpNewAttrs );
 
-    QJsonObject dummyOldFileChecksums;
-    QJsonObject newFileChecksums;
-    std::tie( newFileChecksums, dummyOldFileChecksums ) = addAttachments( localLayerId, tmpNewAttrs );
-    if ( !newFileChecksums.isEmpty() )
+    if ( tmpNewFileChecksums.length() > 0 )
     {
-      newData.insert( QStringLiteral( "files_sha256" ), newFileChecksums );
+      newData.insert( QStringLiteral( "files_sha256" ), tmpNewFileChecksums );
     }
+  }
+  else
+  {
+    Q_ASSERT( tmpNewFileChecksums.isEmpty() );
   }
 
   delta.insert( QStringLiteral( "new" ), newData );
@@ -869,7 +871,7 @@ void DeltaFileWrapper::mergePatchDelta( const QJsonObject &delta )
   QJsonObject tmpNewAttrs;
   if ( newData.contains( QStringLiteral( "geometry" ) ) )
   {
-    newGeomString = newData.value( QStringLiteral( "geometry" ) ).toString();
+    newGeomString = oldData.value( QStringLiteral( "geometry" ) ).toString();
   }
   if ( newData.contains( QStringLiteral( "attributes" ) ) )
   {
@@ -907,20 +909,8 @@ void DeltaFileWrapper::mergePatchDelta( const QJsonObject &delta )
       attributesCreate.insert( attributeName, tmpNewAttrs.value( attributeName ) );
     }
 
-    if ( !newGeomString.isEmpty() )
-    {
-      newCreate.insert( QStringLiteral( "geometry" ), newGeomString );
-    }
+    newCreate.insert( QStringLiteral( "attributes" ), newGeomString );
     newCreate.insert( QStringLiteral( "attributes" ), attributesCreate );
-
-    QJsonObject dummyOldFileChecksums;
-    QJsonObject newFileChecksums;
-    std::tie( newFileChecksums, dummyOldFileChecksums ) = addAttachments( localLayerId, attributesCreate );
-    if ( !newFileChecksums.isEmpty() )
-    {
-      newCreate.insert( QStringLiteral( "files_sha256" ), newFileChecksums );
-    }
-
     deltaCreate.insert( QStringLiteral( "new" ), newCreate );
     deltaCreate.insert( QStringLiteral( "sourcePk" ), delta.value( QStringLiteral( "sourcePk" ) ) );
 
@@ -967,18 +957,6 @@ void DeltaFileWrapper::mergePatchDelta( const QJsonObject &delta )
           }
           existingOldData.insert( "attributes", existingOldAttributes );
           existingNewData.insert( "attributes", existingNewAttributes );
-
-          QJsonObject oldFileChecksums;
-          QJsonObject newFileChecksums;
-          std::tie( newFileChecksums, oldFileChecksums ) = addAttachments( localLayerId, existingNewAttributes, existingOldAttributes );
-          if ( !oldFileChecksums.isEmpty() )
-          {
-            existingOldData.insert( "files_sha256", oldFileChecksums );
-          }
-          if ( !newFileChecksums.isEmpty() )
-          {
-            existingNewData.insert( "files_sha256", newFileChecksums );
-          }
         }
         existingDelta.insert( "old", existingOldData );
         existingDelta.insert( "new", existingNewData );
@@ -1126,7 +1104,7 @@ bool DeltaFileWrapper::applyInternal( bool shouldApplyInReverse )
   // 3) commit the changes, if fails, revert the rest of the layers
   if ( isSuccess )
   {
-    for ( auto [layerId, vl] : qfield::asKeyValueRange( vectorLayers ) )
+    for ( auto [layerId, vl] : smartfield::asKeyValueRange( vectorLayers ) )
     {
       // despite the error, try to rollback all the changes so far
       if ( vl->commitChanges() )
@@ -1143,7 +1121,7 @@ bool DeltaFileWrapper::applyInternal( bool shouldApplyInReverse )
   // 4) revert the changes that didn't manage to be applied
   if ( !isSuccess )
   {
-    for ( auto [layerId, vl] : qfield::asKeyValueRange( vectorLayers ) )
+    for ( auto [layerId, vl] : smartfield::asKeyValueRange( vectorLayers ) )
     {
       // the layer has already been committed
       if ( !vl )
@@ -1232,7 +1210,7 @@ bool DeltaFileWrapper::applyDeltasOnLayers( QHash<QString, QgsVectorLayer *> &ve
       if ( !geomWkt.isEmpty() )
         geom = QgsGeometry::fromWkt( geomWkt );
 
-      for ( auto [attrName, attrValue] : qfield::asKeyValueRange( attributes ) )
+      for ( auto [attrName, attrValue] : smartfield::asKeyValueRange( attributes ) )
         qgsAttributeMap.insert( fields.indexFromName( attrName ), attrValue );
 
       QgsFeature createdFeature = QgsVectorLayerUtils::createFeature( vectorLayers[layerId], geom, qgsAttributeMap );
@@ -1266,7 +1244,7 @@ bool DeltaFileWrapper::applyDeltasOnLayers( QHash<QString, QgsVectorLayer *> &ve
         vectorLayers[layerId]->changeGeometry( f.id(), geom );
       }
 
-      for ( auto [attrName, attrValue] : qfield::asKeyValueRange( attributes ) )
+      for ( auto [attrName, attrValue] : smartfield::asKeyValueRange( attributes ) )
       {
         if ( !vectorLayers[layerId]->changeAttributeValue( f.id(), fields.indexOf( attrName ), attrValue ) )
           return false;
@@ -1338,9 +1316,9 @@ QPair<int, QString> DeltaFileWrapper::getLocalPkAttribute( const QgsVectorLayer 
 
 QPair<int, QString> DeltaFileWrapper::getSourcePkAttribute( const QgsVectorLayer *vl )
 {
-  QString pkAttrNamesAggr = vl->customProperty( QStringLiteral( "QFieldSync/sourceDataPrimaryKeys" ) ).toString();
+  QString pkAttrNamesAggr = vl->customProperty( QStringLiteral( "SmartFieldSync/sourceDataPrimaryKeys" ) ).toString();
 
-  qInfo() << "DeltaFileWrapper::getSourcePkAttribute: getting pkAttrNamesAggr=" << pkAttrNamesAggr << " with type=" << vl->customProperty( QStringLiteral( "QFieldSync/sourceDataPrimaryKeys" ) ).typeName();
+  qInfo() << "DeltaFileWrapper::getSourcePkAttribute: getting pkAttrNamesAggr=" << pkAttrNamesAggr << " with type=" << vl->customProperty( QStringLiteral( "SmartFieldSync/sourceDataPrimaryKeys" ) ).typeName();
 
   if ( pkAttrNamesAggr.isEmpty() )
   {

@@ -117,7 +117,7 @@ QList<IdentifyTool::IdentifyResult> IdentifyTool::identifyVectorLayer( QgsVector
     req.setFilterRect( r );
     if ( !temporalFilter.isEmpty() )
       req.setFilterExpression( temporalFilter );
-    req.setLimit( QSettings().value( "/QField/identify/limit", 200 ).toInt() );
+    req.setLimit( QSettings().value( "/SmartField/identify/limit", 200 ).toInt() );
 #if _QGIS_VERSION_INT >= 33500
     req.setFlags( Qgis::FeatureRequestFlag::ExactIntersect );
 #else

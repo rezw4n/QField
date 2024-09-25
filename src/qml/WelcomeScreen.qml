@@ -1,11 +1,11 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Controls.Material.impl
-import QtQuick.Layouts
-import QtQuick.Particles
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Controls.Material.impl 2.14
+import QtQuick.Layouts 1.14
+import QtQuick.Particles 2.14
 import QtCore
-import org.qfield
-import Theme
+import org.smartfield 1.0
+import Theme 1.0
 
 Page {
   id: welcomeScreen
@@ -14,11 +14,11 @@ Page {
 
   property alias model: table.model
   signal openLocalDataPicker
-  signal showQFieldCloudScreen
+  signal showSmartCloudScreen
 
   Settings {
     id: registry
-    category: 'QField'
+    category: 'SmartField'
 
     property string baseMapProject: ''
     property string defaultProject: ''
@@ -44,17 +44,7 @@ Page {
     padding: 0
     topPadding: Math.max(0, Math.min(80, (mainWindow.height - welcomeGrid.height) / 2 - 45))
     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-    ScrollBar.vertical: QfScrollBar {
-      opacity: active
-      _maxSize: 4
-      _minSize: 2
-
-      Behavior on opacity  {
-        NumberAnimation {
-          duration: 200
-        }
-      }
-    }
+    ScrollBar.vertical.policy: ScrollBar.AsNeeded
     contentItem: welcomeGrid
     contentWidth: welcomeGrid.width
     contentHeight: welcomeGrid.height
@@ -78,7 +68,7 @@ Page {
         Layout.preferredWidth: Math.min(138, mainWindow.height / 4)
         Layout.preferredHeight: Math.min(138, mainWindow.height / 4)
 
-        source: "qrc:/images/qfield_logo.svg"
+        source: "qrc:/images/smartfield_logo.svg"
         rotationOffset: 220
       }
 
@@ -148,7 +138,7 @@ Page {
                 icon.source: Theme.getThemeIcon('ic_create_white_24dp')
 
                 onClicked: {
-                  Qt.openUrlExternally("https://www.qfield.org/");
+                  Qt.openUrlExternally("https://www.smartfield.org/");
                   feedbackView.Layout.preferredHeight = 0;
                 }
               }
@@ -182,7 +172,7 @@ Page {
             Text {
               Layout.margins: 6
               Layout.maximumWidth: feedbackView.width - 12
-              text: qsTr("Hey there, how do you like your experience with QField so far?")
+              text: qsTr("Hey there, how do you like your experience with SmartField so far?")
               font: Theme.defaultFont
               color: Theme.mainTextColor
               horizontalAlignment: Text.AlignHCenter
@@ -208,11 +198,7 @@ Page {
                 round: true
 
                 onClicked: {
-                  if (Qt.platform.os === "android" || Qt.platform.os === "ios" || Qt.platform.os === "windows") {
-                    feedbackView.currentIndex = 2;
-                  } else {
-                    feedbackView.Layout.preferredHeight = 0;
-                  }
+                  feedbackView.currentIndex = 2;
                 }
               }
             }
@@ -244,7 +230,7 @@ Page {
             Text {
               Layout.margins: 6
               Layout.maximumWidth: feedbackView.width - 12
-              text: qsTr("That's great! We'd love for you to click on the button below and leave a review.")
+              text: qsTr("That's great! We'd love for you to click on the button below and leave a comment on the store.")
               font: Theme.defaultFont
               color: Theme.mainTextColor
               horizontalAlignment: Text.AlignHCenter
@@ -264,13 +250,7 @@ Page {
                 icon.source: Theme.getThemeVectorIcon('ic_star_white_24dp')
 
                 onClicked: {
-                  if (Qt.platform.os === "windows") {
-                    Qt.openUrlExternally("https://apps.microsoft.com/detail/xp99h3bcx4bw7f");
-                  } else if (Qt.platform.os === "android") {
-                    Qt.openUrlExternally("market://details?id=ch.opengis.qfield");
-                  } else if (Qt.platform.os === "ios") {
-                    Qt.openUrlExternally("itms-apps://itunes.apple.com/app/qfield-for-qgis/id1531726814");
-                  }
+                  Qt.openUrlExternally("market://details?id=ch.opengis.smartfield");
                   feedbackView.Layout.preferredHeight = 0;
                 }
               }
@@ -361,7 +341,7 @@ Page {
             Text {
               Layout.margins: 6
               Layout.maximumWidth: collectionView.width - 12
-              text: qsTr("To improve stability for everyone, QField collects and sends anonymized metrics.")
+              text: qsTr("To improve stability for everyone, SmartField collects and sends anonymized metrics.")
               font: Theme.defaultFont
               color: Theme.mainTextColor
               horizontalAlignment: Text.AlignHCenter
@@ -376,7 +356,7 @@ Page {
                 text: qsTr('I agree')
 
                 onClicked: {
-                  qfieldSettings.enableInfoCollection = true;
+                  smartfieldSettings.enableInfoCollection = true;
                   collectionView.visible = false;
                 }
               }
@@ -387,7 +367,7 @@ Page {
                 color: Theme.mainColor
 
                 onClicked: {
-                  qfieldSettings.enableInfoCollection = false;
+                  smartfieldSettings.enableInfoCollection = false;
                   collectionView.visible = false;
                 }
               }
@@ -431,9 +411,9 @@ Page {
           QfButton {
             id: cloudProjectButton
             Layout.fillWidth: true
-            text: qsTr("QFieldCloud projects")
+            text: qsTr("SmartCloud projects")
             onClicked: {
-              showQFieldCloudScreen();
+              showSmartCloudScreen();
             }
           }
           QfButton {
@@ -465,7 +445,7 @@ Page {
 
             ListView {
               id: table
-              ScrollBar.vertical: QfScrollBar {
+              ScrollBar.vertical: ScrollBar {
               }
               flickableDirection: Flickable.AutoFlickIfNeeded
               boundsBehavior: Flickable.StopAtBounds
@@ -585,7 +565,7 @@ Page {
                           text: {
                             var notes = [];
                             if (index == 0) {
-                              var firstRun = settings && !settings.value("/QField/FirstRunFlag", false);
+                              var firstRun = settings && !settings.value("/SmartField/FirstRunFlag", false);
                               if (!firstRun && firstShown === false)
                                 notes.push(qsTr("Last session"));
                             }
@@ -620,7 +600,7 @@ Page {
                 onClicked: mouse => {
                   var item = table.itemAt(mouse.x, mouse.y);
                   if (item) {
-                    if (item.type == 1 && cloudConnection.hasToken && cloudConnection.status !== QFieldCloudConnection.LoggedIn) {
+                    if (item.type == 1 && cloudConnection.hasToken && cloudConnection.status !== SmartCloudConnection.LoggedIn) {
                       cloudConnection.login();
                     }
                     iface.loadFile(item.path, item.title);
@@ -791,23 +771,6 @@ Page {
     }
   }
 
-  QfToolButton {
-    id: exitButton
-    visible: false
-    anchors {
-      top: parent.top
-      right: parent.right
-      topMargin: mainWindow.sceneTopMargin
-    }
-    iconSource: Theme.getThemeVectorIcon('ic_shutdown_24dp')
-    iconColor: Theme.mainTextColor
-
-    onClicked: {
-      mainWindow.closeAlreadyRequested = true;
-      mainWindow.close();
-    }
-  }
-
   // Sparkles & unicorns
   Rectangle {
     anchors.fill: parent
@@ -914,17 +877,16 @@ Page {
     if (visible) {
       const currentProjectButtonVisible = !!qgisProject.fileName;
       currentProjectButton.visible = currentProjectButtonVisible;
-      exitButton.visible = currentProjectButtonVisible && (Qt.platform.os === "ios" || Qt.platform.os === "android");
       if (firstShown) {
         welcomeText.text = " ";
       } else {
-        var firstRun = !settings.valueBool("/QField/FirstRunDone", false);
+        var firstRun = !settings.valueBool("/SmartField/FirstRunDone", false);
         if (firstRun) {
-          welcomeText.text = qsTr("Welcome to QField. First time using this application? Try the sample projects listed below.");
-          settings.setValue("/QField/FirstRunDone", true);
-          settings.setValue("/QField/showMapCanvasGuide", true);
+          welcomeText.text = qsTr("Welcome to SmartField. First time using this application? Try the sample projects listed below.");
+          settings.setValue("/SmartField/FirstRunDone", true);
+          settings.setValue("/SmartField/showMapCanvasGuide", true);
         } else {
-          welcomeText.text = qsTr("Welcome back to QField.");
+          welcomeText.text = qsTr("Welcome back to SmartField.");
         }
       }
     }
@@ -932,31 +894,31 @@ Page {
 
   Component.onCompleted: {
     adjustWelcomeScreen();
-    var runCount = settings.value("/QField/RunCount", 0) * 1;
-    var feedbackFormShown = settings.value("/QField/FeedbackFormShown", false);
+    var runCount = settings.value("/SmartField/RunCount", 0) * 1;
+    var feedbackFormShown = settings.value("/SmartField/FeedbackFormShown", false);
     if (!feedbackFormShown) {
       var now = new Date();
-      var dt = settings.value("/QField/FirstRunDate", "");
+      var dt = settings.value("/SmartField/FirstRunDate", "");
       if (dt != "") {
         dt = new Date(dt);
         var daysToPrompt = 30;
         var runsToPrompt = 5;
         if (runCount >= runsToPrompt && (now - dt) >= (daysToPrompt * 24 * 60 * 60 * 1000)) {
           feedbackView.visible = true;
-          settings.setValue("/QField/FeedbackFormShown", true);
+          settings.setValue("/SmartField/FeedbackFormShown", true);
         }
       } else {
-        settings.setValue("/QField/FirstRunDate", now.toISOString());
+        settings.setValue("/SmartField/FirstRunDate", now.toISOString());
       }
     }
     if (platformUtilities.capabilities & PlatformUtilities.SentryFramework) {
-      var collectionFormShown = settings.value("/QField/CollectionFormShownV2", false);
+      var collectionFormShown = settings.value("/SmartField/CollectionFormShownV2", false);
       if (!collectionFormShown) {
         collectionView.visible = true;
-        settings.setValue("/QField/CollectionFormShownV2", true);
+        settings.setValue("/SmartField/CollectionFormShownV2", true);
       }
     }
-    settings.setValue("/QField/RunCount", runCount + 1);
+    settings.setValue("/SmartField/RunCount", runCount + 1);
     if (registry.defaultProject != '') {
       if (!FileUtils.fileExists(registry.defaultProject)) {
         registry.defaultProject = '';

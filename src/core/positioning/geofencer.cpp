@@ -241,13 +241,13 @@ void Geofencer::applyProjectSettings( QgsProject *project )
 
   if ( project )
   {
-    active = project->readBoolEntry( QStringLiteral( "qfieldsync" ), QStringLiteral( "geofencingIsActive" ), false );
-    const QString layerId = project->readEntry( QStringLiteral( "qfieldsync" ), QStringLiteral( "geofencingLayer" ) );
+    active = project->readBoolEntry( QStringLiteral( "smartfieldsync" ), QStringLiteral( "geofencingActive" ), false );
+    const QString layerId = project->readEntry( QStringLiteral( "smartfieldsync" ), QStringLiteral( "geofencingLayer" ) );
     if ( !layerId.isEmpty() )
     {
       layer = qobject_cast<QgsVectorLayer *>( project->mapLayer( layerId ) );
     }
-    behavior = static_cast<Behaviors>( project->readNumEntry( QStringLiteral( "qfieldsync" ), QStringLiteral( "geofencingBehavior" ), static_cast<int>( AlertWhenOutsideGeofencedArea ) ) );
+    behavior = static_cast<Behaviors>( project->readNumEntry( QStringLiteral( "smartfieldsync" ), QStringLiteral( "geofencingBehavior" ), static_cast<int>( AlertWhenOutsideGeofencedArea ) ) );
   }
 
   setActive( active );

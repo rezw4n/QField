@@ -41,7 +41,7 @@ void PluginManager::loadPlugin( const QString &pluginPath, const QString &plugin
   QSettings settings;
   QString pluginKey = pluginPath;
   pluginKey.replace( QChar( '/' ), QChar( '_' ) );
-  settings.beginGroup( QStringLiteral( "/qfield/plugins/%1" ).arg( pluginKey ) );
+  settings.beginGroup( QStringLiteral( "/smartfield/plugins/%1" ).arg( pluginKey ) );
   const QString pluginUuid = settings.value( QStringLiteral( "uuid" ) ).toString();
   if ( !skipPermissionCheck )
   {
@@ -96,7 +96,7 @@ void PluginManager::unloadPlugin( const QString &pluginPath )
     QSettings settings;
     QString pluginKey = pluginPath;
     pluginKey.replace( QChar( '/' ), QChar( '_' ) );
-    settings.beginGroup( QStringLiteral( "/qfield/plugins/%1" ).arg( pluginKey ) );
+    settings.beginGroup( QStringLiteral( "/smartfield/plugins/%1" ).arg( pluginKey ) );
     const QString pluginUuid = settings.value( QStringLiteral( "uuid" ) ).toString();
     settings.endGroup();
 
@@ -143,7 +143,7 @@ void PluginManager::grantRequestedPluginPermission( bool permanent )
     QSettings settings;
     QString pluginKey = mPermissionRequestPluginPath;
     pluginKey.replace( QChar( '/' ), QChar( '_' ) );
-    settings.beginGroup( QStringLiteral( "/qfield/plugins/%1" ).arg( pluginKey ) );
+    settings.beginGroup( QStringLiteral( "/smartfield/plugins/%1" ).arg( pluginKey ) );
     settings.setValue( QStringLiteral( "permissionGranted" ), true );
     if ( !settings.value( QStringLiteral( "uuid" ) ).toString().isEmpty() )
     {
@@ -161,7 +161,7 @@ void PluginManager::denyRequestedPluginPermission( bool permanent )
   QSettings settings;
   QString pluginKey = mPermissionRequestPluginPath;
   pluginKey.replace( QChar( '/' ), QChar( '_' ) );
-  settings.beginGroup( QStringLiteral( "/qfield/plugins/%1" ).arg( pluginKey ) );
+  settings.beginGroup( QStringLiteral( "/smartfield/plugins/%1" ).arg( pluginKey ) );
   const QString pluginUuid = settings.value( QStringLiteral( "uuid" ) ).toString();
   if ( permanent )
   {
@@ -180,7 +180,7 @@ void PluginManager::denyRequestedPluginPermission( bool permanent )
 void PluginManager::clearPluginPermissions()
 {
   QSettings settings;
-  settings.beginGroup( QStringLiteral( "/qfield/plugins/" ) );
+  settings.beginGroup( QStringLiteral( "/smartfield/plugins/" ) );
   const QStringList pluginKeys = settings.childGroups();
   for ( const QString &pluginKey : pluginKeys )
   {
@@ -195,7 +195,7 @@ void PluginManager::clearPluginPermissions()
 void PluginManager::restoreAppPlugins()
 {
   QSettings settings;
-  settings.beginGroup( QStringLiteral( "/qfield/plugins/" ) );
+  settings.beginGroup( QStringLiteral( "/smartfield/plugins/" ) );
   const QStringList pluginKeys = settings.childGroups();
   for ( const QString &pluginKey : pluginKeys )
   {
@@ -277,7 +277,7 @@ void PluginManager::enableAppPlugin( const QString &uuid )
       QSettings settings;
       QString pluginKey = mAvailableAppPlugins[uuid].path();
       pluginKey.replace( QChar( '/' ), QChar( '_' ) );
-      settings.beginGroup( QStringLiteral( "/qfield/plugins/%1" ).arg( pluginKey ) );
+      settings.beginGroup( QStringLiteral( "/smartfield/plugins/%1" ).arg( pluginKey ) );
       settings.setValue( QStringLiteral( "uuid" ), uuid );
       if ( settings.value( QStringLiteral( "permissionGranted" ), false ).toBool() )
       {
@@ -299,7 +299,7 @@ void PluginManager::disableAppPlugin( const QString &uuid )
       QSettings settings;
       QString pluginKey = mAvailableAppPlugins[uuid].path();
       pluginKey.replace( QChar( '/' ), QChar( '_' ) );
-      settings.beginGroup( QStringLiteral( "/qfield/plugins/%1" ).arg( pluginKey ) );
+      settings.beginGroup( QStringLiteral( "/smartfield/plugins/%1" ).arg( pluginKey ) );
       settings.setValue( QStringLiteral( "userEnabled" ), false );
       settings.endGroup();
 
@@ -442,7 +442,7 @@ QString PluginManager::findProjectPlugin( const QString &projectPath )
   const QString completeBaseName = fi.completeBaseName();
   QStringList possiblePluginPaths = QStringList() << QStringLiteral( "%1/%2.qml" ).arg( fi.absolutePath(), completeBaseName );
   // Cloud-served projects come with a _cloud suffix, take that into account
-  if ( completeBaseName.endsWith( "_qfield" ) )
+  if ( completeBaseName.endsWith( "_smartfield" ) )
   {
     possiblePluginPaths << QStringLiteral( "%1/%2.qml" ).arg( fi.absolutePath(), fi.completeBaseName().mid( 0, completeBaseName.size() - 7 ) );
   }

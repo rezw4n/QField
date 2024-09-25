@@ -1,7 +1,7 @@
-import QtQuick
-import QtQuick.Controls
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import org.smartfield 1.0
+import Theme 1.0
 
 Item {
   id: controller
@@ -65,10 +65,10 @@ Item {
       PositioningInformationView {
         id: positioningInformationView
         width: parent.width
-        height: Math.min(contentHeight, mainWindow.height / 3)
+        height: contentHeight
         visible: positioningInformationViewEnabled
         positionSource: controller.positionSource
-        antennaHeight: positioningSettings.antennaHeightActivated ? positioningSettings.antennaHeight : 0
+        antennaHeight: positioningSettings.antennaHeightActivated ? positioningSettings.antennaHeight : NaN
       }
     }
 

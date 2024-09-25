@@ -1,6 +1,6 @@
-import QtQuick
-import QtQuick.Controls
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import Theme 1.0
 
 Container {
   id: container
@@ -22,7 +22,7 @@ Container {
   property alias iconColor: toggleButton.iconColor
 
   onNameChanged: {
-    collapsed = settings.valueBool("QField/QfToolButtonContainer/" + name + "/collapsed", true);
+    collapsed = settings.valueBool("SmartField/QfToolButtonContainer/" + name + "/collapsed", true);
   }
 
   width: {
@@ -143,8 +143,8 @@ Container {
 
       onClicked: {
         container.collapsed = !container.collapsed;
-        if (container.name != "") {
-          settings.setValue("QField/QfToolButtonContainer/" + container.name + "/collapsed", container.collapsed);
+        if (name != "") {
+          settings.setValue("SmartField/QfToolButtonContainer/" + name + "/collapsed", container.collapsed);
         }
       }
     }

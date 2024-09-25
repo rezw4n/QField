@@ -163,16 +163,16 @@ class AppInterface : public QObject
      */
     void loadProjectEnded( const QString &path, const QString &name );
 
-    //! Requests QField to set its map to the provided \a extent.
+    //! Requests SmartField to set its map to the provided \a extent.
     void setMapExtent( const QgsRectangle &extent );
 
-    //! Requests QField to open its local data picker screen to show the \a path content.
+    //! Requests SmartField to open its local data picker screen to show the \a path content.
     void openPath( const QString &path );
 
-    //! Emitted when a volume key is pressed while QField is set to handle those keys.
+    //! Emitted when a volume key is pressed while SmartField is set to handle those keys.
     void volumeKeyDown( int volumeKeyCode );
 
-    //! Emitted when a volume key is pressed while QField is set to handle those keys.
+    //! Emitted when a volume key is pressed while SmartField is set to handle those keys.
     void volumeKeyUp( int volumeKeyCode );
 
   private:

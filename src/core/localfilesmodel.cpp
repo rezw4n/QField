@@ -16,7 +16,7 @@
 
 #include "localfilesmodel.h"
 #include "platformutilities.h"
-#include "qfieldcloudutils.h"
+#include "smartcloudutils.h"
 #include "qgismobileapp.h"
 
 #include <QDir>
@@ -27,23 +27,19 @@ LocalFilesModel::LocalFilesModel( QObject *parent )
   : QAbstractListModel( parent )
 {
   QSettings settings;
-  const bool favoritesInitialized = settings.value( QStringLiteral( "qfieldFavoritesInitialized" ), false ).toBool();
+  const bool favoritesInitialized = settings.value( QStringLiteral( "smartfieldFavoritesInitialized" ), false ).toBool();
   if ( !favoritesInitialized )
   {
+    QStringList favorites;
     const QString applicationDirectory = PlatformUtilities::instance()->applicationDirectory();
     if ( !applicationDirectory.isEmpty() )
     {
-      mFavorites << QStringLiteral( "%1/Imported Projects" ).arg( applicationDirectory )
-                 << QStringLiteral( "%1/Imported Datasets" ).arg( applicationDirectory );
+      favorites << QStringLiteral( "%1/Imported Projects" ).arg( applicationDirectory )
+                << QStringLiteral( "%1/Imported Datasets" ).arg( applicationDirectory );
     }
     const QString sampleProjectPath = PlatformUtilities::instance()->systemLocalDataLocation( QLatin1String( "sample_projects" ) );
-    mFavorites << sampleProjectPath;
-    settings.setValue( QStringLiteral( "qfieldFavorites" ), mFavorites );
-    settings.setValue( QStringLiteral( "qfieldFavoritesInitialized" ), true );
-  }
-  else
-  {
-    mFavorites = settings.value( QStringLiteral( "qfieldFavorites" ), QStringList() ).toStringList();
+    favorites << sampleProjectPath;
+    settings.setValue( QStringLiteral( "smartfieldFavorites" ), favorites );
   }
   resetToRoot();
 }
@@ -58,7 +54,6 @@ QHash<int, QByteArray> LocalFilesModel::roleNames() const
   roles[ItemPathRole] = "ItemPath";
   roles[ItemSizeRole] = "ItemSize";
   roles[ItemHasThumbnailRole] = "ItemHasThumbnail";
-  roles[ItemIsFavoriteRole] = "ItemIsFavorite";
   return roles;
 }
 
@@ -83,31 +78,6 @@ void LocalFilesModel::resetToPath( const QString &path )
   }
 }
 
-bool LocalFilesModel::isPathFavoriteEditable( const QString &path )
-{
-  const QString sampleProjectPath = PlatformUtilities::instance()->systemLocalDataLocation( QLatin1String( "sample_projects" ) );
-  return path != sampleProjectPath;
-}
-
-void LocalFilesModel::addToFavorites( const QString &path )
-{
-  if ( !mFavorites.contains( path ) )
-  {
-    mFavorites << path;
-    QSettings().setValue( QStringLiteral( "qfieldFavorites" ), mFavorites );
-    reloadModel();
-  }
-}
-
-void LocalFilesModel::removeFromFavorites( const QString &path )
-{
-  if ( mFavorites.removeAll( path ) )
-  {
-    QSettings().setValue( QStringLiteral( "qfieldFavorites" ), mFavorites );
-    reloadModel();
-  }
-}
-
 QString LocalFilesModel::currentTitle() const
 {
   return getCurrentTitleFromPath( currentPath() );
@@ -121,7 +91,7 @@ const QString LocalFilesModel::getCurrentTitleFromPath( const QString &path ) co
   }
   else if ( path == PlatformUtilities::instance()->applicationDirectory() )
   {
-    return tr( "QField files directory" );
+    return tr( "SmartField files directory" );
   }
   else if ( path == PlatformUtilities::instance()->applicationDirectory() + QStringLiteral( "/Imported Projects" ) )
   {
@@ -141,10 +111,10 @@ const QString LocalFilesModel::getCurrentTitleFromPath( const QString &path ) co
   }
   else
   {
-    const QString cloudProjectId = QFieldCloudUtils::getProjectId( path );
+    const QString cloudProjectId = SmartCloudUtils::getProjectId( path );
     if ( !cloudProjectId.isEmpty() )
     {
-      return QFieldCloudUtils::projectSetting( cloudProjectId, QStringLiteral( "name" ), QString() ).toString();
+      return SmartCloudUtils::projectSetting( cloudProjectId, QStringLiteral( "name" ), QString() ).toString();
     }
   }
 
@@ -213,7 +183,7 @@ void LocalFilesModel::reloadModel()
     const QString applicationDirectory = PlatformUtilities::instance()->applicationDirectory();
     if ( !applicationDirectory.isEmpty() )
     {
-      mItems << Item( ItemMetaType::Folder, ItemType::ApplicationFolder, tr( "QField files directory" ), QString(), applicationDirectory );
+      mItems << Item( ItemMetaType::Folder, ItemType::ApplicationFolder, tr( "SmartField files directory" ), QString(), applicationDirectory );
     }
 
     const QStringList additionalApplicationDirectories = PlatformUtilities::instance()->additionalApplicationDirectories();
@@ -236,7 +206,7 @@ void LocalFilesModel::reloadModel()
       }
     }
 
-    const QStringList favorites = QSettings().value( QStringLiteral( "qfieldFavorites" ), QStringList() ).toStringList();
+    const QStringList favorites = QSettings().value( QStringLiteral( "smartfieldFavorites" ), QStringList() ).toStringList();
     for ( const QString &item : favorites )
     {
       mItems << Item( ItemMetaType::Favorite, ItemType::SimpleFolder, getCurrentTitleFromPath( item ), QString(), item );
@@ -249,7 +219,6 @@ void LocalFilesModel::reloadModel()
     {
       const QStringList items = dir.entryList( QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDir::DirsFirst | QDir::IgnoreCase );
       QList<Item> folders;
-      QList<Item> files;
       QList<Item> projects;
       QList<Item> datasets;
       for ( const QString &item : items )
@@ -280,13 +249,9 @@ void LocalFilesModel::reloadModel()
           {
             datasets << Item( ItemMetaType::Dataset, ItemType::RasterDataset, fi.completeBaseName(), suffix, fi.absoluteFilePath(), fi.size() );
           }
-          else if ( suffix == QStringLiteral( "log" ) || suffix == QStringLiteral( "txt" ) )
-          {
-            files << Item( ItemMetaType::File, ItemType::OtherFile, fi.completeBaseName(), suffix, fi.absoluteFilePath(), fi.size() );
-          }
         }
       }
-      mItems << folders << projects << datasets << files;
+      mItems << folders << projects << datasets;
     }
   }
 
@@ -329,9 +294,6 @@ QVariant LocalFilesModel::data( const QModelIndex &index, int role ) const
     case ItemHasThumbnailRole:
       return mItems[index.row()].size < 25000000
              && SUPPORTED_DATASET_THUMBNAIL.contains( mItems[index.row()].format );
-
-    case ItemIsFavoriteRole:
-      return mFavorites.contains( mItems[index.row()].path );
   }
 
   return QVariant();

@@ -1,4 +1,4 @@
-set(QFIELD_CORE_SRCS
+set(SMARTFIELD_CORE_SRCS
     platforms/platformutilities.cpp
     utils/coordinatereferencesystemutils.cpp
     utils/expressioncontextutils.cpp
@@ -8,7 +8,7 @@ set(QFIELD_CORE_SRCS
     utils/layerutils.cpp
     utils/positioningutils.cpp
     utils/projectutils.cpp
-    utils/qfieldcloudutils.cpp
+    utils/smartcloudutils.cpp
     utils/relationutils.cpp
     utils/snappingutils.cpp
     utils/stringutils.cpp
@@ -34,7 +34,6 @@ set(QFIELD_CORE_SRCS
     positioning/positioning.cpp
     positioning/positioningdevicemodel.cpp
     positioning/geofencer.cpp
-    positioning/positioninginformationmodel.cpp
     processing/processingalgorithm.cpp
     processing/processingalgorithmparametersmodel.cpp
     processing/processingalgorithmsmodel.cpp
@@ -93,9 +92,9 @@ set(QFIELD_CORE_SRCS
     projectinfo.cpp
     projectsource.cpp
     projectsimageprovider.cpp
-    qfieldappauthrequesthandler.cpp
-    qfieldcloudconnection.cpp
-    qfieldcloudprojectsmodel.cpp
+    smartfieldappauthrequesthandler.cpp
+    smartcloudconnection.cpp
+    smartcloudprojectsmodel.cpp
     qgismobileapp.cpp
     qgsgeometrywrapper.cpp
     qgsgpkgflusher.cpp
@@ -116,7 +115,7 @@ set(QFIELD_CORE_SRCS
     vertexmodel.cpp
     viewstatus.cpp)
 
-set(QFIELD_CORE_HDRS
+set(SMARTFIELD_CORE_HDRS
     platforms/platformutilities.h
     utils/coordinatereferencesystemutils.h
     utils/expressioncontextutils.h
@@ -126,7 +125,7 @@ set(QFIELD_CORE_HDRS
     utils/layerutils.h
     utils/positioningutils.h
     utils/projectutils.h
-    utils/qfieldcloudutils.h
+    utils/smartcloudutils.h
     utils/relationutils.h
     utils/snappingutils.h
     utils/stringutils.h
@@ -153,7 +152,6 @@ set(QFIELD_CORE_HDRS
     positioning/tcpreceiver.h
     positioning/udpreceiver.h
     positioning/geofencer.h
-    positioning/positioninginformationmodel.h
     processing/processingalgorithm.h
     processing/processingalgorithmparametersmodel.h
     processing/processingalgorithmsmodel.h
@@ -213,9 +211,9 @@ set(QFIELD_CORE_HDRS
     projectinfo.h
     projectsource.h
     projectsimageprovider.h
-    qfieldappauthrequesthandler.h
-    qfieldcloudconnection.h
-    qfieldcloudprojectsmodel.h
+    smartfieldappauthrequesthandler.h
+    smartcloudconnection.h
+    smartcloudprojectsmodel.h
     qgismobileapp.h
     qgsgeometrywrapper.h
     qgsgpkgflusher.h
@@ -235,81 +233,81 @@ set(QFIELD_CORE_HDRS
     valuemapmodelbase.h
     vertexmodel.h
     viewstatus.h
-    ${CMAKE_CURRENT_BINARY_DIR}/qfield.h)
+    ${CMAKE_CURRENT_BINARY_DIR}/smartfield.h)
 
-list(APPEND QFIELD_CORE_SRCS permissions.cpp)
-list(APPEND QFIELD_CORE_HDRS permissions.h)
+list(APPEND SMARTFIELD_CORE_SRCS permissions.cpp)
+list(APPEND SMARTFIELD_CORE_HDRS permissions.h)
 
 if(WITH_BLUETOOTH)
-  list(APPEND QFIELD_CORE_SRCS positioning/bluetoothdevicemodel.cpp
+  list(APPEND SMARTFIELD_CORE_SRCS positioning/bluetoothdevicemodel.cpp
        positioning/bluetoothreceiver.cpp)
-  list(APPEND QFIELD_CORE_HDRS positioning/bluetoothdevicemodel.h
+  list(APPEND SMARTFIELD_CORE_HDRS positioning/bluetoothdevicemodel.h
        positioning/bluetoothreceiver.h)
 endif()
 
 if(WITH_SERIALPORT)
-  list(APPEND QFIELD_CORE_SRCS positioning/serialportmodel.cpp
+  list(APPEND SMARTFIELD_CORE_SRCS positioning/serialportmodel.cpp
        positioning/serialportreceiver.cpp)
-  list(APPEND QFIELD_CORE_HDRS positioning/serialportmodel.h
+  list(APPEND SMARTFIELD_CORE_HDRS positioning/serialportmodel.h
        positioning/serialportreceiver.h)
 endif()
 
 if(ANDROID)
-  set(QFIELD_CORE_HDRS
-      ${QFIELD_CORE_HDRS}
+  set(SMARTFIELD_CORE_HDRS
+      ${SMARTFIELD_CORE_HDRS}
       platforms/android/androidplatformutilities.h
       platforms/android/androidresourcesource.h
       platforms/android/androidviewstatus.h
       platforms/android/androidprojectsource.h
-      ${CMAKE_CURRENT_BINARY_DIR}/qfield_android.h)
-  set(QFIELD_CORE_SRCS
-      ${QFIELD_CORE_SRCS}
+      ${CMAKE_CURRENT_BINARY_DIR}/smartfield_android.h)
+  set(SMARTFIELD_CORE_SRCS
+      ${SMARTFIELD_CORE_SRCS}
       platforms/android/androidplatformutilities.cpp
       platforms/android/androidresourcesource.cpp
       platforms/android/androidviewstatus.cpp
       platforms/android/androidprojectsource.cpp)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-  set(QFIELD_CORE_HDRS
-      ${QFIELD_CORE_HDRS} platforms/ios/iosplatformutilities.h
+  set(SMARTFIELD_CORE_HDRS
+      ${SMARTFIELD_CORE_HDRS} platforms/ios/iosplatformutilities.h
       platforms/ios/iosresourcesource.h platforms/ios/iosprojectsource.h)
-  set(QFIELD_CORE_SRCS
-      ${QFIELD_CORE_SRCS} platforms/ios/iosplatformutilities.mm
+  set(SMARTFIELD_CORE_SRCS
+      ${SMARTFIELD_CORE_SRCS} platforms/ios/iosplatformutilities.mm
       platforms/ios/iosresourcesource.mm platforms/ios/iosprojectsource.mm)
 endif()
 
 find_package(SQLite3 REQUIRED)
 find_package(ZXing REQUIRED)
 
-add_library(qfield_core STATIC ${QFIELD_CORE_SRCS} ${QFIELD_CORE_HDRS})
+add_library(smartfield_core STATIC ${SMARTFIELD_CORE_SRCS} ${SMARTFIELD_CORE_HDRS})
 
 string(SUBSTRING ${ZXing_VERSION} 0 1 ZXing_VERSION_MAJOR)
-target_compile_definitions(qfield_core
+target_compile_definitions(smartfield_core
                            PRIVATE ZXing_VERSION_MAJOR=${ZXing_VERSION_MAJOR})
 
 if(WITH_BLUETOOTH)
-  target_compile_definitions(qfield_core PRIVATE WITH_BLUETOOTH)
+  target_compile_definitions(smartfield_core PRIVATE WITH_BLUETOOTH)
 endif()
 if(WITH_SERIALPORT)
-  target_compile_definitions(qfield_core PRIVATE WITH_SERIALPORT)
+  target_compile_definitions(smartfield_core PRIVATE WITH_SERIALPORT)
 endif()
 if(WITH_NFC)
-  target_compile_definitions(qfield_core PRIVATE WITH_NFC)
+  target_compile_definitions(smartfield_core PRIVATE WITH_NFC)
 endif()
 
 include(GenerateExportHeader)
-generate_export_header(qfield_core)
+generate_export_header(smartfield_core)
 
-configure_file(qfield.h.in ${CMAKE_CURRENT_BINARY_DIR}/qfield.h @ONLY)
+configure_file(smartfield.h.in ${CMAKE_CURRENT_BINARY_DIR}/smartfield.h @ONLY)
 
-target_include_directories(qfield_core SYSTEM
+target_include_directories(smartfield_core SYSTEM
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "iOS")
-  target_compile_options(qfield_core PRIVATE "-fobjc-arc")
+  target_compile_options(smartfield_core PRIVATE "-fobjc-arc")
 endif()
 
 target_include_directories(
-  qfield_core
+  smartfield_core
   PUBLIC ${CMAKE_SOURCE_DIR}/src/core
          ${CMAKE_SOURCE_DIR}/src/core/locator
          ${CMAKE_SOURCE_DIR}/src/core/platforms
@@ -319,20 +317,20 @@ target_include_directories(
          ${CMAKE_SOURCE_DIR}/src/core/processing)
 if(ANDROID)
   string(REPLACE "_" "_1" APP_PACKAGE_JNI_NAME "${APP_PACKAGE_NAME}")
-  configure_file(platforms/android/qfield_android.h.in
-                 ${CMAKE_CURRENT_BINARY_DIR}/qfield_android.h @ONLY)
+  configure_file(platforms/android/smartfield_android.h.in
+                 ${CMAKE_CURRENT_BINARY_DIR}/smartfield_android.h @ONLY)
   target_include_directories(
-    qfield_core PUBLIC ${CMAKE_SOURCE_DIR}/src/core/platforms/android)
+    smartfield_core PUBLIC ${CMAKE_SOURCE_DIR}/src/core/platforms/android)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-  target_include_directories(qfield_core
+  target_include_directories(smartfield_core
                              PUBLIC ${CMAKE_SOURCE_DIR}/src/core/platforms/ios)
 endif()
 
-target_compile_features(qfield_core PUBLIC cxx_std_17)
-set_target_properties(qfield_core PROPERTIES AUTOMOC TRUE)
+target_compile_features(smartfield_core PUBLIC cxx_std_17)
+set_target_properties(smartfield_core PROPERTIES AUTOMOC TRUE)
 
 target_link_libraries(
-  qfield_core
+  smartfield_core
   PUBLIC Qt::Core
          Qt::CorePrivate
          Qt::Gui
@@ -348,7 +346,6 @@ target_link_libraries(
          Qt::Concurrent
          Qt::WebView
          Qt::Multimedia
-         Qt::WebSockets
          QGIS::Core
          QGIS::Analysis
          ZXing::ZXing
@@ -363,7 +360,7 @@ if(WITH_BLUETOOTH)
     Qt6
     COMPONENTS Bluetooth
     REQUIRED)
-  target_link_libraries(qfield_core PUBLIC Qt6::Bluetooth)
+  target_link_libraries(smartfield_core PUBLIC Qt6::Bluetooth)
 endif()
 
 if(WITH_SERIALPORT)
@@ -371,7 +368,7 @@ if(WITH_SERIALPORT)
     Qt6
     COMPONENTS SerialPort
     REQUIRED)
-  target_link_libraries(qfield_core PUBLIC Qt::SerialPort)
+  target_link_libraries(smartfield_core PUBLIC Qt::SerialPort)
 endif()
 
 if(WITH_NFC)
@@ -379,23 +376,23 @@ if(WITH_NFC)
     Qt6
     COMPONENTS Nfc
     REQUIRED)
-  target_link_libraries(qfield_core PUBLIC Qt6::Nfc)
+  target_link_libraries(smartfield_core PUBLIC Qt6::Nfc)
 endif()
 
 if(WITH_SENTRY)
-  target_link_libraries(qfield_core PRIVATE qfield_sentry)
+  target_link_libraries(smartfield_core PRIVATE smartfield_sentry)
 endif()
 
 if(TARGET Qt::PrintSupport)
-  target_link_libraries(qfield_core PUBLIC Qt::PrintSupport)
+  target_link_libraries(smartfield_core PUBLIC Qt::PrintSupport)
 endif()
 
-install(FILES ${QFIELD_CORE_HDRS} DESTINATION ${QFIELD_INCLUDE_DIR})
+install(FILES ${SMARTFIELD_CORE_HDRS} DESTINATION ${SMARTFIELD_INCLUDE_DIR})
 install(
-  TARGETS qfield_core
-  BUNDLE DESTINATION ${QFIELD_BIN_DIR}
-  RUNTIME DESTINATION ${QFIELD_BIN_DIR}
-  LIBRARY DESTINATION ${QFIELD_LIB_DIR}
-  ARCHIVE DESTINATION ${QFIELD_LIB_DIR}
-  FRAMEWORK DESTINATION ${QFIELD_FW_SUBDIR}
-  PUBLIC_HEADER DESTINATION ${QFIELD_INCLUDE_DIR})
+  TARGETS smartfield_core
+  BUNDLE DESTINATION ${SMARTFIELD_BIN_DIR}
+  RUNTIME DESTINATION ${SMARTFIELD_BIN_DIR}
+  LIBRARY DESTINATION ${SMARTFIELD_LIB_DIR}
+  ARCHIVE DESTINATION ${SMARTFIELD_LIB_DIR}
+  FRAMEWORK DESTINATION ${SMARTFIELD_FW_SUBDIR}
+  PUBLIC_HEADER DESTINATION ${SMARTFIELD_INCLUDE_DIR})

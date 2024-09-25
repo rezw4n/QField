@@ -1,10 +1,10 @@
-import QtQuick
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 import ".."
 
-QfVisibilityFadingRow {
+VisibilityFadingRow {
   id: vertexEditorToolbar
 
   signal finished
@@ -77,7 +77,7 @@ QfVisibilityFadingRow {
     id: cancelButton
     iconSource: Theme.getThemeIcon("ic_clear_white_24dp")
     round: true
-    visible: featureModel && featureModel.vertexModel.dirty && !qfieldSettings.autoSave
+    visible: featureModel && featureModel.vertexModel.dirty && !smartfieldSettings.autoSave
     bgcolor: "#900000"
     onClicked: {
       digitizingLogger.clearCoordinates();
@@ -91,7 +91,7 @@ QfVisibilityFadingRow {
     iconSource: Theme.getThemeIcon("ic_check_white_48dp")
     round: true
     visible: featureModel && featureModel.vertexModel.dirty
-    bgcolor: !qfieldSettings.autoSave ? Theme.mainColor : Theme.darkGray
+    bgcolor: !smartfieldSettings.autoSave ? Theme.mainColor : Theme.darkGray
 
     onClicked: {
       if (vertexEditorToolbar.currentVertexModified)
@@ -116,7 +116,7 @@ QfVisibilityFadingRow {
           featureModel.vertexModel.currentVertexIndex = -1;
         }
       }
-      applyChanges(qfieldSettings.autoSave);
+      applyChanges(smartfieldSettings.autoSave);
     }
   }
 
@@ -129,7 +129,7 @@ QfVisibilityFadingRow {
     iconColor: enabled ? "white" : Theme.darkGraySemiOpaque
 
     onClicked: {
-      applyChanges(qfieldSettings.autoSave);
+      applyChanges(smartfieldSettings.autoSave);
       if (featureModel.vertexModel.currentVertexIndex != -1) {
         if (featureModel.vertexModel.editingMode === VertexModel.AddVertex) {
           featureModel.vertexModel.editingMode = VertexModel.EditVertex;
@@ -138,7 +138,7 @@ QfVisibilityFadingRow {
         }
       } else {
         featureModel.vertexModel.addVertexNearestToPosition(coordinateLocator.currentCoordinate);
-        applyChanges(qfieldSettings.autoSave);
+        applyChanges(smartfieldSettings.autoSave);
       }
     }
   }
@@ -156,7 +156,7 @@ QfVisibilityFadingRow {
       if (vertexEditorToolbar.currentVertexModified) {
         digitizingLogger.addCoordinate(featureModel.vertexModel.currentPoint);
       }
-      applyChanges(qfieldSettings.autoSave);
+      applyChanges(smartfieldSettings.autoSave);
       featureModel.vertexModel.previous();
     }
   }
@@ -174,7 +174,7 @@ QfVisibilityFadingRow {
       if (vertexEditorToolbar.currentVertexModified) {
         digitizingLogger.addCoordinate(featureModel.vertexModel.currentPoint);
       }
-      applyChanges(qfieldSettings.autoSave);
+      applyChanges(smartfieldSettings.autoSave);
       featureModel.vertexModel.next();
     }
   }

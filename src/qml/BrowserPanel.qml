@@ -1,9 +1,9 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtWebView
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import QtWebView 1.14
+import org.smartfield 1.0
+import Theme 1.0
 
 Popup {
   id: browserPanel
@@ -66,22 +66,36 @@ Popup {
     if (url != '') {
       if (browserView === undefined) {
         // avoid cost of WevView creation until needed
-        browserView = Qt.createQmlObject('import QtWebView
-          WebView {
-            id: browserView
-            anchors { top: parent.top; left: parent.left; right: parent.right; }
-            onLoadingChanged: {
-              if ( !loading ) {
-                anchors.fill = parent; width = parent.width
-                height = parent.height; opacity = 1
+        if (qVersion >= '6.0.0') {
+          browserView = Qt.createQmlObject('import QtWebView
+            WebView {
+              id: browserView
+              anchors { top: parent.top; left: parent.left; right: parent.right; }
+              onLoadingChanged: {
+                if ( !loading ) {
+                  anchors.fill = parent; width = parent.width
+                  height = parent.height; opacity = 1
+                }
               }
-            }
-            onCookieAdded: (domain, name) => {
-              browserPanel.browserCookies.push([domain, name])
-            }
-          }', browserContent);
-        if (clearCookiesOnOpen) {
-          browserView.deleteAllCookies();
+              onCookieAdded: (domain, name) => {
+                browserPanel.browserCookies.push([domain, name])
+              }
+            }', browserContent);
+          if (clearCookiesOnOpen) {
+            browserView.deleteAllCookies();
+          }
+        } else {
+          browserView = Qt.createQmlObject('import QtWebView 1.14
+            WebView {
+              id: browserView
+              anchors { top: parent.top; left: parent.left; right: parent.right; }
+              onLoadingChanged: {
+                if ( !loading ) {
+                  anchors.fill = parent; width = parent.width
+                  height = parent.height; opacity = 1
+                }
+              }
+            }', browserContent);
         }
       }
       browserView.anchors.fill = undefined;

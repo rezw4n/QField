@@ -1,10 +1,10 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Controls.Material.impl 2.14
+import Theme 1.0
+import org.smartfield 1.0
 
 Item {
   id: processingAlgorithmForm
@@ -83,11 +83,20 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       visible: tabRow.currentIndex !== tabRow.model.length - 1
+
       contentWidth: content.width
       contentHeight: content.height
       bottomMargin: processingAlgorithmForm.bottomMargin
       clip: true
-      ScrollBar.vertical: QfScrollBar {
+
+      ScrollBar.vertical: ScrollBar {
+        policy: content.height > contentView.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+        width: 6
+        contentItem: Rectangle {
+          implicitWidth: 6
+          implicitHeight: 25
+          color: Theme.mainColor
+        }
       }
 
       Rectangle {

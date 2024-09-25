@@ -1,23 +1,15 @@
-import QtQuick
-import QtQuick.Controls
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import Theme 1.0
 
 Popup {
   id: toast
 
   property string type: 'info'
   property int edgeSpacing: 52
-  property real virtualKeyboardHeight: {
-    const top = Qt.inputMethod.keyboardRectangle.top / Screen.devicePixelRatio;
-    if (top > 0) {
-      const height = Qt.inputMethod.keyboardRectangle.height / Screen.devicePixelRatio;
-      return height - (top + height - mainWindow.height);
-    }
-    return 0;
-  }
 
   x: edgeSpacing
-  y: mainWindow.height - 112 - virtualKeyboardHeight
+  y: parent.height - 112
   z: 10001
 
   width: mainWindow.width - edgeSpacing * 2

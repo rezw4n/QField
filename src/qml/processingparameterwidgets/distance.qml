@@ -1,8 +1,9 @@
-import QtQuick
-import QtQuick.Controls
-import Theme
-import org.qfield
-import org.qgis
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import Theme 1.0
+import org.smartfield 1.0
+import org.qgis 1.0
+import "."
 
 ProcessingParameterWidgetBase {
   id: distanceItem
@@ -136,10 +137,10 @@ ProcessingParameterWidgetBase {
       visible: enabled
 
       onClicked: {
-        adjustValue(-1);
+        decreaseValue();
       }
       onDoubleClicked: {
-        adjustValue(-1);
+        decreaseValue();
       }
       onPressAndHold: {
         changeValueTimer.increase = false;
@@ -167,10 +168,10 @@ ProcessingParameterWidgetBase {
       visible: enabled
 
       onClicked: {
-        adjustValue(1);
+        increaseValue();
       }
       onDoubleClicked: {
-        adjustValue(1);
+        increaseValue();
       }
       onPressAndHold: {
         changeValueTimer.increase = true;
@@ -216,7 +217,7 @@ ProcessingParameterWidgetBase {
     var newValue;
     if (!isNaN(currentValue)) {
       newValue = currentValue + (distanceItem.step * direction);
-      prepareValueChangeRequest(Math.min(distanceItem.max, Math.max(distanceItem.min, newValue)));
+      prepareValueChangeRequest(Math.min(distanceItem.max(Math.max(distanceItem.min, newValue))));
     } else {
       newValue = 0;
       prepareValueChangeRequest(newValue, false);

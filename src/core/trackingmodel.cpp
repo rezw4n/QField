@@ -254,18 +254,18 @@ void TrackingModel::createProjectTrackers( QgsProject *project )
   {
     if ( QgsVectorLayer *vl = qobject_cast<QgsVectorLayer *>( layer ) )
     {
-      const bool trackingSessionActive = layer->customProperty( "QFieldSync/tracking_session_active", false ).toBool();
+      const bool trackingSessionActive = layer->customProperty( "SmartFieldSync/tracking_session_active", false ).toBool();
       if ( trackingSessionActive )
       {
-        const bool timeRequirementActive = layer->customProperty( "QFieldSync/tracking_time_requirement_active", false ).toBool();
-        const int timeRequirementIntervalSeconds = layer->customProperty( "QFieldSync/tracking_time_requirement_interval_seconds", 30 ).toInt();
-        const bool distanceRequirementActive = layer->customProperty( "QFieldSync/tracking_distance_requirement_active", false ).toBool();
-        const int distanceRequirementMinimumMeters = layer->customProperty( "QFieldSync/tracking_distance_requirement_minimum_meters", 30 ).toInt();
-        const bool sensorDataRequirementActive = layer->customProperty( "QFieldSync/tracking_sensor_data_requirement_active", false ).toBool();
-        const bool allRequirementsActive = layer->customProperty( "QFieldSync/tracking_all_requirements_active", false ).toBool();
-        const bool erroneousDistanceSafeguardActive = layer->customProperty( "QFieldSync/tracking_erroneous_distance_safeguard_active", false ).toBool();
-        const bool erroneousDistanceSafeguardMaximumMeters = layer->customProperty( "QFieldSync/tracking_erroneous_distance_safeguard_maximum_meters", 250 ).toInt();
-        const int measurementType = layer->customProperty( "QFieldSync/tracking_measurement_type", false ).toInt();
+        const bool timeRequirementActive = layer->customProperty( "SmartFieldSync/tracking_time_requirement_active", false ).toBool();
+        const int timeRequirementIntervalSeconds = layer->customProperty( "SmartFieldSync/tracking_time_requirement_interval_seconds", 30 ).toInt();
+        const bool distanceRequirementActive = layer->customProperty( "SmartFieldSync/tracking_distance_requirement_active", false ).toBool();
+        const int distanceRequirementMinimumMeters = layer->customProperty( "SmartFieldSync/tracking_distance_requirement_minimum_meters", 30 ).toInt();
+        const bool sensorDataRequirementActive = layer->customProperty( "SmartFieldSync/tracking_sensor_data_requirement_active", false ).toBool();
+        const bool allRequirementsActive = layer->customProperty( "SmartFieldSync/tracking_all_requirements_active", false ).toBool();
+        const bool erroneousDistanceSafeguardActive = layer->customProperty( "SmartFieldSync/tracking_erroneous_distance_safeguard_active", false ).toBool();
+        const bool erroneousDistanceSafeguardMaximumMeters = layer->customProperty( "SmartFieldSync/tracking_erroneous_distance_safeguard_maximum_meters", 250 ).toInt();
+        const int measurementType = layer->customProperty( "SmartFieldSync/tracking_measurement_type", false ).toInt();
 
         Tracker *tracker = new Tracker( vl );
         tracker->setTimeInterval( timeRequirementActive ? timeRequirementIntervalSeconds : 0 );

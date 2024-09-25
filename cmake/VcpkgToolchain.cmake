@@ -1,5 +1,5 @@
 set(NUGET_SOURCE "https://nuget.pkg.github.com/opengisch/index.json")
-set(NUGET_USERNAME "qfield-fairy" CACHE STRING "Nuget user")
+set(NUGET_USERNAME "smartfield-fairy" CACHE STRING "Nuget user")
 # Obfuscate a (read only) github token, if it's here clear text it will be invalidated
 # Python: print(*(ord(i) for i in token), sep=";")
 

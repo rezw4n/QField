@@ -1,8 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Controls.Material
-import QtQuick.Window
-import org.qfield
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Window 2.14
+import org.smartfield 1.0
 
 Drawer {
   id: overlayFeatureFormDrawer
@@ -18,21 +18,21 @@ Drawer {
   closePolicy: Popup.NoAutoClose // prevent accidental feature addition when clicking outside of the popup drawer
 
   width: {
-    if (qfieldSettings.fullScreenIdentifyView || parent.width < parent.height || parent.width < 300) {
+    if (smartfieldSettings.fullScreenIdentifyView || parent.width < parent.height || parent.width < 300) {
       parent.width;
     } else {
       Math.min(Math.max(200, parent.width / 2.25), parent.width);
     }
   }
   height: {
-    if (qfieldSettings.fullScreenIdentifyView || parent.width > parent.height) {
+    if (smartfieldSettings.fullScreenIdentifyView || parent.width > parent.height) {
       parent.height;
     } else {
       Math.min(Math.max(200, parent.height / 2), parent.height);
     }
   }
 
-  interactive: overlayFeatureForm.model.constraintsHardValid || qfieldSettings.autoSave ? true : false
+  interactive: overlayFeatureForm.model.constraintsHardValid || smartfieldSettings.autoSave ? true : false
   dragMargin: 0
 
   /**
@@ -121,7 +121,7 @@ Drawer {
 
     Keys.onReleased: event => {
       if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
-        if (overlayFeatureForm.model.constraintsHardValid || qfieldSettings.autoSave) {
+        if (overlayFeatureForm.model.constraintsHardValid || smartfieldSettings.autoSave) {
           overlayFeatureFormDrawer.close();
         } else {
           //block closing to fix constraints or cancel with button

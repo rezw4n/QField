@@ -1,5 +1,5 @@
-import QtQuick
-import Theme
+import QtQuick 2.14
+import Theme 1.0
 
 Flickable {
   id: flick

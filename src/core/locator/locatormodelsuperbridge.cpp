@@ -281,7 +281,7 @@ QVariant LocatorFiltersModel::data( const QModelIndex &index, int role ) const
     { QStringLiteral( "goto" ), tr( "Returns a point from a pair of X and Y coordinates - or WGS84 latitude and longitude - typed in the search bar." ) },
     { QStringLiteral( "bookmarks" ), tr( "Returns a list of user and currently open project bookmarks with matching names." ) },
     { QStringLiteral( "calculator" ), tr( "Returns the value of an expression typed in the search bar." ) },
-    { QStringLiteral( "optionpages" ), tr( "Returns QField documentation pages matching terms." ) },
+    { QStringLiteral( "optionpages" ), tr( "Returns SmartField documentation pages matching terms." ) },
     { QStringLiteral( "pelias-finland" ), tr( "Returns a list of locations and addresses within Finland with matching terms." ) } };
 
   if ( !mLocatorModelSuperBridge->locator() || !index.isValid() || index.parent().isValid() || index.row() < 0 || index.row() >= rowCount( QModelIndex() ) )

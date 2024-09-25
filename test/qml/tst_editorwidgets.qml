@@ -1,7 +1,7 @@
-import QtQuick
-import QtTest
-import org.qfield
-import Theme
+import QtQuick 2.3
+import QtTest 1.0
+import org.smartfield 1.0
+import Theme 1.0
 import "../../src/qml/editorwidgets" as EditorWidgets
 
 TestCase {
@@ -56,7 +56,7 @@ TestCase {
     property var field: undefined
     property var currentLayer: undefined
 
-    // to simulate customProperty('QFieldSync/value_map_button_interface_threshold') -> toggleButtons view
+    // to simulate customProperty('SmartFieldSync/value_map_button_interface_threshold') -> toggleButtons view
     Item {
       id: currentLayerTrue
       function customProperty(value) {
@@ -64,7 +64,7 @@ TestCase {
       }
     }
 
-    // to to simulate customProperty('QFieldSync/value_map_button_interface_threshold') -> comboBox veiw
+    // to to simulate customProperty('SmartFieldSync/value_map_button_interface_threshold') -> comboBox veiw
     Item {
       id: currentLayerFalse
       function customProperty(value) {

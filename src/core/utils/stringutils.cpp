@@ -165,22 +165,10 @@ const QStringList StringUtils::csvToStringList( const QString &string )
 
 QString StringUtils::replaceFilenameTags( const QString &string, const QString &filename )
 {
-  // IMPORTANT: an equivalent Java function QFieldUtils on Android needs to be kept synchronized
+  // IMPORTANT: an equivalent Java function SmartFieldUtils on Android needs to be kept synchronized
   QString replacedString = string;
   QFileInfo fi( filename );
   replacedString.replace( QStringLiteral( "{filename}" ), fi.fileName() );
   replacedString.replace( QStringLiteral( "{extension}" ), fi.completeSuffix() );
   return replacedString;
-}
-
-QString StringUtils::highlightText( const QString &string, const QString &highlightText, const QColor &highlightColor )
-{
-  QString formattedString = string.toHtmlEscaped();
-  if ( !highlightText.isEmpty() )
-  {
-    const QString formattedHighlightText = highlightText.toHtmlEscaped();
-    formattedString.replace( QRegularExpression( QStringLiteral( "(?!=&[a-z]*)(%1)(?![a-z]*;)" ).arg( formattedHighlightText ), QRegularExpression::CaseInsensitiveOption ), QStringLiteral( "<span style=\"text-decoration:underline;%1\">\\1</span>" ).arg( highlightColor.isValid() ? QStringLiteral( "color:%1" ).arg( highlightColor.name() ) : QString() ) );
-  }
-
-  return formattedString;
 }

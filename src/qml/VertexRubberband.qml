@@ -1,8 +1,8 @@
-import QtQuick
-import QtQml
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQml 2.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 
 Repeater {
   id: vertexRubberband

@@ -7,10 +7,10 @@
       "vcpkg/triplets"
     ]
   },
-  "name": "qfield",
+  "name": "smartfield",
   "version-string": "dev",
   "description": "A simplified and touch optimized frontend for QGIS.",
-  "homepage": "https://github.com/opengisch/qfield",
+  "homepage": "https://github.com/opengisch/smartfield",
   "dependencies": [
     "catch2",
     {
@@ -57,6 +57,14 @@
       "default-features": false
     },
     {
+      "name": "qtbase",
+      "default-features": false,
+      "features": [
+        "gles3"
+      ],
+      "platform": "!windows & !osx & !android"
+    },
+    {
       "name": "qtcharts",
       "features": [
         "qml"
@@ -91,16 +99,10 @@
       "host": true,
       "default-features": false
     },
-    {
-      "name": "qtwebsockets",
-      "features": [
-        "qml"
-      ]
-    },
     "qtwebview",
     {
       "name": "sentry-cocoa",
-      "platform": "ios"
+      "platform": "ios | osx"
     },
     {
       "name": "sentry-native",

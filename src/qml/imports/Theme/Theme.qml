@@ -1,6 +1,6 @@
 pragma Singleton
-import QtQuick
-import QtQuick.Controls.Material
+import QtQuick 2.14
+import QtQuick.Controls.Material 2.14
 
 QtObject {
   property bool darkTheme: false
@@ -61,7 +61,6 @@ QtObject {
   readonly property color vertexNewColorSemiOpaque: "#404CAF50"
 
   readonly property color processingPreview: '#99000000'
-  readonly property color scrollBarBackgroundColor: darkTheme ? mainBackgroundColorSemiOpaque : "#aaffffff"
 
   readonly property color accentColor: '#4CAF50'
   readonly property color accentLightColor: '#994CAF50'
@@ -121,13 +120,13 @@ QtObject {
       ppiName = "hdpi";
     else
       ppiName = "mdpi";
-    var theme = 'qfield';
+    var theme = 'smartfield';
     var path = 'qrc:/themes/' + theme + '/' + ppiName + '/' + name + '.png';
     return path;
   }
 
   function getThemeVectorIcon(name) {
-    var theme = 'qfield';
+    var theme = 'smartfield';
     var path = 'qrc:/themes/' + theme + '/nodpi/' + name + '.svg';
     return path;
   }

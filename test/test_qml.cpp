@@ -16,8 +16,8 @@
  ***************************************************************************/
 
 #include "platformutilities.h"
-#include "qfield.h"
-#include "qfield_qml_init.h"
+#include "smartfield.h"
+#include "smartfield_qml_init.h"
 #include "qgismobileapp.h"
 
 #include <qgis.h>
@@ -140,7 +140,7 @@ class Setup : public QObject
 
       QCoreApplication::setOrganizationName( "OPENGIS.ch" );
       QCoreApplication::setOrganizationDomain( "opengis.ch" );
-      QCoreApplication::setApplicationName( qfield::appName );
+      QCoreApplication::setApplicationName( smartfield::appName );
 
       QgsApplication::setPrefixPath( QGIS_PREFIX_PATH, true );
 

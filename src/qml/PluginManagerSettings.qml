@@ -1,9 +1,9 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 
 Popup {
   id: popup
@@ -44,7 +44,7 @@ Popup {
         Layout.margins: 20
         visible: pluginsList.model.count === 0
 
-        text: qsTr('No plugins have been installed yet. To learn more about plugins, %1read the documentation%2.').arg('<a href="https://docs.qfield.org/how-to/plugins/">').arg('</a>')
+        text: qsTr('No plugins have been installed yet. To learn more about plugins, %1read the documentation%2.').arg('<a href="https://docs.smartfield.org/how-to/plugins/">').arg('</a>')
         font: Theme.defaultFont
         wrapMode: Text.WordWrap
         horizontalAlignment: Text.AlignHCenter
@@ -85,7 +85,7 @@ Popup {
                 Layout.preferredWidth: 24
                 Layout.preferredHeight: 24
 
-                source: Icon !== '' ? UrlUtils.fromString(Icon) : ''
+                source: Icon !== '' ? 'file://' + Icon : ''
                 fillMode: Image.PreserveAspectFit
                 mipmap: true
               }

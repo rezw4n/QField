@@ -1,8 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import org.smartfield 1.0
+import Theme 1.0
 
 Page {
   id: messageLog
@@ -43,7 +43,14 @@ Page {
         objectName: 'messagesList'
         flickableDirection: Flickable.VerticalFlick
         boundsBehavior: Flickable.StopAtBounds
-        ScrollBar.vertical: QfScrollBar {
+        ScrollBar.vertical: ScrollBar {
+          policy: ScrollBar.AsNeeded
+          width: 6
+          contentItem: Rectangle {
+            implicitWidth: 6
+            implicitHeight: 25
+            color: Theme.mainColor
+          }
         }
         clip: true
         anchors.fill: parent
@@ -135,7 +142,7 @@ Page {
       id: submitLog
       Layout.fillWidth: true
       text: qsTr("Send application log")
-      visible: qfieldSettings.enableInfoCollection && platformUtilities.capabilities & PlatformUtilities.SentryFramework
+      visible: smartfieldSettings.enableInfoCollection && platformUtilities.capabilities & PlatformUtilities.SentryFramework
 
       onClicked: {
         applicationLogDialog.open();
@@ -189,8 +196,8 @@ Page {
         bottomPadding: 5
         text: qsTr('Include cloud user details')
         font: Theme.defaultFont
-        visible: cloudConnection.status === QFieldCloudConnection.LoggedIn
-        checked: cloudConnection.status === QFieldCloudConnection.LoggedIn
+        visible: cloudConnection.status === SmartCloudConnection.LoggedIn
+        checked: cloudConnection.status === SmartCloudConnection.LoggedIn
         indicator.height: 16
         indicator.width: 16
         indicator.implicitHeight: 24

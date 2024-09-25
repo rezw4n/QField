@@ -1,5 +1,5 @@
 /***************************************************************************
-                            platformutilities.cpp  -  utilities for qfield
+                            platformutilities.cpp  -  utilities for smartfield
 
                               -------------------
               begin                : Wed Dec 04 10:48:28 CET 2015
@@ -20,13 +20,12 @@
 #include "fileutils.h"
 #include "platformutilities.h"
 #include "projectsource.h"
-#include "qfield.h"
-#include "qfieldcloudconnection.h"
+#include "smartfield.h"
+#include "smartcloudconnection.h"
 #include "qgismobileapp.h"
 #include "qgsmessagelog.h"
 #include "resourcesource.h"
 #include "stringutils.h"
-#include "urlutils.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -66,7 +65,7 @@ PlatformUtilities::Capabilities PlatformUtilities::capabilities() const
 
 void PlatformUtilities::copySampleProjects()
 {
-  const bool success = FileUtils::copyRecursively( systemSharedDataLocation() + QLatin1String( "/qfield/sample_projects" ), systemLocalDataLocation( QLatin1String( "sample_projects" ) ) );
+  const bool success = FileUtils::copyRecursively( systemSharedDataLocation() + QLatin1String( "/smartfield/sample_projects" ), systemLocalDataLocation( QLatin1String( "sample_projects" ) ) );
   Q_ASSERT( success );
 }
 
@@ -80,7 +79,7 @@ void PlatformUtilities::initSystem()
     localGitRev = gitRevFile.readAll();
   }
   gitRevFile.close();
-  QByteArray appGitRev = qfield::gitRev.toUtf8();
+  QByteArray appGitRev = smartfield::gitRev.toUtf8();
   if ( localGitRev != appGitRev )
   {
     afterUpdate();
@@ -114,22 +113,22 @@ QString PlatformUtilities::systemSharedDataLocation() const
    *
    * [prefix_path]
    * |-- bin
-   * |   |-- qfield.exe
+   * |   |-- smartfield.exe
    * |-- share
-   * |   |-- qfield
+   * |   |-- smartfield
    * |   |   |-- sample_projects
    * |   |-- proj
    * |   |   |-- data
    * |   |   |   |--  proj.db
    *
-   * systemSharedDataLocation()'s return value will therefore be - relative to qfield.exe - '../share'.
+   * systemSharedDataLocation()'s return value will therefore be - relative to smartfield.exe - '../share'.
    * However it is possible to override this default logic through a environment variable named
-   * QFIELD_SYSTEM_SHARED_DATA_PATH. If present, its value will be used as the return value instead.
+   * SMARTFIELD_SYSTEM_SHARED_DATA_PATH. If present, its value will be used as the return value instead.
   */
   const static QString sharePath = QDir( QFileInfo( !QCoreApplication::applicationFilePath().isEmpty() ? QCoreApplication::applicationFilePath() : QCoreApplication::arguments().value( 0 ) ).canonicalPath()
                                          + QLatin1String( "/../share" ) )
                                      .absolutePath();
-  const static QString environmentSharePath = QString( qgetenv( "QFIELD_SYSTEM_SHARED_DATA_PATH" ) );
+  const static QString environmentSharePath = QString( qgetenv( "SMARTFIELD_SYSTEM_SHARED_DATA_PATH" ) );
   return !environmentSharePath.isEmpty() ? QDir( environmentSharePath ).absolutePath() : sharePath;
 }
 
@@ -153,7 +152,7 @@ void PlatformUtilities::loadQgsProject() const
 
 QStringList PlatformUtilities::appDataDirs() const
 {
-  return QStringList() << QStandardPaths::standardLocations( QStandardPaths::DocumentsLocation ).first() + QStringLiteral( "/QField/" );
+  return QStringList() << QStandardPaths::standardLocations( QStandardPaths::DocumentsLocation ).first() + QStringLiteral( "/SmartField/" );
 }
 
 QStringList PlatformUtilities::availableGrids() const
@@ -195,7 +194,7 @@ bool PlatformUtilities::renameFile( const QString &filename, const QString &newn
 
 QString PlatformUtilities::applicationDirectory() const
 {
-  return QStandardPaths::standardLocations( QStandardPaths::DocumentsLocation ).first() + QStringLiteral( "/QField/" );
+  return QStandardPaths::standardLocations( QStandardPaths::DocumentsLocation ).first() + QStringLiteral( "/SmartField/" );
 }
 
 QStringList PlatformUtilities::additionalApplicationDirectories() const
@@ -284,7 +283,7 @@ ResourceSource *PlatformUtilities::createResource( const QString &prefix, const 
       }
     }
 
-    QgsMessageLog::logMessage( tr( "Failed to save file resource" ), "QField", Qgis::Critical );
+    QgsMessageLog::logMessage( tr( "Failed to save file resource" ), "SmartField", Qgis::Critical );
   }
 
   return new ResourceSource( parent, prefix, QString() );
@@ -325,7 +324,7 @@ ResourceSource *PlatformUtilities::getFile( const QString &prefix, const QString
 
 ViewStatus *PlatformUtilities::open( const QString &uri, bool, QObject * )
 {
-  QDesktopServices::openUrl( UrlUtils::fromString( uri ) );
+  QDesktopServices::openUrl( QStringLiteral( "file://%1" ).arg( uri ) );
   return nullptr;
 }
 
@@ -335,11 +334,11 @@ ProjectSource *PlatformUtilities::openProject( QObject * )
   ProjectSource *source = new ProjectSource();
   QString fileName { QFileDialog::getOpenFileName( nullptr,
                                                    tr( "Open File" ),
-                                                   settings.value( QStringLiteral( "QField/lastOpenDir" ), QString() ).toString(),
+                                                   settings.value( QStringLiteral( "SmartField/lastOpenDir" ), QString() ).toString(),
                                                    QStringLiteral( "%1 (*.%2);;%3 (*.%4);;%5 (*.%6);;%7 (*.%8)" ).arg( tr( "All Supported Files" ), ( SUPPORTED_PROJECT_EXTENSIONS + SUPPORTED_VECTOR_EXTENSIONS + SUPPORTED_RASTER_EXTENSIONS ).join( QStringLiteral( " *." ) ), tr( "QGIS Project Files" ), SUPPORTED_PROJECT_EXTENSIONS.join( QStringLiteral( " *." ) ), tr( "Vector Datasets" ), SUPPORTED_VECTOR_EXTENSIONS.join( QStringLiteral( " *." ) ), tr( "Raster Datasets" ), SUPPORTED_RASTER_EXTENSIONS.join( QStringLiteral( " *." ) ) ) ) };
   if ( !fileName.isEmpty() )
   {
-    settings.setValue( QStringLiteral( "/QField/lastOpenDir" ), QFileInfo( fileName ).absolutePath() );
+    settings.setValue( QStringLiteral( "/SmartField/lastOpenDir" ), QFileInfo( fileName ).absolutePath() );
     QTimer::singleShot( 0, this, [source, fileName]() { emit source->projectOpened( fileName ); } );
   }
   return source;
@@ -398,7 +397,7 @@ double PlatformUtilities::systemFontPointSize() const
   return QApplication::font().pointSizeF() + 2.0;
 }
 
-void PlatformUtilities::uploadPendingAttachments( QFieldCloudConnection *connection ) const
+void PlatformUtilities::uploadPendingAttachments( SmartCloudConnection *connection ) const
 {
   QTimer::singleShot( 500, [connection]() {
     if ( connection )
@@ -418,6 +417,7 @@ PlatformUtilities *PlatformUtilities::instance()
   return sPlatformUtils;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 5, 0 )
 Qt::PermissionStatus PlatformUtilities::checkCameraPermission() const
 {
   QCameraPermission cameraPermission;
@@ -441,3 +441,4 @@ void PlatformUtilities::requestMicrophonePermission( std::function<void( Qt::Per
   QMicrophonePermission microphonePermission;
   qApp->requestPermission( microphonePermission, [=]( const QPermission &permission ) { func( permission.status() ); } );
 }
+#endif

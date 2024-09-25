@@ -15,18 +15,18 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifdef QFIELDTEST_MAIN
+#ifdef SMARTFIELDTEST_MAIN
 #define CATCH_CONFIG_RUNNER
 #endif
 
-#include "qfield.h"
+#include "smartfield.h"
 
 #include <QString>
 #include <QtGlobal>
 
 #include <catch2/catch_all.hpp>
 
-#ifdef QFIELDTEST_MAIN
+#ifdef SMARTFIELDTEST_MAIN
 #include <qgsapplication.h>
 int main( int argc, char *argv[] )
 {

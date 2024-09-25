@@ -53,7 +53,7 @@ void HelpLocatorFilter::fetchResults( const QString &string, const QgsLocatorCon
     return;
   }
 
-  QNetworkRequest request( QUrl( "https://docs.qfield.org/search/search_index.json" ) );
+  QNetworkRequest request( QUrl( "https://docs.smartfield.org/search/search_index.json" ) );
   QgsBlockingNetworkRequest blockingRequest;
   const QgsBlockingNetworkRequest::ErrorCode errorCode = blockingRequest.get( request, false, feedback );
   if ( errorCode != QgsBlockingNetworkRequest::NoError )
@@ -131,7 +131,7 @@ void HelpLocatorFilter::fetchResults( const QString &string, const QgsLocatorCon
           result.description = htmlDoc.toPlainText();
           result.score = matchScore;
           result.filter = this;
-          result.setUserData( QStringLiteral( "https://docs.qfield.org/%1" ).arg( location ) );
+          result.setUserData( QStringLiteral( "https://docs.smartfield.org/%1" ).arg( location ) );
           emit resultFetched( result );
         }
       }

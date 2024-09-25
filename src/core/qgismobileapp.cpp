@@ -28,6 +28,9 @@
 #include "cpl_string.h"
 #include "cpl_vsi.h"
 
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+#include "barcodevideofilter.h"
+#endif
 #ifdef WITH_BLUETOOTH
 #include "bluetoothdevicemodel.h"
 #include "bluetoothreceiver.h"
@@ -84,11 +87,9 @@
 #include "nearfieldreader.h"
 #include "orderedrelationmodel.h"
 #include "parametizedimage.h"
-#include "permissions.h"
 #include "platformutilities.h"
 #include "positioning.h"
 #include "positioningdevicemodel.h"
-#include "positioninginformationmodel.h"
 #include "positioningutils.h"
 #include "printlayoutlistmodel.h"
 #include "processingalgorithm.h"
@@ -98,10 +99,10 @@
 #include "projectsimageprovider.h"
 #include "projectsource.h"
 #include "projectutils.h"
-#include "qfield.h"
-#include "qfieldcloudconnection.h"
-#include "qfieldcloudprojectsmodel.h"
-#include "qfieldcloudutils.h"
+#include "smartfield.h"
+#include "smartcloudconnection.h"
+#include "smartcloudprojectsmodel.h"
+#include "smartcloudutils.h"
 #include "qgismobileapp.h"
 #include "qgsgeometrywrapper.h"
 #include "qgsproviderregistry.h"
@@ -128,11 +129,14 @@
 #include "valuemapmodel.h"
 #include "vertexmodel.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 5, 0 )
+#include "permissions.h"
+#endif
+
 #include <QDateTime>
 #include <QFileInfo>
 #include <QFontDatabase>
 #include <QPalette>
-#include <QPermissions>
 #include <QQmlFileSelector>
 #include <QResource>
 #include <QScreen>
@@ -186,6 +190,9 @@
 #include <qgsvectorlayereditbuffer.h>
 #include <qgsvectorlayertemporalproperties.h>
 
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 6, 0 )
+#include <QPermissions>
+#endif
 
 #define QUOTE( string ) _QUOTE( string )
 #define _QUOTE( string ) #string
@@ -213,9 +220,9 @@ QgisMobileapp::QgisMobileapp( QgsApplication *app, QObject *parent )
 
   AppInterface::setInstance( mIface );
 
-  //set the authHandler to qfield-handler
+  //set the authHandler to smartfield-handler
   std::unique_ptr<QgsNetworkAuthenticationHandler> handler;
-  mAuthRequestHandler = new QFieldAppAuthRequestHandler();
+  mAuthRequestHandler = new SmartFieldAppAuthRequestHandler();
   handler.reset( mAuthRequestHandler );
   QgsNetworkAccessManager::instance()->setAuthHandler( std::move( handler ) );
 
@@ -295,7 +302,7 @@ QgisMobileapp::QgisMobileapp( QgsApplication *app, QObject *parent )
 #endif
 
     QgsApplication::instance()->authManager()->setPasswordHelperEnabled( false );
-    QgsApplication::instance()->authManager()->setMasterPassword( QString( "qfield" ) );
+    QgsApplication::instance()->authManager()->setMasterPassword( QString( "smartfield" ) );
     // import authentication method configurations
     for ( const QString &dataDir : dataDirs )
     {
@@ -418,132 +425,136 @@ void QgisMobileapp::initDeclarative( QQmlEngine *engine )
   // Register QgsQuick QML types
   qmlRegisterType<QgsQuickMapCanvasMap>( "org.qgis", 1, 0, "MapCanvasMap" );
   qmlRegisterType<QgsQuickMapSettings>( "org.qgis", 1, 0, "MapSettings" );
-  qmlRegisterType<QgsQuickCoordinateTransformer>( "org.qfield", 1, 0, "CoordinateTransformer" );
+  qmlRegisterType<QgsQuickCoordinateTransformer>( "org.smartfield", 1, 0, "CoordinateTransformer" );
   qmlRegisterType<QgsQuickElevationProfileCanvas>( "org.qgis", 1, 0, "ElevationProfileCanvas" );
   qmlRegisterType<QgsQuickMapTransform>( "org.qgis", 1, 0, "MapTransform" );
 
-  // Register QField QML types
+  // Register SmartField QML types
   qRegisterMetaType<PlatformUtilities::Capabilities>( "PlatformUtilities::Capabilities" );
   qRegisterMetaType<GeometryUtils::GeometryOperationResult>( "GeometryOperationResult" );
-  qRegisterMetaType<QFieldCloudConnection::ConnectionStatus>( "QFieldCloudConnection::ConnectionStatus" );
+  qRegisterMetaType<SmartCloudConnection::ConnectionStatus>( "SmartCloudConnection::ConnectionStatus" );
   qRegisterMetaType<CloudUserInformation>( "CloudUserInformation" );
-  qRegisterMetaType<QFieldCloudProjectsModel::ProjectStatus>( "QFieldCloudProjectsModel::ProjectStatus" );
-  qRegisterMetaType<QFieldCloudProjectsModel::ProjectCheckout>( "QFieldCloudProjectsModel::ProjectCheckout" );
-  qRegisterMetaType<QFieldCloudProjectsModel::ProjectModification>( "QFieldCloudProjectsModel::ProjectModification" );
+  qRegisterMetaType<SmartCloudProjectsModel::ProjectStatus>( "SmartCloudProjectsModel::ProjectStatus" );
+  qRegisterMetaType<SmartCloudProjectsModel::ProjectCheckout>( "SmartCloudProjectsModel::ProjectCheckout" );
+  qRegisterMetaType<SmartCloudProjectsModel::ProjectModification>( "SmartCloudProjectsModel::ProjectModification" );
   qRegisterMetaType<Tracker::MeasureType>( "Tracker::MeasureType" );
   qRegisterMetaType<Positioning::ElevationCorrectionMode>( "Positioning::ElevationCorrectionMode" );
 
-  qmlRegisterType<MultiFeatureListModel>( "org.qfield", 1, 0, "MultiFeatureListModel" );
-  qmlRegisterType<FeatureIterator>( "org.qfield", 1, 0, "FeatureIterator" );
-  qmlRegisterType<FeatureListModel>( "org.qfield", 1, 0, "FeatureListModel" );
-  qmlRegisterType<FeatureListModelSelection>( "org.qfield", 1, 0, "FeatureListModelSelection" );
-  qmlRegisterType<FeatureListExtentController>( "org.qfield", 1, 0, "FeaturelistExtentController" );
-  qmlRegisterType<Geometry>( "org.qfield", 1, 0, "Geometry" );
-  qmlRegisterType<ModelHelper>( "org.qfield", 1, 0, "ModelHelper" );
-  qmlRegisterType<RubberbandShape>( "org.qfield", 1, 0, "RubberbandShape" );
-  qmlRegisterType<RubberbandModel>( "org.qfield", 1, 0, "RubberbandModel" );
-  qmlRegisterType<ResourceSource>( "org.qfield", 1, 0, "ResourceSource" );
-  qmlRegisterType<ProjectInfo>( "org.qfield", 1, 0, "ProjectInfo" );
-  qmlRegisterType<ProjectSource>( "org.qfield", 1, 0, "ProjectSource" );
-  qmlRegisterType<ViewStatus>( "org.qfield", 1, 0, "ViewStatus" );
+  qmlRegisterType<MultiFeatureListModel>( "org.smartfield", 1, 0, "MultiFeatureListModel" );
+  qmlRegisterType<FeatureIterator>( "org.smartfield", 1, 0, "FeatureIterator" );
+  qmlRegisterType<FeatureListModel>( "org.smartfield", 1, 0, "FeatureListModel" );
+  qmlRegisterType<FeatureListModelSelection>( "org.smartfield", 1, 0, "FeatureListModelSelection" );
+  qmlRegisterType<FeatureListExtentController>( "org.smartfield", 1, 0, "FeaturelistExtentController" );
+  qmlRegisterType<Geometry>( "org.smartfield", 1, 0, "Geometry" );
+  qmlRegisterType<ModelHelper>( "org.smartfield", 1, 0, "ModelHelper" );
+  qmlRegisterType<RubberbandShape>( "org.smartfield", 1, 0, "RubberbandShape" );
+  qmlRegisterType<RubberbandModel>( "org.smartfield", 1, 0, "RubberbandModel" );
+  qmlRegisterType<ResourceSource>( "org.smartfield", 1, 0, "ResourceSource" );
+  qmlRegisterType<ProjectInfo>( "org.smartfield", 1, 0, "ProjectInfo" );
+  qmlRegisterType<ProjectSource>( "org.smartfield", 1, 0, "ProjectSource" );
+  qmlRegisterType<ViewStatus>( "org.smartfield", 1, 0, "ViewStatus" );
 
-  qmlRegisterType<Geofencer>( "org.qfield", 1, 0, "Geofencer" );
-  qmlRegisterType<DigitizingLogger>( "org.qfield", 1, 0, "DigitizingLogger" );
-  qmlRegisterType<AttributeFormModel>( "org.qfield", 1, 0, "AttributeFormModel" );
-  qmlRegisterType<FeatureModel>( "org.qfield", 1, 0, "FeatureModel" );
-  qmlRegisterType<IdentifyTool>( "org.qfield", 1, 0, "IdentifyTool" );
-  qmlRegisterType<DrawingCanvas>( "org.qfield", 1, 0, "DrawingCanvas" );
-  qmlRegisterType<SubModel>( "org.qfield", 1, 0, "SubModel" );
-  qmlRegisterType<ExpressionVariableModel>( "org.qfield", 1, 0, "ExpressionVariableModel" );
-  qmlRegisterType<BadLayerHandler>( "org.qfield", 1, 0, "BadLayerHandler" );
-  qmlRegisterType<SnappingUtils>( "org.qfield", 1, 0, "SnappingUtils" );
-  qmlRegisterType<DistanceArea>( "org.qfield", 1, 0, "DistanceArea" );
-  qmlRegisterType<FocusStack>( "org.qfield", 1, 0, "FocusStack" );
-  qmlRegisterType<ParametizedImage>( "org.qfield", 1, 0, "ParametizedImage" );
-  qmlRegisterType<PrintLayoutListModel>( "org.qfield", 1, 0, "PrintLayoutListModel" );
-  qmlRegisterType<VertexModel>( "org.qfield", 1, 0, "VertexModel" );
-  qmlRegisterType<MapToScreen>( "org.qfield", 1, 0, "MapToScreen" );
-  qmlRegisterType<LocatorModelSuperBridge>( "org.qfield", 1, 0, "LocatorModelSuperBridge" );
-  qmlRegisterType<LocatorActionsModel>( "org.qfield", 1, 0, "LocatorActionsModel" );
-  qmlRegisterType<LocatorFiltersModel>( "org.qfield", 1, 0, "LocatorFiltersModel" );
-  qmlRegisterType<LinePolygonShape>( "org.qfield", 1, 0, "LinePolygonShape" );
-  qmlRegisterType<LocalFilesModel>( "org.qfield", 1, 0, "LocalFilesModel" );
-  qmlRegisterType<QgsGeometryWrapper>( "org.qfield", 1, 0, "QgsGeometryWrapper" );
-  qmlRegisterType<ValueMapModel>( "org.qfield", 1, 0, "ValueMapModel" );
-  qmlRegisterType<RecentProjectListModel>( "org.qfield", 1, 0, "RecentProjectListModel" );
-  qmlRegisterType<ReferencingFeatureListModel>( "org.qfield", 1, 0, "ReferencingFeatureListModel" );
-  qmlRegisterType<OrderedRelationModel>( "org.qfield", 1, 0, "OrderedRelationModel" );
-  qmlRegisterType<FeatureCheckListModel>( "org.qfield", 1, 0, "FeatureCheckListModel" );
-  qmlRegisterType<GeometryEditorsModel>( "org.qfield", 1, 0, "GeometryEditorsModel" );
-  qmlRegisterType<ExpressionEvaluator>( "org.qfield", 1, 0, "ExpressionEvaluator" );
+  qmlRegisterType<Geofencer>( "org.smartfield", 1, 0, "Geofencer" );
+  qmlRegisterType<DigitizingLogger>( "org.smartfield", 1, 0, "DigitizingLogger" );
+  qmlRegisterType<AttributeFormModel>( "org.smartfield", 1, 0, "AttributeFormModel" );
+  qmlRegisterType<FeatureModel>( "org.smartfield", 1, 0, "FeatureModel" );
+  qmlRegisterType<IdentifyTool>( "org.smartfield", 1, 0, "IdentifyTool" );
+  qmlRegisterType<DrawingCanvas>( "org.smartfield", 1, 0, "DrawingCanvas" );
+  qmlRegisterType<SubModel>( "org.smartfield", 1, 0, "SubModel" );
+  qmlRegisterType<ExpressionVariableModel>( "org.smartfield", 1, 0, "ExpressionVariableModel" );
+  qmlRegisterType<BadLayerHandler>( "org.smartfield", 1, 0, "BadLayerHandler" );
+  qmlRegisterType<SnappingUtils>( "org.smartfield", 1, 0, "SnappingUtils" );
+  qmlRegisterType<DistanceArea>( "org.smartfield", 1, 0, "DistanceArea" );
+  qmlRegisterType<FocusStack>( "org.smartfield", 1, 0, "FocusStack" );
+  qmlRegisterType<ParametizedImage>( "org.smartfield", 1, 0, "ParametizedImage" );
+  qmlRegisterType<PrintLayoutListModel>( "org.smartfield", 1, 0, "PrintLayoutListModel" );
+  qmlRegisterType<VertexModel>( "org.smartfield", 1, 0, "VertexModel" );
+  qmlRegisterType<MapToScreen>( "org.smartfield", 1, 0, "MapToScreen" );
+  qmlRegisterType<LocatorModelSuperBridge>( "org.smartfield", 1, 0, "LocatorModelSuperBridge" );
+  qmlRegisterType<LocatorActionsModel>( "org.smartfield", 1, 0, "LocatorActionsModel" );
+  qmlRegisterType<LocatorFiltersModel>( "org.smartfield", 1, 0, "LocatorFiltersModel" );
+  qmlRegisterType<LinePolygonShape>( "org.smartfield", 1, 0, "LinePolygonShape" );
+  qmlRegisterType<LocalFilesModel>( "org.smartfield", 1, 0, "LocalFilesModel" );
+  qmlRegisterType<QgsGeometryWrapper>( "org.smartfield", 1, 0, "QgsGeometryWrapper" );
+  qmlRegisterType<ValueMapModel>( "org.smartfield", 1, 0, "ValueMapModel" );
+  qmlRegisterType<RecentProjectListModel>( "org.smartfield", 1, 0, "RecentProjectListModel" );
+  qmlRegisterType<ReferencingFeatureListModel>( "org.smartfield", 1, 0, "ReferencingFeatureListModel" );
+  qmlRegisterType<OrderedRelationModel>( "org.smartfield", 1, 0, "OrderedRelationModel" );
+  qmlRegisterType<FeatureCheckListModel>( "org.smartfield", 1, 0, "FeatureCheckListModel" );
+  qmlRegisterType<GeometryEditorsModel>( "org.smartfield", 1, 0, "GeometryEditorsModel" );
+  qmlRegisterType<ExpressionEvaluator>( "org.smartfield", 1, 0, "ExpressionEvaluator" );
 #ifdef WITH_BLUETOOTH
-  qmlRegisterType<BluetoothDeviceModel>( "org.qfield", 1, 0, "BluetoothDeviceModel" );
-  qmlRegisterType<BluetoothReceiver>( "org.qfield", 1, 0, "BluetoothReceiver" );
+  qmlRegisterType<BluetoothDeviceModel>( "org.smartfield", 1, 0, "BluetoothDeviceModel" );
+  qmlRegisterType<BluetoothReceiver>( "org.smartfield", 1, 0, "BluetoothReceiver" );
   engine->rootContext()->setContextProperty( "withBluetooth", QVariant( true ) );
 #else
   engine->rootContext()->setContextProperty( "withBluetooth", QVariant( false ) );
 #endif
 #ifdef WITH_SERIALPORT
-  qmlRegisterType<SerialPortModel>( "org.qfield", 1, 0, "SerialPortModel" );
-  qmlRegisterType<SerialPortReceiver>( "org.qfield", 1, 0, "SerialPortReceiver" );
+  qmlRegisterType<SerialPortModel>( "org.smartfield", 1, 0, "SerialPortModel" );
+  qmlRegisterType<SerialPortReceiver>( "org.smartfield", 1, 0, "SerialPortReceiver" );
   engine->rootContext()->setContextProperty( "withSerialPort", QVariant( true ) );
 #else
   engine->rootContext()->setContextProperty( "withSerialPort", QVariant( false ) );
 #endif
-  qmlRegisterType<NearFieldReader>( "org.qfield", 1, 0, "NearFieldReader" );
+  qmlRegisterType<NearFieldReader>( "org.smartfield", 1, 0, "NearFieldReader" );
   engine->rootContext()->setContextProperty( "withNfc", QVariant( NearFieldReader::isSupported() ) );
-  qmlRegisterType<ChangelogContents>( "org.qfield", 1, 0, "ChangelogContents" );
-  qmlRegisterType<LayerResolver>( "org.qfield", 1, 0, "LayerResolver" );
-  qmlRegisterType<QFieldCloudConnection>( "org.qfield", 1, 0, "QFieldCloudConnection" );
-  qmlRegisterType<QFieldCloudProjectsModel>( "org.qfield", 1, 0, "QFieldCloudProjectsModel" );
-  qmlRegisterType<QFieldCloudProjectsFilterModel>( "org.qfield", 1, 0, "QFieldCloudProjectsFilterModel" );
-  qmlRegisterType<DeltaListModel>( "org.qfield", 1, 0, "DeltaListModel" );
-  qmlRegisterType<ScaleBarMeasurement>( "org.qfield", 1, 0, "ScaleBarMeasurement" );
-  qmlRegisterType<SensorListModel>( "org.qfield", 1, 0, "SensorListModel" );
-  qmlRegisterType<Navigation>( "org.qfield", 1, 0, "Navigation" );
-  qmlRegisterType<NavigationModel>( "org.qfield", 1, 0, "NavigationModel" );
-  qmlRegisterType<Positioning>( "org.qfield", 1, 0, "Positioning" );
-  qmlRegisterType<PositioningInformationModel>( "org.qfield", 1, 0, "PositioningInformationModel" );
-  qmlRegisterType<PositioningDeviceModel>( "org.qfield", 1, 0, "PositioningDeviceModel" );
-  qmlRegisterType<AudioRecorder>( "org.qfield", 1, 0, "AudioRecorder" );
-  qmlRegisterType<BarcodeDecoder>( "org.qfield", 1, 0, "BarcodeDecoder" );
-  qmlRegisterType<CameraPermission>( "org.qfield", 1, 0, "QfCameraPermission" );
-  qmlRegisterType<MicrophonePermission>( "org.qfield", 1, 0, "QfMicrophonePermission" );
-  qmlRegisterUncreatableType<QAbstractSocket>( "org.qfield", 1, 0, "QAbstractSocket", "" );
-  qmlRegisterUncreatableType<AbstractGnssReceiver>( "org.qfield", 1, 0, "AbstractGnssReceiver", "" );
-  qmlRegisterUncreatableType<Tracker>( "org.qfield", 1, 0, "Tracker", "" );
+  qmlRegisterType<ChangelogContents>( "org.smartfield", 1, 0, "ChangelogContents" );
+  qmlRegisterType<LayerResolver>( "org.smartfield", 1, 0, "LayerResolver" );
+  qmlRegisterType<SmartCloudConnection>( "org.smartfield", 1, 0, "SmartCloudConnection" );
+  qmlRegisterType<SmartCloudProjectsModel>( "org.smartfield", 1, 0, "SmartCloudProjectsModel" );
+  qmlRegisterType<SmartCloudProjectsFilterModel>( "org.smartfield", 1, 0, "SmartCloudProjectsFilterModel" );
+  qmlRegisterType<DeltaListModel>( "org.smartfield", 1, 0, "DeltaListModel" );
+  qmlRegisterType<ScaleBarMeasurement>( "org.smartfield", 1, 0, "ScaleBarMeasurement" );
+  qmlRegisterType<SensorListModel>( "org.smartfield", 1, 0, "SensorListModel" );
+  qmlRegisterType<Navigation>( "org.smartfield", 1, 0, "Navigation" );
+  qmlRegisterType<NavigationModel>( "org.smartfield", 1, 0, "NavigationModel" );
+  qmlRegisterType<Positioning>( "org.smartfield", 1, 0, "Positioning" );
+  qmlRegisterType<PositioningDeviceModel>( "org.smartfield", 1, 0, "PositioningDeviceModel" );
+  qmlRegisterType<AudioRecorder>( "org.smartfield", 1, 0, "AudioRecorder" );
+  qmlRegisterType<BarcodeDecoder>( "org.smartfield", 1, 0, "BarcodeDecoder" );
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+  qmlRegisterType<BarcodeVideoFilter>( "org.smartfield", 1, 0, "BarcodeVideoFilter" );
+#endif
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 5, 0 )
+  qmlRegisterType<CameraPermission>( "org.smartfield", 1, 0, "QfCameraPermission" );
+  qmlRegisterType<MicrophonePermission>( "org.smartfield", 1, 0, "QfMicrophonePermission" );
+#endif
+  qmlRegisterUncreatableType<QAbstractSocket>( "org.smartfield", 1, 0, "QAbstractSocket", "" );
+  qmlRegisterUncreatableType<AbstractGnssReceiver>( "org.smartfield", 1, 0, "AbstractGnssReceiver", "" );
+  qmlRegisterUncreatableType<Tracker>( "org.smartfield", 1, 0, "Tracker", "" );
   qRegisterMetaType<GnssPositionInformation>( "GnssPositionInformation" );
   qRegisterMetaType<PluginInformation>( "PluginInformation" );
 
-  qmlRegisterType<ProcessingAlgorithm>( "org.qfield", 1, 0, "ProcessingAlgorithm" );
-  qmlRegisterType<ProcessingAlgorithmParametersModel>( "org.qfield", 1, 0, "ProcessingAlgorithmParametersModel" );
-  qmlRegisterType<ProcessingAlgorithmsModel>( "org.qfield", 1, 0, "ProcessingAlgorithmsModel" );
+  qmlRegisterType<ProcessingAlgorithm>( "org.smartfield", 1, 0, "ProcessingAlgorithm" );
+  qmlRegisterType<ProcessingAlgorithmParametersModel>( "org.smartfield", 1, 0, "ProcessingAlgorithmParametersModel" );
+  qmlRegisterType<ProcessingAlgorithmsModel>( "org.smartfield", 1, 0, "ProcessingAlgorithmsModel" );
 
-  REGISTER_SINGLETON( "org.qfield", ExpressionContextUtils, "ExpressionContextUtils" );
-  REGISTER_SINGLETON( "org.qfield", GeometryEditorsModel, "GeometryEditorsModelSingleton" );
-  REGISTER_SINGLETON( "org.qfield", GeometryUtils, "GeometryUtils" );
-  REGISTER_SINGLETON( "org.qfield", FeatureUtils, "FeatureUtils" );
-  REGISTER_SINGLETON( "org.qfield", FileUtils, "FileUtils" );
-  REGISTER_SINGLETON( "org.qfield", LayerUtils, "LayerUtils" );
-  REGISTER_SINGLETON( "org.qfield", RelationUtils, "RelationUtils" );
-  REGISTER_SINGLETON( "org.qfield", StringUtils, "StringUtils" );
-  REGISTER_SINGLETON( "org.qfield", UrlUtils, "UrlUtils" );
-  REGISTER_SINGLETON( "org.qfield", QFieldCloudUtils, "QFieldCloudUtils" );
-  REGISTER_SINGLETON( "org.qfield", PositioningUtils, "PositioningUtils" );
-  REGISTER_SINGLETON( "org.qfield", ProjectUtils, "ProjectUtils" );
-  REGISTER_SINGLETON( "org.qfield", CoordinateReferenceSystemUtils, "CoordinateReferenceSystemUtils" );
+  REGISTER_SINGLETON( "org.smartfield", ExpressionContextUtils, "ExpressionContextUtils" );
+  REGISTER_SINGLETON( "org.smartfield", GeometryEditorsModel, "GeometryEditorsModelSingleton" );
+  REGISTER_SINGLETON( "org.smartfield", GeometryUtils, "GeometryUtils" );
+  REGISTER_SINGLETON( "org.smartfield", FeatureUtils, "FeatureUtils" );
+  REGISTER_SINGLETON( "org.smartfield", FileUtils, "FileUtils" );
+  REGISTER_SINGLETON( "org.smartfield", LayerUtils, "LayerUtils" );
+  REGISTER_SINGLETON( "org.smartfield", RelationUtils, "RelationUtils" );
+  REGISTER_SINGLETON( "org.smartfield", StringUtils, "StringUtils" );
+  REGISTER_SINGLETON( "org.smartfield", UrlUtils, "UrlUtils" );
+  REGISTER_SINGLETON( "org.smartfield", SmartCloudUtils, "SmartCloudUtils" );
+  REGISTER_SINGLETON( "org.smartfield", PositioningUtils, "PositioningUtils" );
+  REGISTER_SINGLETON( "org.smartfield", ProjectUtils, "ProjectUtils" );
+  REGISTER_SINGLETON( "org.smartfield", CoordinateReferenceSystemUtils, "CoordinateReferenceSystemUtils" );
 
-  qmlRegisterUncreatableType<AppInterface>( "org.qfield", 1, 0, "AppInterface", "AppInterface is only provided by the environment and cannot be created ad-hoc" );
-  qmlRegisterUncreatableType<Settings>( "org.qfield", 1, 0, "SettingsInterface", "" );
-  qmlRegisterUncreatableType<PluginManager>( "org.qfield", 1, 0, "PluginManager", "" );
-  qmlRegisterUncreatableType<PlatformUtilities>( "org.qfield", 1, 0, "PlatformUtilities", "" );
-  qmlRegisterUncreatableType<FlatLayerTreeModel>( "org.qfield", 1, 0, "FlatLayerTreeModel", "The FlatLayerTreeModel is available as context property `flatLayerTree`." );
-  qmlRegisterUncreatableType<TrackingModel>( "org.qfield", 1, 0, "TrackingModel", "The TrackingModel is available as context property `trackingModel`." );
-  qmlRegisterUncreatableType<QgsGpkgFlusher>( "org.qfield", 1, 0, "QgsGpkgFlusher", "The gpkgFlusher is available as context property `gpkgFlusher`" );
-  qmlRegisterUncreatableType<LayerObserver>( "org.qfield", 1, 0, "LayerObserver", "" );
-  qmlRegisterUncreatableType<DeltaFileWrapper>( "org.qfield", 1, 0, "DeltaFileWrapper", "" );
-  qmlRegisterUncreatableType<BookmarkModel>( "org.qfield", 1, 0, "BookmarkModel", "The BookmarkModel is available as context property `bookmarkModel`" );
-  qmlRegisterUncreatableType<MessageLogModel>( "org.qfield", 1, 0, "MessageLogModel", "The MessageLogModel is available as context property `messageLogModel`." );
+  qmlRegisterUncreatableType<AppInterface>( "org.smartfield", 1, 0, "AppInterface", "AppInterface is only provided by the environment and cannot be created ad-hoc" );
+  qmlRegisterUncreatableType<Settings>( "org.smartfield", 1, 0, "SettingsInterface", "" );
+  qmlRegisterUncreatableType<PluginManager>( "org.smartfield", 1, 0, "PluginManager", "" );
+  qmlRegisterUncreatableType<PlatformUtilities>( "org.smartfield", 1, 0, "PlatformUtilities", "" );
+  qmlRegisterUncreatableType<FlatLayerTreeModel>( "org.smartfield", 1, 0, "FlatLayerTreeModel", "The FlatLayerTreeModel is available as context property `flatLayerTree`." );
+  qmlRegisterUncreatableType<TrackingModel>( "org.smartfield", 1, 0, "TrackingModel", "The TrackingModel is available as context property `trackingModel`." );
+  qmlRegisterUncreatableType<QgsGpkgFlusher>( "org.smartfield", 1, 0, "QgsGpkgFlusher", "The gpkgFlusher is available as context property `gpkgFlusher`" );
+  qmlRegisterUncreatableType<LayerObserver>( "org.smartfield", 1, 0, "LayerObserver", "" );
+  qmlRegisterUncreatableType<DeltaFileWrapper>( "org.smartfield", 1, 0, "DeltaFileWrapper", "" );
+  qmlRegisterUncreatableType<BookmarkModel>( "org.smartfield", 1, 0, "BookmarkModel", "The BookmarkModel is available as context property `bookmarkModel`" );
+  qmlRegisterUncreatableType<MessageLogModel>( "org.smartfield", 1, 0, "MessageLogModel", "The MessageLogModel is available as context property `messageLogModel`." );
 
   qRegisterMetaType<SnappingResult>( "SnappingResult" );
 
@@ -552,9 +563,9 @@ void QgisMobileapp::initDeclarative( QQmlEngine *engine )
   engine->rootContext()->setContextProperty( "withNfc", QVariant( NearFieldReader::isSupported() ) );
   engine->rootContext()->setContextProperty( "systemFontPointSize", PlatformUtilities::instance()->systemFontPointSize() );
   engine->rootContext()->setContextProperty( "mouseDoubleClickInterval", QApplication::styleHints()->mouseDoubleClickInterval() );
-  engine->rootContext()->setContextProperty( "appVersion", qfield::appVersion );
-  engine->rootContext()->setContextProperty( "appVersionStr", qfield::appVersionStr );
-  engine->rootContext()->setContextProperty( "gitRev", qfield::gitRev );
+  engine->rootContext()->setContextProperty( "appVersion", smartfield::appVersion );
+  engine->rootContext()->setContextProperty( "appVersionStr", smartfield::appVersionStr );
+  engine->rootContext()->setContextProperty( "gitRev", smartfield::gitRev );
   engine->rootContext()->setContextProperty( "platformUtilities", PlatformUtilities::instance() );
 }
 
@@ -579,7 +590,7 @@ void QgisMobileapp::registerGlobalVariables()
   rootContext()->setContextProperty( "clipboardManager", mClipboardManager.get() );
   rootContext()->setContextProperty( "messageLogModel", mMessageLogModel );
   rootContext()->setContextProperty( "drawingTemplateModel", mDrawingTemplateModel );
-  rootContext()->setContextProperty( "qfieldAuthRequestHandler", mAuthRequestHandler );
+  rootContext()->setContextProperty( "smartfieldAuthRequestHandler", mAuthRequestHandler );
   rootContext()->setContextProperty( "trackingModel", mTrackingModel );
   addImageProvider( QLatin1String( "legend" ), mLegendImageProvider );
   addImageProvider( QLatin1String( "localfiles" ), mLocalFilesImageProvider );
@@ -667,17 +678,17 @@ void QgisMobileapp::onAfterFirstRendering()
     }
     else
     {
-      if ( QSettings().value( "/QField/loadProjectOnLaunch", true ).toBool() )
+      if ( QSettings().value( "/SmartField/loadProjectOnLaunch", true ).toBool() )
       {
         QSettings settings;
-        const QString defaultProject = settings.value( QStringLiteral( "QField/defaultProject" ), QString() ).toString();
+        const QString defaultProject = settings.value( QStringLiteral( "SmartField/defaultProject" ), QString() ).toString();
         if ( !defaultProject.isEmpty() && QFileInfo::exists( defaultProject ) )
         {
           loadProjectFile( defaultProject );
         }
         else
         {
-          const QString lastProjectFilePath = settings.value( QStringLiteral( "QField/lastProjectFilePath" ), QString() ).toString();
+          const QString lastProjectFilePath = settings.value( QStringLiteral( "SmartField/lastProjectFilePath" ), QString() ).toString();
           if ( !lastProjectFilePath.isEmpty() && QFileInfo::exists( lastProjectFilePath ) )
           {
             loadProjectFile( lastProjectFilePath );
@@ -706,7 +717,7 @@ bool QgisMobileapp::loadProjectFile( const QString &path, const QString &name )
   QFileInfo fi( path );
   if ( !fi.exists() )
   {
-    QgsMessageLog::logMessage( tr( "Can't load project, file \"%1\" does not exist" ).arg( path ), QStringLiteral( "QField" ), Qgis::Warning );
+    QgsMessageLog::logMessage( tr( "Can't load project, file \"%1\" does not exist" ).arg( path ), QStringLiteral( "SmartField" ), Qgis::Warning );
     return false;
   }
 
@@ -734,7 +745,7 @@ bool QgisMobileapp::loadProjectFile( const QString &path, const QString &name )
 void QgisMobileapp::reloadProjectFile()
 {
   if ( mProjectFilePath.isEmpty() )
-    QgsMessageLog::logMessage( tr( "No project file currently opened" ), QStringLiteral( "QField" ), Qgis::Warning );
+    QgsMessageLog::logMessage( tr( "No project file currently opened" ), QStringLiteral( "SmartField" ), Qgis::Warning );
 
   emit loadProjectTriggered( mProjectFilePath, mProjectFileName );
 }
@@ -743,9 +754,9 @@ void QgisMobileapp::readProjectFile()
 {
   QFileInfo fi( mProjectFilePath );
   if ( !fi.exists() )
-    QgsMessageLog::logMessage( tr( "Can't read project, file \"%1\" does not exist" ).arg( mProjectFilePath ), QStringLiteral( "QField" ), Qgis::Warning );
+    QgsMessageLog::logMessage( tr( "Can't read project, file \"%1\" does not exist" ).arg( mProjectFilePath ), QStringLiteral( "SmartField" ), Qgis::Warning );
 
-  QSettings().setValue( QStringLiteral( "QField/lastProjectFilePath" ), mProjectFilePath );
+  QSettings().setValue( QStringLiteral( "SmartField/lastProjectFilePath" ), mProjectFilePath );
 
   const QString suffix = fi.suffix().toLower();
 
@@ -780,7 +791,7 @@ void QgisMobileapp::readProjectFile()
   if ( SUPPORTED_PROJECT_EXTENSIONS.contains( suffix ) )
   {
     mProject->read( mProjectFilePath, Qgis::ProjectReadFlag::DontLoadProjectStyles | Qgis::ProjectReadFlag::DontLoad3DViews );
-    mProject->writeEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), false );
+    mProject->writeEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), false );
     projectLoaded = true;
   }
   else if ( suffix == QStringLiteral( "gpkg" ) )
@@ -793,7 +804,7 @@ void QgisMobileapp::readProjectFile()
       {
         QgsGeoPackageProjectUri projectUri { true, mProjectFilePath, projectNames.at( 0 ) };
         mProject->read( QgsGeoPackageProjectStorage::encodeUri( projectUri ), Qgis::ProjectReadFlag::DontLoadProjectStyles | Qgis::ProjectReadFlag::DontLoad3DViews );
-        mProject->writeEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), false );
+        mProject->writeEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), false );
         projectLoaded = true;
       }
     }
@@ -808,11 +819,11 @@ void QgisMobileapp::readProjectFile()
   }
 
   QString title;
-  if ( mProject->fileName().startsWith( QFieldCloudUtils::localCloudDirectory() ) )
+  if ( mProject->fileName().startsWith( SmartCloudUtils::localCloudDirectory() ) )
   {
-    // Overwrite the title to match what is used in QFieldCloud
+    // Overwrite the title to match what is used in SmartCloud
     const QString projectId = fi.dir().dirName();
-    title = QSettings().value( QStringLiteral( "QFieldCloud/projects/%1/name" ).arg( projectId ), fi.fileName() ).toString();
+    title = QSettings().value( QStringLiteral( "SmartCloud/projects/%1/name" ).arg( projectId ), fi.fileName() ).toString();
   }
   else
   {
@@ -968,7 +979,7 @@ void QgisMobileapp::readProjectFile()
     if ( crs.isValid() )
     {
       QSettings settings;
-      const QString fileAssociationProject = settings.value( QStringLiteral( "QField/baseMapProject" ), QString() ).toString();
+      const QString fileAssociationProject = settings.value( QStringLiteral( "SmartField/baseMapProject" ), QString() ).toString();
       if ( !fileAssociationProject.isEmpty() && QFile::exists( fileAssociationProject ) )
       {
         mProject->read( fileAssociationProject, Qgis::ProjectReadFlag::DontLoadProjectStyles | Qgis::ProjectReadFlag::DontLoad3DViews );
@@ -1015,7 +1026,7 @@ void QgisMobileapp::readProjectFile()
     mProject->setCrs( crs );
     mProject->setEllipsoid( crs.ellipsoidAcronym() );
     mProject->setTitle( mProjectFileName );
-    mProject->writeEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), true );
+    mProject->writeEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), true );
 
     for ( QgsMapLayer *l : std::as_const( rasterLayers ) )
     {

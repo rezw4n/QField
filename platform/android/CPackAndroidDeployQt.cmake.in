@@ -1,13 +1,13 @@
-if(NOT "$ENV{KEYNAME}" STREQUAL ""
-   AND NOT "$ENV{KEYPASS}" STREQUAL ""
-   AND NOT "$ENV{STOREPASS}" STREQUAL "")
+if(DEFINED ENV{KEYNAME}
+   AND DEFINED ENV{KEYPASS}
+   AND DEFINED ENV{STOREPASS})
   execute_process(
     COMMAND
       "@ANDROIDDEPLOYQT_EXECUTABLE@"
       --sign @CMAKE_SOURCE_DIR@/keystore.p12 "$ENV{KEYNAME}"
       --storepass "$ENV{STOREPASS}"
       --keypass "$ENV{KEYPASS}"
-      --input @CMAKE_BINARY_DIR@/src/app/android-qfield-deployment-settings.json
+      --input @CMAKE_BINARY_DIR@/src/app/android-smartfield-deployment-settings.json
       --output @CMAKE_BINARY_DIR@/src/app/android-build
       --deployment bundled
       --android-platform android-@ANDROID_TARGET_PLATFORM@
@@ -30,7 +30,7 @@ else()
   execute_process(
     COMMAND
       "@ANDROIDDEPLOYQT_EXECUTABLE@"
-      --input @CMAKE_BINARY_DIR@/src/app/android-qfield-deployment-settings.json
+      --input @CMAKE_BINARY_DIR@/src/app/android-smartfield-deployment-settings.json
       --output @CMAKE_BINARY_DIR@/src/app/android-build
       --deployment bundled
       --android-platform android-@ANDROID_TARGET_PLATFORM@

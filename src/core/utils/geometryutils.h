@@ -16,7 +16,7 @@
 #ifndef GEOMETRYUTILS_H
 #define GEOMETRYUTILS_H
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 
 #include <QObject>
 #include <QtPositioning/QGeoCoordinate>
@@ -28,7 +28,7 @@
 class QgsVectorLayer;
 class RubberbandModel;
 
-class QFIELD_CORE_EXPORT GeometryUtils : public QObject
+class SMARTFIELD_CORE_EXPORT GeometryUtils : public QObject
 {
     Q_OBJECT
   public:

@@ -16,7 +16,7 @@
 #ifndef RUBBERBANDMODEL_H
 #define RUBBERBANDMODEL_H
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 
 #include <QDateTime>
 #include <QObject>
@@ -37,7 +37,7 @@ class QgsVectorLayer;
  * It can be used as a linestring or as a ring in a polygon.
  */
 
-class QFIELD_CORE_EXPORT RubberbandModel : public QObject
+class SMARTFIELD_CORE_EXPORT RubberbandModel : public QObject
 {
     Q_OBJECT
 

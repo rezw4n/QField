@@ -17,14 +17,14 @@
  ***************************************************************************/
 
 #include "platformutilities.h"
-#include "qfield.h"
+#include "smartfield.h"
 #include "qgismobileapp.h"
 #if WITH_SENTRY
 #include "sentry_wrapper.h"
 #endif
 
 #if defined( Q_OS_ANDROID )
-#include "qfieldservice.h"
+#include "smartfieldservice.h"
 #endif
 
 #include <qgsapplication.h>
@@ -69,6 +69,10 @@ void initGraphics()
   format.setSamples( 4 );
   QSurfaceFormat::setDefaultFormat( format );
 #endif
+
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+  QGuiApplication::setAttribute( Qt::AA_EnableHighDpiScaling );
+#endif
 }
 
 int main( int argc, char **argv )
@@ -77,11 +81,11 @@ int main( int argc, char **argv )
   {
     QCoreApplication::setOrganizationName( "OPENGIS.ch" );
     QCoreApplication::setOrganizationDomain( "opengis.ch" );
-    QCoreApplication::setApplicationName( qfield::appName );
+    QCoreApplication::setApplicationName( smartfield::appName );
 
 #if defined( Q_OS_ANDROID )
     // For now the service only deals with background attachment uploads and will terminate once all uploads are done
-    QFieldService app( argc, argv );
+    SmartFieldService app( argc, argv );
 #endif
     return 0;
   }
@@ -92,7 +96,7 @@ int main( int argc, char **argv )
   QCoreApplication *dummyApp = new QCoreApplication( argc, argv );
   QCoreApplication::setOrganizationName( "OPENGIS.ch" );
   QCoreApplication::setOrganizationDomain( "opengis.ch" );
-  QCoreApplication::setApplicationName( qfield::appName );
+  QCoreApplication::setApplicationName( smartfield::appName );
   const QSettings settings;
   const QString customLanguage = settings.value( "/customLanguage", QString() ).toString();
 
@@ -106,22 +110,22 @@ int main( int argc, char **argv )
 
   Q_INIT_RESOURCE( qml );
 
-  QTranslator qfieldTranslator;
+  QTranslator smartfieldTranslator;
   QTranslator qtTranslator;
-  bool qfieldTranslatorLoaded = false;
+  bool smartfieldTranslatorLoaded = false;
   bool qtTranslatorLoaded = false;
   if ( !customLanguage.isEmpty() )
   {
-    qfieldTranslatorLoaded = qfieldTranslator.load( QStringLiteral( "qfield_%1" ).arg( customLanguage ), QStringLiteral( ":/i18n/" ), "_" );
+    smartfieldTranslatorLoaded = smartfieldTranslator.load( QStringLiteral( "smartfield_%1" ).arg( customLanguage ), QStringLiteral( ":/i18n/" ), "_" );
     qtTranslatorLoaded = qtTranslator.load( QStringLiteral( "qt_%1" ).arg( customLanguage ), QStringLiteral( ":/i18n/" ), "_" );
   }
-  if ( !qfieldTranslatorLoaded || qfieldTranslator.isEmpty() )
-    ( void ) qfieldTranslator.load( QLocale(), "qfield", "_", ":/i18n/" );
+  if ( !smartfieldTranslatorLoaded || smartfieldTranslator.isEmpty() )
+    ( void ) smartfieldTranslator.load( QLocale(), "smartfield", "_", ":/i18n/" );
   if ( !qtTranslatorLoaded || qtTranslator.isEmpty() )
     ( void ) qtTranslator.load( QLocale(), "qt", "_", ":/i18n/" );
 
   dummyApp->installTranslator( &qtTranslator );
-  dummyApp->installTranslator( &qfieldTranslator );
+  dummyApp->installTranslator( &smartfieldTranslator );
 
   QtWebView::initialize();
 
@@ -144,13 +148,13 @@ int main( int argc, char **argv )
     QgsApplication::setLocale( QLocale() );
   }
 
-  const QString qfieldFont( qgetenv( "QFIELD_FONT_TTF" ) );
-  if ( !qfieldFont.isEmpty() )
+  const QString smartfieldFont( qgetenv( "SMARTFIELD_FONT_TTF" ) );
+  if ( !smartfieldFont.isEmpty() )
   {
-    const QString qfieldFontName( qgetenv( "QFIELD_FONT_NAME" ) );
-    const int qfieldFontSize = QString( qgetenv( "QFIELD_FONT_SIZE" ) ).toInt();
-    QFontDatabase::addApplicationFont( qfieldFont );
-    app.setFont( QFont( qfieldFontName, qfieldFontSize ) );
+    const QString smartfieldFontName( qgetenv( "SMARTFIELD_FONT_NAME" ) );
+    const int smartfieldFontSize = QString( qgetenv( "SMARTFIELD_FONT_SIZE" ) ).toInt();
+    QFontDatabase::addApplicationFont( smartfieldFont );
+    app.setFont( QFont( smartfieldFontName, smartfieldFontSize ) );
   }
 
   QStringList projSearchPaths = QgsProjUtils::searchPaths();
@@ -201,10 +205,10 @@ int main( int argc, char **argv )
   // Set up the QSettings environment must be done after qapp is created
   QCoreApplication::setOrganizationName( "OPENGIS.ch" );
   QCoreApplication::setOrganizationDomain( "opengis.ch" );
-  QCoreApplication::setApplicationName( qfield::appName );
+  QCoreApplication::setApplicationName( smartfield::appName );
 
   app.installTranslator( &qtTranslator );
-  app.installTranslator( &qfieldTranslator );
+  app.installTranslator( &smartfieldTranslator );
 
   qputenv( "QT_QUICK_CONTROLS_STYLE", QByteArray( "Material" ) );
 

@@ -44,7 +44,7 @@ void PositioningDeviceModel::reloadModel()
   mDevices << Device( InternalDevice, tr( "Internal device" ), QVariantMap() );
 
   QSettings settings;
-  settings.beginGroup( "/qfield/positioningDevices" );
+  settings.beginGroup( "/smartfield/positioningDevices" );
   const QStringList deviceKeys = settings.childGroups();
   for ( int i = 0; i < deviceKeys.count(); i++ )
   {
@@ -99,7 +99,7 @@ int PositioningDeviceModel::addDevice( const Type &type, const QString &name, co
     return -1;
 
   QSettings settings;
-  settings.beginGroup( "/qfield/positioningDevices" );
+  settings.beginGroup( "/smartfield/positioningDevices" );
   const QStringList deviceKeys = settings.childGroups();
 
   QString uniqueName = name;
@@ -131,7 +131,7 @@ void PositioningDeviceModel::removeDevice( const QString &name )
     return;
 
   QSettings settings;
-  settings.beginGroup( "/qfield/positioningDevices" );
+  settings.beginGroup( "/smartfield/positioningDevices" );
   const QStringList deviceKeys = settings.childGroups();
   if ( deviceKeys.contains( name ) )
   {

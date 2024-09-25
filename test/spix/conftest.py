@@ -68,12 +68,12 @@ def report_summary():
 @pytest.fixture
 def process(request):
     filenames = [
-        "./output/bin/qfield_spix",
-        "./output/bin/Release/qfield_spix.exe",
-        "./output/bin/RelWithDebInfo/qfield_spix.exe",
-        "./output/bin/Debug/qfield_spix.exe",
-        "./output/bin/qfield.app/qfield_spix.exe",
-        "./output/bin/qfield.app/Contents/MacOS/qfield_spix",
+        "./output/bin/smartfield_spix",
+        "./output/bin/Release/smartfield_spix.exe",
+        "./output/bin/RelWithDebInfo/smartfield_spix.exe",
+        "./output/bin/Debug/smartfield_spix.exe",
+        "./output/bin/smartfield.app/smartfield_spix.exe",
+        "./output/bin/smartfield.app/Contents/MacOS/smartfield_spix",
     ]
 
     marker = request.node.get_closest_marker("project_file")
@@ -84,11 +84,11 @@ def process(request):
         data = marker.args[0]
         projectpath = str(Path(__file__).parent.parent / "testdata" / marker.args[0])
 
-    os.environ["QFIELD_FONT_TTF"] = str(
+    os.environ["SMARTFIELD_FONT_TTF"] = str(
         Path(__file__).parent.parent / "testdata" / "FiraSansCondensed-Regular.ttf"
     )
-    os.environ["QFIELD_FONT_NAME"] = "Fira Sans Condensed"
-    os.environ["QFIELD_FONT_SIZE"] = "14"
+    os.environ["SMARTFIELD_FONT_NAME"] = "Fira Sans Condensed"
+    os.environ["SMARTFIELD_FONT_SIZE"] = "14"
 
     for filename in filenames:
         try:
@@ -100,13 +100,13 @@ def process(request):
         except FileNotFoundError:
             pass
     else:
-        assert False, f"No qfield executable found in {filenames}"
+        assert False, f"No smartfield executable found in {filenames}"
 
 
 @pytest.fixture
 def app(request, process, process_communicate):
     """
-    Starts a qfield process and connects an xmlrpc client to it.
+    Starts a smartfield process and connects an xmlrpc client to it.
     Returns the xmlrpc client that can send commands to the running process.
 
     Will wait up to 30 seconds for the process to start and return as soon

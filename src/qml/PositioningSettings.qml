@@ -1,5 +1,6 @@
+import QtQuick 2.14
 import QtCore
-import org.qfield
+import org.smartfield 1.0
 
 Settings {
   property bool positioningActivated: false

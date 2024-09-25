@@ -33,13 +33,12 @@
         <file>ProcessingAlgorithmForm.qml</file>
         <file>ProcessingAlgorithmPreview.qml</file>
         <file>processingparameterwidgets/ProcessingParameterWidgetBase.qml</file>
-        <file>processingparameterwidgets/boolean.qml</file>
         <file>processingparameterwidgets/enum.qml</file>
         <file>processingparameterwidgets/distance.qml</file>
         <file>processingparameterwidgets/number.qml</file>
-        <file>QFieldAudioRecorder.qml</file>
-        <file>QFieldCamera.qml</file>
-        <file>QFieldSettings.qml</file>
+        <file>SmartFieldAudioRecorder.qml</file>
+        <file>SmartFieldCamera.qml</file>
+        <file>SmartFieldSettings.qml</file>
         <file>ScaleBar.qml</file>
         <file>SensorInformationView.qml</file>
         <file>Toast.qml</file>
@@ -69,6 +68,7 @@
         <file>TemporalProperties.qml</file>
         <file>LayerTreeItemProperties.qml</file>
         <file>VertexRubberband.qml</file>
+        <file>VisibilityFadingRow.qml</file>
         <file>LocatorItem.qml</file>
         <file>LocatorSettings.qml</file>
         <file>OverlayFeatureFormDrawer.qml</file>
@@ -99,25 +99,22 @@
         <file>imports/Theme/QfTabBar.qml</file>
         <file>imports/Theme/qmldir</file>
         <file>imports/Theme/QfSwipeAnimator.qml</file>
-        <file>imports/Theme/QfVisibilityFadingRow.qml</file>
         <file>TrackerSettings.qml</file>
         <file>TrackingSession.qml</file>
         <file>EmbeddedFeatureForm.qml</file>
         <file>ImageDial.qml</file>
         <file>ScreenLocker.qml</file>
         <file>SerialPortDeviceChooser.qml</file>
-        <file>QFieldCloudLogin.qml</file>
-        <file>QFieldCloudScreen.qml</file>
-        <file>QFieldCloudPopup.qml</file>
-        <file>QFieldCloudDeltaHistory.qml</file>
-        <file>QFieldCloudPackageLayersFeedback.qml</file>
-        <file>QFieldLocalDataPickerScreen.qml</file>
-        <file>QFieldSketcher.qml</file>
+        <file>SmartCloudLogin.qml</file>
+        <file>SmartCloudScreen.qml</file>
+        <file>SmartCloudPopup.qml</file>
+        <file>SmartCloudDeltaHistory.qml</file>
+        <file>SmartCloudPackageLayersFeedback.qml</file>
+        <file>SmartFieldLocalDataPickerScreen.qml</file>
+        <file>SmartFieldSketcher.qml</file>
         <file>PluginManagerSettings.qml</file>
         <file>InformationDrawer.qml</file>
-        <file>QFieldGuide.qml</file>
+        <file>SmartFieldGuide.qml</file>
         <file>imports/Theme/QfProgrerssRing.qml</file>
-        <file>imports/Theme/QfScrollBar.qml</file>
-        <file>imports/Theme/QfSearchBar.qml</file>
     </qresource>
 </RCC>

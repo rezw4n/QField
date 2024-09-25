@@ -14,11 +14,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-import QtQuick
-import QtQuick.Controls
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 
 Rectangle {
   id: toolBar
@@ -271,7 +271,7 @@ Rectangle {
     anchors.top: parent.top
     anchors.topMargin: toolBar.topMargin
 
-    visible: !qfieldSettings.autoSave && toolBar.state == "Edit"
+    visible: !smartfieldSettings.autoSave && toolBar.state == "Edit"
     width: visible ? 48 : 0
     height: 48
     clip: true
@@ -360,7 +360,7 @@ Rectangle {
         editButton.supportsEditing = selection.focusedLayer && selection.focusedLayer.supportsEditing;
       }
       function onFocusedFeatureChanged() {
-        if (QFieldCloudUtils.getProjectId(qgisProject.fileName) != '') {
+        if (SmartCloudUtils.getProjectId(qgisProject.fileName) != '') {
           editButton.isCreatedCloudFeature = cloudProjectsModel.layerObserver.deltaFileWrapper.isCreatedFeature(selection.focusedLayer, selection.focusedFeature);
         } else {
           editButton.isCreatedCloudFeature = false;
@@ -744,7 +744,7 @@ Rectangle {
       id: duplicateFeatureBtn
       text: qsTr('Duplicate Feature')
       icon.source: Theme.getThemeVectorIcon("ic_duplicate_black_24dp")
-      enabled: (projectInfo.insertRights && (!selection.focusedLayer || !selection.focusedLayer.customProperty("QFieldSync/is_geometry_locked", false)))
+      enabled: (projectInfo.insertRights && (!selection.focusedLayer || !selection.focusedLayer.customProperty("SmartFieldSync/is_geometry_locked", false)))
       visible: enabled
 
       font: Theme.defaultFont
@@ -758,7 +758,7 @@ Rectangle {
       id: transferFeatureAttributesBtn
       text: qsTr('Update Attributes From Feature')
       icon.source: Theme.getThemeVectorIcon("ic_transfer_into_black_24dp")
-      enabled: (projectInfo.insertRights && (!selection.focusedLayer || !selection.focusedLayer.customProperty("QFieldSync/is_geometry_locked", false)))
+      enabled: (projectInfo.insertRights && (!selection.focusedLayer || !selection.focusedLayer.customProperty("SmartFieldSync/is_geometry_locked", false)))
       visible: enabled
 
       font: Theme.defaultFont
@@ -772,7 +772,7 @@ Rectangle {
       id: deleteFeatureBtn
       text: qsTr('Delete Feature')
       icon.source: Theme.getThemeIcon("ic_delete_forever_white_24dp")
-      enabled: ((projectInfo.editRights || editButton.isCreatedCloudFeature) && (!selection.focusedLayer || !selection.focusedLayer.customProperty("QFieldSync/is_geometry_locked", false)))
+      enabled: ((projectInfo.editRights || editButton.isCreatedCloudFeature) && (!selection.focusedLayer || !selection.focusedLayer.customProperty("SmartFieldSync/is_geometry_locked", false)))
       visible: enabled
 
       font: Theme.defaultFont

@@ -1,11 +1,12 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
-import QtQuick.Layouts
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Controls.Material.impl 2.14
+import QtQuick.Layouts 1.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
+import "."
 
 ListView {
   id: legend

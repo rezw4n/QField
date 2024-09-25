@@ -15,10 +15,10 @@
  *                                                                         *
  ***************************************************************************/
 
-#define QFIELDTEST_MAIN
+#define SMARTFIELDTEST_MAIN
 #include "catch2.h"
 #include "layerobserver.h"
-#include "utils/qfieldcloudutils.h"
+#include "utils/smartcloudutils.h"
 
 QStringList getDeltaOperations( QString fileName )
 {
@@ -65,7 +65,7 @@ TEST_CASE( "LayerObserver" )
   REQUIRE( QDir( settingsDir.path() ).mkpath( QStringLiteral( "cloud_projects/TEST_PROJECT_ID" ) ) );
 
   QDir projectDir( QStringLiteral( "%1/cloud_projects/TEST_PROJECT_ID" ).arg( settingsDir.path() ) );
-  QFieldCloudUtils::setLocalCloudDirectory( settingsDir.path() );
+  SmartCloudUtils::setLocalCloudDirectory( settingsDir.path() );
   QFile projectFile( QStringLiteral( "%1/%2" ).arg( projectDir.path(), QStringLiteral( "project.qgs" ) ) );
   QFile attachmentFile( QStringLiteral( "%1/%2" ).arg( projectDir.path(), QStringLiteral( "attachment.jpg" ) ) );
 
@@ -75,8 +75,8 @@ TEST_CASE( "LayerObserver" )
   QgsProject::instance()->setFileName( projectFile.fileName() );
 
   std::unique_ptr<QgsVectorLayer> mLayer = std::make_unique<QgsVectorLayer>( QStringLiteral( "Point?crs=EPSG:3857&field=fid:integer&field=str:string" ), QStringLiteral( "Test Layer" ), QStringLiteral( "memory" ) );
-  mLayer->setCustomProperty( QStringLiteral( "QFieldSync/action" ), QStringLiteral( "CLOUD" ) );
-  mLayer->setCustomProperty( QStringLiteral( "QFieldSync/sourceDataPrimaryKeys" ), QStringLiteral( "fid" ) );
+  mLayer->setCustomProperty( QStringLiteral( "SmartFieldSync/action" ), QStringLiteral( "CLOUD" ) );
+  mLayer->setCustomProperty( QStringLiteral( "SmartFieldSync/sourceDataPrimaryKeys" ), QStringLiteral( "fid" ) );
 
   REQUIRE( mLayer->isValid() );
 

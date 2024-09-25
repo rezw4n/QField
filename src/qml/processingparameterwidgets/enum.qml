@@ -1,8 +1,9 @@
-import QtQuick
-import QtQuick.Controls
-import Theme
-import org.qfield
-import org.qgis
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import Theme 1.0
+import org.smartfield 1.0
+import org.qgis 1.0
+import "."
 
 ProcessingParameterWidgetBase {
   id: distanceItem

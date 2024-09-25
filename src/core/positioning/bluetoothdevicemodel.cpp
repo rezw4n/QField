@@ -18,10 +18,12 @@
 
 #include <QDebug>
 #include <QGuiApplication>
-#include <QPermissions>
 #include <QSettings>
 #include <qgis.h>
 
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 6, 0 )
+#include <QPermissions>
+#endif
 
 BluetoothDeviceModel::BluetoothDeviceModel( QObject *parent )
   : QAbstractListModel( parent )
@@ -34,7 +36,11 @@ void BluetoothDeviceModel::initiateDiscoveryAgent()
   mServiceDiscoveryAgent = std::make_unique<QBluetoothServiceDiscoveryAgent>();
 
   connect( mServiceDiscoveryAgent.get(), &QBluetoothServiceDiscoveryAgent::serviceDiscovered, this, &BluetoothDeviceModel::serviceDiscovered );
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+  connect( mServiceDiscoveryAgent.get(), qOverload<QBluetoothServiceDiscoveryAgent::Error>( &QBluetoothServiceDiscoveryAgent::error ), this, [=]( QBluetoothServiceDiscoveryAgent::Error error ) {
+#else
   connect( mServiceDiscoveryAgent.get(), qOverload<QBluetoothServiceDiscoveryAgent::Error>( &QBluetoothServiceDiscoveryAgent::errorOccurred ), this, [=]( QBluetoothServiceDiscoveryAgent::Error error ) {
+#endif
     if ( error != QBluetoothServiceDiscoveryAgent::NoError )
     {
       setLastError( mServiceDiscoveryAgent->errorString() );
@@ -51,6 +57,7 @@ void BluetoothDeviceModel::initiateDiscoveryAgent()
 
 void BluetoothDeviceModel::startServiceDiscovery( const bool fullDiscovery )
 {
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 6, 0 )
   if ( !mPermissionChecked )
   {
     QBluetoothPermission bluetoothPermission;
@@ -79,6 +86,7 @@ void BluetoothDeviceModel::startServiceDiscovery( const bool fullDiscovery )
       return;
     }
   }
+#endif
 
   if ( !mServiceDiscoveryAgent )
     initiateDiscoveryAgent();

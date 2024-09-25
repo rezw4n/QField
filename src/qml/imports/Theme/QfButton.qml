@@ -1,8 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Controls.impl
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
+import QtQuick.Controls 2.14
+import QtQuick.Controls.impl 2.14
+import QtQuick 2.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Controls.Material.impl 2.14
 
 Button {
   id: button
@@ -10,7 +10,6 @@ Button {
   property color bgcolor: Theme.mainColor
   property color color: button.enabled ? Theme.controlBackgroundColor : Theme.mainTextDisabledColor
   property alias radius: backgroundRectangle.radius
-  property alias borderColor: backgroundRectangle.border.color
   property bool dropdown: false
 
   signal dropdownClicked

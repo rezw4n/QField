@@ -1,5 +1,5 @@
-import QtQuick
-import org.qfield
+import QtQuick 2.14
+import org.smartfield 1.0
 
 Item {
   id: geometryHighlighter

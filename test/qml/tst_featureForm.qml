@@ -1,14 +1,14 @@
-import QtQuick
-import QtTest
-import org.qfield
-import Theme
-import "../../src/qml/" as QFieldControls
+import QtQuick 2.3
+import QtTest 1.0
+import org.smartfield 1.0
+import Theme 1.0
+import "../../src/qml/" as SmartFieldControls
 import "Utils.js" as Utils
 
 TestCase {
   name: "FeatureForm"
 
-  QFieldControls.FeatureForm {
+  SmartFieldControls.FeatureForm {
     id: featureForm
     property var mainWindow: mainWindowItem
     property var mSelectedLayer: qgisProject.mapLayersByName('Apiary')[0]
@@ -311,7 +311,7 @@ TestCase {
   }
 
   Item {
-    id: qfieldSettings
+    id: smartfieldSettings
     property bool autoSave: false
   }
 

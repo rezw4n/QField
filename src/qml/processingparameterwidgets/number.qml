@@ -1,8 +1,9 @@
-import QtQuick
-import QtQuick.Controls
-import Theme
-import org.qfield
-import org.qgis
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import Theme 1.0
+import org.smartfield 1.0
+import org.qgis 1.0
+import "."
 
 ProcessingParameterWidgetBase {
   id: numberItem
@@ -63,10 +64,10 @@ ProcessingParameterWidgetBase {
       visible: enabled
 
       onClicked: {
-        adjustValue(-1);
+        decreaseValue();
       }
       onDoubleClicked: {
-        adjustValue(-1);
+        decreaseValue();
       }
       onPressAndHold: {
         changeValueTimer.increase = false;
@@ -94,10 +95,10 @@ ProcessingParameterWidgetBase {
       visible: enabled
 
       onClicked: {
-        adjustValue(1);
+        increaseValue();
       }
       onDoubleClicked: {
-        adjustValue(1);
+        increaseValue();
       }
       onPressAndHold: {
         changeValueTimer.increase = true;
@@ -123,11 +124,11 @@ ProcessingParameterWidgetBase {
     onTriggered: {
       var hitBoundary = false;
       if (increase) {
-        adjustValue(1);
-        hitBoundary = parseFloat(textField.text) === numberItem.max;
+        increaseValue();
+        hitBoundary = textField.text == numberItem.max;
       } else {
-        adjustValue(-1);
-        hitBoundary = parseFloat(textField.text) === numberItem.min;
+        decreaseValue();
+        hitBoundary = textField.text == numberItem.min;
       }
       if (!hitBoundary) {
         if (interval > 50)
@@ -138,15 +139,27 @@ ProcessingParameterWidgetBase {
     }
   }
 
-  function adjustValue(direction) {
-    var currentValue = parseFloat(textField.text);
+  function decreaseValue() {
+    var currentValue = Number.parseFloat(textField.text);
     var newValue;
     if (!isNaN(currentValue)) {
-      newValue = currentValue + (numberItem.step * direction);
-      valueChangeRequested(Math.min(numberItem.max, Math.max(numberItem.min, newValue)));
+      newValue = currentValue - numberItem.step;
+      valueChangeRequested(Math.max(numberItem.min, newValue));
     } else {
       newValue = 0;
       valueChangeRequested(newValue, false);
+    }
+  }
+
+  function increaseValue() {
+    var currentValue = Number.parseFloat(textField.text);
+    var newValue;
+    if (!isNaN(currentValue)) {
+      newValue = currentValue + numberItem.step;
+      valueChangeRequested(Math.min(numberItem.max, newValue));
+    } else {
+      newValue = 0;
+      valueChangeRequested(newValue);
     }
   }
 

@@ -16,7 +16,7 @@
 #ifndef POSITIONINGUTILS_H
 #define POSITIONINGUTILS_H
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 
 #include <QObject>
 #include <qgscoordinatereferencesystem.h>
@@ -24,7 +24,7 @@
 
 class GnssPositionInformation;
 
-class QFIELD_CORE_EXPORT PositioningUtils : public QObject
+class SMARTFIELD_CORE_EXPORT PositioningUtils : public QObject
 {
     Q_OBJECT
 
@@ -36,11 +36,6 @@ class QFIELD_CORE_EXPORT PositioningUtils : public QObject
      * The status will be set to "A"ctive by default.
      */
     static Q_INVOKABLE GnssPositionInformation createGnssPositionInformation( double latitude, double longitude, double altitude, double speed, double direction, double horizontalAccuracy, double verticalAcurracy, double verticalSpeed, double magneticVariation, const QDateTime &timestamp, const QString &sourceName );
-
-    /**
-     * Creates an empty GnssPositionInformation.
-     */
-    static Q_INVOKABLE GnssPositionInformation createEmptyGnssPositionInformation();
 
     /**
      * Returns an average GnssPositionInformation from a list of position information

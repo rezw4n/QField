@@ -20,7 +20,7 @@
 #define EXPRESSIONCONTEXTUTILS_H
 
 #include "gnsspositioninformation.h"
-#include "qfieldcloudconnection.h"
+#include "smartcloudconnection.h"
 #include "snappingresult.h"
 
 #include <qgsexpressioncontext.h>

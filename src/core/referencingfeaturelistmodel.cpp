@@ -222,13 +222,13 @@ bool ReferencingFeatureListModel::deleteFeature( QgsFeatureId referencingFeature
 
   if ( !referencingLayer || !referencingLayer->isValid() )
   {
-    QgsMessageLog::logMessage( tr( "Invalid referencing layer" ), "QField", Qgis::Critical );
+    QgsMessageLog::logMessage( tr( "Invalid referencing layer" ), "SmartField", Qgis::Critical );
     return false;
   }
 
   if ( !referencingLayer->startEditing() )
   {
-    QgsMessageLog::logMessage( tr( "Cannot start editing" ), "QField", Qgis::Critical );
+    QgsMessageLog::logMessage( tr( "Cannot start editing" ), "SmartField", Qgis::Critical );
     return false;
   }
 
@@ -237,20 +237,20 @@ bool ReferencingFeatureListModel::deleteFeature( QgsFeatureId referencingFeature
 
   if ( !referencingLayer->deleteFeature( referencingFeatureId ) )
   {
-    QgsMessageLog::logMessage( tr( "Cannot delete feature" ), "QField", Qgis::Critical );
+    QgsMessageLog::logMessage( tr( "Cannot delete feature" ), "SmartField", Qgis::Critical );
 
     if ( !referencingLayer->rollBack() )
-      QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( referencingLayer->name() ), "QField", Qgis::Critical );
+      QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( referencingLayer->name() ), "SmartField", Qgis::Critical );
 
     return false;
   }
 
   if ( !referencingLayer->commitChanges() )
   {
-    QgsMessageLog::logMessage( tr( "Cannot commit layer changes in layer %1." ).arg( referencingLayer->name() ), "QField", Qgis::Critical );
+    QgsMessageLog::logMessage( tr( "Cannot commit layer changes in layer %1." ).arg( referencingLayer->name() ), "SmartField", Qgis::Critical );
 
     if ( !referencingLayer->rollBack() )
-      QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( referencingLayer->name() ), "QField", Qgis::Critical );
+      QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( referencingLayer->name() ), "SmartField", Qgis::Critical );
 
     return false;
   }

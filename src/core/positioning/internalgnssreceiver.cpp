@@ -18,9 +18,11 @@
 #include "positioning.h"
 
 #include <QGuiApplication>
-#include <QPermissions>
 #include <qgsapplication.h>
 
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 6, 0 )
+#include <QPermissions>
+#endif
 
 InternalGnssReceiver::InternalGnssReceiver( QObject *parent )
   : AbstractGnssReceiver( parent )
@@ -33,7 +35,11 @@ InternalGnssReceiver::InternalGnssReceiver( QObject *parent )
     mGeoPositionSource->setUpdateInterval( 1000 );
 
     connect( mGeoPositionSource.get(), &QGeoPositionInfoSource::positionUpdated, this, &InternalGnssReceiver::handlePositionUpdated );
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+    connect( mGeoPositionSource.get(), qOverload<QGeoPositionInfoSource::Error>( &QGeoPositionInfoSource::error ), this, &InternalGnssReceiver::handleError );
+#else
     connect( mGeoPositionSource.get(), qOverload<QGeoPositionInfoSource::Error>( &QGeoPositionInfoSource::errorOccurred ), this, &InternalGnssReceiver::handleError );
+#endif
 
     mSocketState = QAbstractSocket::ConnectedState;
 
@@ -46,7 +52,11 @@ InternalGnssReceiver::InternalGnssReceiver( QObject *parent )
 
     connect( mGeoSatelliteSource.get(), &QGeoSatelliteInfoSource::satellitesInUseUpdated, this, &InternalGnssReceiver::handleSatellitesInUseUpdated );
     connect( mGeoSatelliteSource.get(), &QGeoSatelliteInfoSource::satellitesInViewUpdated, this, &InternalGnssReceiver::handleSatellitesInViewUpdated );
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+    connect( mGeoSatelliteSource.get(), qOverload<QGeoSatelliteInfoSource::Error>( &QGeoSatelliteInfoSource::error ), this, &InternalGnssReceiver::handleSatelliteError );
+#else
     connect( mGeoSatelliteSource.get(), qOverload<QGeoSatelliteInfoSource::Error>( &QGeoSatelliteInfoSource::errorOccurred ), this, &InternalGnssReceiver::handleSatelliteError );
+#endif
   }
 
   connect( QgsApplication::instance(), &QGuiApplication::applicationStateChanged, this, &InternalGnssReceiver::onApplicationStateChanged );
@@ -97,6 +107,7 @@ void InternalGnssReceiver::handleDisconnectDevice()
 
 void InternalGnssReceiver::handleConnectDevice()
 {
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 6, 0 )
   if ( !mPermissionChecked )
   {
     QLocationPermission locationPermission;
@@ -127,7 +138,7 @@ void InternalGnssReceiver::handleConnectDevice()
       return;
     }
   }
-
+#endif
   if ( mGeoPositionSource )
   {
     mGeoPositionSource->startUpdates();

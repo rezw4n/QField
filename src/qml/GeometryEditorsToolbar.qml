@@ -1,12 +1,12 @@
-import QtQuick
-import QtQml.Models
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQml.Models 2.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 
 /**
 This contains several geometry editing tools
-A tool must subclass QfVisibilityFadingRow
+A tool must subclass VisibilityFadingRow
 And contains following functions:
   * function init(featureModel, mapSettings, editorRubberbandModel)
   * function cancel()
@@ -22,7 +22,7 @@ It can optionally implement the functions:
   * canvasLongPressed(point)
   These functions must return true if they catch the event
 */
-QfVisibilityFadingRow {
+VisibilityFadingRow {
   id: geometryEditorsToolbar
 
   property FeatureModel featureModel //<! the feature which has its geometry being edited
@@ -50,7 +50,7 @@ QfVisibilityFadingRow {
   }
 
   function init() {
-    var lastUsed = settings.value("/QField/GeometryEditorLastUsed", -1);
+    var lastUsed = settings.value("/SmartField/GeometryEditorLastUsed", -1);
     if (lastUsed >= 0 && lastUsed < editors.rowCount()) {
       selectorRow.stateVisible = false;
       var toolbarQml = editors.data(editors.index(lastUsed, 0), GeometryEditorsModelSingleton.ToolbarRole);
@@ -100,7 +100,7 @@ QfVisibilityFadingRow {
       return false;
   }
 
-  QfVisibilityFadingRow {
+  VisibilityFadingRow {
     id: selectorRow
     stateVisible: true
 
@@ -121,7 +121,7 @@ QfVisibilityFadingRow {
           selectorRow.stateVisible = false;
           geometryEditorsToolbar.image = Theme.getThemeVectorIcon(iconPath);
           toolbarRow.load(toolbar, iconPath, name);
-          settings.setValue("/QField/GeometryEditorLastUsed", index);
+          settings.setValue("/SmartField/GeometryEditorLastUsed", index);
         }
       }
     }
@@ -175,7 +175,7 @@ QfVisibilityFadingRow {
       vertexRubberband.isVisible = false;
       selectorRow.stateVisible = true;
       image = Theme.getThemeIcon("ic_edit_geometry_white");
-      settings.setValue("/QField/GeometryEditorLastUsed", -1);
+      settings.setValue("/SmartField/GeometryEditorLastUsed", -1);
     }
   }
 }

@@ -1,10 +1,10 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Controls.Material.impl 2.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 
 Item {
   id: locatorItem
@@ -147,7 +147,7 @@ Item {
 
     mapSettings: mapCanvas.mapSettings
     locatorHighlightGeometry: locatorHighlightItem.geometryWrapper
-    keepScale: qfieldSettings.locatorKeepScale
+    keepScale: smartfieldSettings.locatorKeepScale
 
     featureListController: featureForm.extentController
 
@@ -351,7 +351,15 @@ Item {
       height: resultsList.count > 0 ? Math.min(contentHeight, mainWindow.height / 2 - searchFieldRect.height - 10) : 0
       clip: true
 
-      ScrollBar.vertical: QfScrollBar {
+      ScrollBar.vertical: ScrollBar {
+        width: 6
+        policy: resultsList.contentHeight > resultsList.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+
+        contentItem: Rectangle {
+          implicitWidth: 6
+          implicitHeight: 25
+          color: Theme.mainColor
+        }
       }
 
       delegate: searchField.displayText !== '' ? resultsComponent : filtersComponent

@@ -24,7 +24,7 @@
 
 namespace sentry_wrapper {
 static QtMessageHandler originalMessageHandler = nullptr;
-const char *const applicationName = "QField";
+const char *const applicationName = "SmartField";
 void qfMessageHandler(QtMsgType type, const QMessageLogContext &context,
                       const QString &msg) {
   SentryBreadcrumb *crumb = [[SentryBreadcrumb alloc] init];

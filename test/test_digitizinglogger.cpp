@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#define QFIELDTEST_MAIN
+#define SMARTFIELDTEST_MAIN
 #include "catch2.h"
 #include "digitizinglogger.h"
 
@@ -34,7 +34,7 @@ TEST_CASE( "DigitizingLogger" )
 
   QgsProject::instance()->addMapLayer( logsLayer.get() );
   QgsProject::instance()->setCrs( QgsCoordinateReferenceSystem( QStringLiteral( "EPSG:3857" ) ) );
-  QgsProject::instance()->writeEntry( QStringLiteral( "qfieldsync" ), QStringLiteral( "digitizingLogsLayer" ), logsLayer->id() );
+  QgsProject::instance()->writeEntry( QStringLiteral( "smartfieldsync" ), QStringLiteral( "digitizingLogsLayer" ), logsLayer->id() );
   qDebug() << logsLayer->id();
 
   std::unique_ptr<QgsVectorLayer> layer = std::make_unique<QgsVectorLayer>( QStringLiteral( "Point?crs=EPSG:3857&field=fid:integer&field=str:string" ), QStringLiteral( "Input Layer" ), QStringLiteral( "memory" ) );

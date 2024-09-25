@@ -16,7 +16,7 @@
 #ifndef QGSQUICKMAPSETTINGS_H
 #define QGSQUICKMAPSETTINGS_H
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 
 #include <QObject>
 #include <qgscoordinatetransformcontext.h>
@@ -41,7 +41,7 @@ class QgsProject;
  * \sa QgsMapCanvas
  *
  */
-class QFIELD_CORE_EXPORT QgsQuickMapSettings : public QObject
+class SMARTFIELD_CORE_EXPORT QgsQuickMapSettings : public QObject
 {
     Q_OBJECT
 

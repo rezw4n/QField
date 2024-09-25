@@ -4,8 +4,8 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 import QtMultimedia
 import QtCore
-import org.qfield
-import Theme
+import org.smartfield 1.0
+import Theme 1.0
 
 Popup {
   id: codeReader

@@ -15,126 +15,46 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "expressioncontextutils.h"
 #include "expressionevaluator.h"
-
-#include <qgsexpressioncontextutils.h>
+#include "qgsexpressioncontextutils.h"
+#include "qgsproject.h"
 
 ExpressionEvaluator::ExpressionEvaluator( QObject *parent )
   : QObject( parent )
 {
 }
 
-void ExpressionEvaluator::setMode( Mode mode )
-{
-  if ( mMode == mode )
-    return;
-
-  mMode = mode;
-  emit modeChanged();
-}
-
 void ExpressionEvaluator::setExpressionText( const QString &expressionText )
 {
-  if ( mExpressionText == expressionText )
-    return;
-
   mExpressionText = expressionText;
-  emit expressionTextChanged();
+  emit expressionTextChanged( mExpressionText );
 }
 
 void ExpressionEvaluator::setFeature( const QgsFeature &feature )
 {
-  if ( mFeature == feature )
-    return;
-
   mFeature = feature;
-  emit featureChanged();
+  emit featureChanged( mFeature );
 }
 
 void ExpressionEvaluator::setLayer( QgsMapLayer *layer )
 {
-  if ( mLayer == layer )
-    return;
-
   mLayer = layer;
-  emit layerChanged();
-}
-
-void ExpressionEvaluator::setProject( QgsProject *project )
-{
-  if ( mProject == project )
-    return;
-
-  mProject = project;
-  emit projectChanged();
-}
-
-void ExpressionEvaluator::setMapSettings( QgsQuickMapSettings *mapSettings )
-{
-  if ( mMapSettings == mapSettings )
-    return;
-
-  mMapSettings = mapSettings;
-  emit mapSettingsChanged();
-}
-
-void ExpressionEvaluator::setPositionInformation( const GnssPositionInformation &positionInformation )
-{
-  mPositionInformation = positionInformation;
-  emit positionInformationChanged();
-}
-
-void ExpressionEvaluator::setCloudUserInformation( const CloudUserInformation &cloudUserInformation )
-{
-  mCloudUserInformation = cloudUserInformation;
-  emit cloudUserInformationChanged();
+  emit layerChanged( mLayer );
 }
 
 QVariant ExpressionEvaluator::evaluate()
 {
-  if ( mExpressionText.isEmpty() )
+  if ( !mFeature.isValid() || !mLayer || mExpressionText.isEmpty() )
     return QString();
 
+  QgsExpression exp( mExpressionText );
   QgsExpressionContext expressionContext;
-  expressionContext << QgsExpressionContextUtils::globalScope();
+  expressionContext.setFeature( mFeature );
+  expressionContext << QgsExpressionContextUtils::globalScope()
+                    << QgsExpressionContextUtils::projectScope( QgsProject::instance() )
+                    << QgsExpressionContextUtils::layerScope( mLayer );
 
-  if ( mPositionInformation.isValid() )
-  {
-    expressionContext << ExpressionContextUtils::positionScope( mPositionInformation, false );
-  }
-  if ( !mCloudUserInformation.username.isEmpty() )
-  {
-    expressionContext << ExpressionContextUtils::cloudUserScope( mCloudUserInformation );
-  }
-  if ( mMapSettings )
-  {
-    expressionContext << QgsExpressionContextUtils::mapSettingsScope( mMapSettings->mapSettings() );
-  }
-  if ( mProject )
-  {
-    expressionContext << QgsExpressionContextUtils::projectScope( mProject );
-  }
-  if ( mLayer )
-  {
-    expressionContext << QgsExpressionContextUtils::layerScope( mLayer );
-  }
-  if ( mFeature.isValid() )
-  {
-    expressionContext.setFeature( mFeature );
-  }
-
-  QVariant value;
-  if ( mMode == ExpressionMode )
-  {
-    QgsExpression expression( mExpressionText );
-    expression.prepare( &expressionContext );
-    value = expression.evaluate( &expressionContext );
-  }
-  else
-  {
-    value = QgsExpression::replaceExpressionText( mExpressionText, &expressionContext );
-  }
-
+  exp.prepare( &expressionContext );
+  QVariant value = exp.evaluate( &expressionContext );
   return value.toString();
 }

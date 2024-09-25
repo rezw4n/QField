@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#define QFIELDTEST_MAIN
+#define SMARTFIELDTEST_MAIN
 #include "catch2.h"
 #include "orderedrelationmodel.h"
 

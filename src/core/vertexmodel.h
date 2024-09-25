@@ -20,7 +20,7 @@
 
 class QgsQuickMapSettings;
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 #include "qgscoordinatetransform.h"
 #include "qgsgeometry.h"
 #include "qgspoint.h"
@@ -33,7 +33,7 @@ class QgsQuickMapSettings;
  *
  * The model holds all vertices and the candidates for new vertices. If you need the existing nodes, use flatVertices().
  */
-class QFIELD_CORE_EXPORT VertexModel : public QAbstractListModel
+class SMARTFIELD_CORE_EXPORT VertexModel : public QAbstractListModel
 {
     Q_OBJECT
     //! The current mode

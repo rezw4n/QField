@@ -20,7 +20,7 @@
 
 #include "geometry.h"
 #include "gnsspositioninformation.h"
-#include "qfieldcloudconnection.h"
+#include "smartcloudconnection.h"
 #include "snappingresult.h"
 #include "vertexmodel.h"
 

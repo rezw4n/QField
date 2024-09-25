@@ -10,8 +10,8 @@ __pycache__
 .DS_Store
 .idea
 /keystore.p12
-/QField.pro.user
-/QField.pro.user.*
+/SmartField.pro.user
+/SmartField.pro.user.*
 /config.pri
 /build*
 /platform/android/local.properties

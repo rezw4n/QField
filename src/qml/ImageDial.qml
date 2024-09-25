@@ -1,10 +1,10 @@
-import QtQuick
-import QtQuick.Controls
+import QtQuick 2.14
+import QtQuick.Controls 2.14
 
 Dial {
   id: control
 
-  property string source: "qrc:/images/qfield_logo.svg"
+  property string source: "qrc:/images/smartfield_logo.svg"
   property int rotationOffset: 0
 
   background: Rectangle {

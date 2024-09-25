@@ -16,7 +16,7 @@
 #ifndef FEATUREUTILS_H
 #define FEATUREUTILS_H
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 
 #include <QObject>
 #include <qgsfeature.h>
@@ -25,7 +25,7 @@
 class QgsVectorLayer;
 class QgsQuickMapSettings;
 
-class QFIELD_CORE_EXPORT FeatureUtils : public QObject
+class SMARTFIELD_CORE_EXPORT FeatureUtils : public QObject
 {
     Q_OBJECT
   public:

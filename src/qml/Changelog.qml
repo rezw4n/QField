@@ -1,8 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import Theme 1.0
+import org.smartfield 1.0
 
 Popup {
   id: changelogPopup
@@ -22,7 +22,7 @@ Popup {
     anchors.fill: parent
 
     header: QfPageHeader {
-      title: qsTr("What's new in QField")
+      title: qsTr("What's new in SmartField")
 
       showApplyButton: false
       showCancelButton: false
@@ -103,7 +103,7 @@ Popup {
         Layout.fillWidth: true
         icon.source: Theme.getThemeVectorIcon('ic_sponsor_white_24dp')
 
-        text: qsTr('Support QField')
+        text: qsTr('Support SmartField')
         onClicked: Qt.openUrlExternally("https://github.com/sponsors/opengisch")
       }
     }
@@ -113,31 +113,31 @@ Popup {
     id: changelogContents
     onMarkdownChanged: {
       if (changelogContents.markdown) {
-        settings.setValue("/QField/isLoadingChangelog", false);
-        settings.remove("/QField/isCrashingSslDevice");
+        settings.setValue("/SmartField/isLoadingChangelog", false);
+        settings.remove("/SmartField/isCrashingSslDevice");
       }
     }
   }
 
   onClosed: {
-    settings.setValue("/QField/ChangelogVersion", appVersion);
+    settings.setValue("/SmartField/ChangelogVersion", appVersion);
     changelogFlickable.contentY = 0;
   }
 
   onOpened: {
-    if (settings.valueBool("/QField/isLoadingChangelog", false)) {
-      settings.setValue("/QField/isCrashingSslDevice", true);
+    if (settings.valueBool("/SmartField/isLoadingChangelog", false)) {
+      settings.setValue("/SmartField/isCrashingSslDevice", true);
     } else {
-      settings.remove("/QField/isCrashingSslDevice");
+      settings.remove("/SmartField/isCrashingSslDevice");
     }
-    if (settings.valueBool("/QField/isCrashingSslDevice", false) === true) {
-      changelogBody.text = qsTr("Check the latest QField changes on ") + ' <a href="https://github.com/opengisch/qfield/releases">' + qsTr('QField releases page') + '</a>.';
+    if (settings.valueBool("/SmartField/isCrashingSslDevice", false) === true) {
+      changelogBody.text = qsTr("Check the latest SmartField changes on ") + ' <a href="https://github.com/opengisch/smartfield/releases">' + qsTr('SmartField releases page') + '</a>.';
       return;
     }
     if (changelogContents.status === ChangelogContents.SuccessStatus || changelogContents.status === ChangelogContents.LoadingStatus)
       return;
-    settings.remove("/QField/isLoadingChangelog");
-    settings.setValue("/QField/isLoadingChangelog", true);
+    settings.remove("/SmartField/isLoadingChangelog");
+    settings.setValue("/SmartField/isLoadingChangelog", true);
     settings.sync();
     changelogContents.request();
   }

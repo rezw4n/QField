@@ -7,12 +7,12 @@ set(VCPKG_TAG 1318ab14aae14db20085441cd71366891a9c9d0c)
 set(QML_IMPORT_PATH ${CMAKE_SOURCE_DIR}/src/qml/imports CACHE PATH "QML import path for Qt Creator to detect custom modules properly")
 
 set(CMAKE_COLOR_MAKEFILE ON)
-set(APP_NAME "QField" CACHE STRING "Application Name")
-set(APP_ICON "qfield_logo" CACHE STRING "Application Icon")
+set(APP_NAME "SmartField" CACHE STRING "Application Name")
+set(APP_ICON "smartfield_logo" CACHE STRING "Application Icon")
 set(APK_VERSION_CODE "1" CACHE STRING "Apk Version Code (Example: 1)")
 set(APP_VERSION "0" CACHE STRING "Application Version (Example: v1.0.0)")
 set(APP_VERSION_STR "local - dev" CACHE STRING "Application Version Name (Example: 1.0.0 - Homerun)")
-set(APP_PACKAGE_NAME "qfield" CACHE STRING "Package name suffix. E.g. qfield --> ch.opengis.qfield")
+set(APP_PACKAGE_NAME "smartfield" CACHE STRING "Package name suffix. E.g. smartfield --> ch.opengis.smartfield")
 
 string(REGEX REPLACE "v" "" CLEAN_APP_VERSION "${APP_VERSION}")
 
@@ -38,40 +38,40 @@ message(STATUS "Building for git rev ${GIT_REV}")
 set(DEFAULT_BIN_SUBDIR     bin)
 set(DEFAULT_CGIBIN_SUBDIR  bin)
 set(DEFAULT_LIB_SUBDIR     lib${LIB_SUFFIX})
-set(DEFAULT_INCLUDE_SUBDIR include/qfield)
+set(DEFAULT_INCLUDE_SUBDIR include/smartfield)
 
-set(QFIELD_BIN_SUBDIR     ${DEFAULT_BIN_SUBDIR}     CACHE STRING "Subdirectory where executables will be installed")
-set(QFIELD_LIB_SUBDIR     ${DEFAULT_LIB_SUBDIR}     CACHE STRING "Subdirectory where libraries will be installed")
-set(QFIELD_INCLUDE_SUBDIR ${DEFAULT_INCLUDE_SUBDIR} CACHE STRING "Subdirectory where header files will be installed")
+set(SMARTFIELD_BIN_SUBDIR     ${DEFAULT_BIN_SUBDIR}     CACHE STRING "Subdirectory where executables will be installed")
+set(SMARTFIELD_LIB_SUBDIR     ${DEFAULT_LIB_SUBDIR}     CACHE STRING "Subdirectory where libraries will be installed")
+set(SMARTFIELD_INCLUDE_SUBDIR ${DEFAULT_INCLUDE_SUBDIR} CACHE STRING "Subdirectory where header files will be installed")
 
 set(RELATIVE_PREFIX_PATH ${WITH_VCPKG} CACHE BOOL "Use a prefix path relative to the application itself rather than hard coding the path while compiling")
 if(RELATIVE_PREFIX_PATH)
   add_definitions(-DRELATIVE_PREFIX_PATH)
 endif()
 
-mark_as_advanced (QFIELD_INCLUDE_SUBDIR QFIELD_BIN_SUBDIR QFIELD_LIB_SUBDIR)
-set(QFIELD_BIN_DIR ${QFIELD_BIN_SUBDIR})
-set(QFIELD_LIB_DIR ${QFIELD_LIB_SUBDIR})
-set(QFIELD_INCLUDE_DIR ${QFIELD_INCLUDE_SUBDIR})
-set(QT_ANDROID_APPLICATION_BINARY "qfield")
+mark_as_advanced (SMARTFIELD_INCLUDE_SUBDIR SMARTFIELD_BIN_SUBDIR SMARTFIELD_LIB_SUBDIR)
+set(SMARTFIELD_BIN_DIR ${SMARTFIELD_BIN_SUBDIR})
+set(SMARTFIELD_LIB_DIR ${SMARTFIELD_LIB_SUBDIR})
+set(SMARTFIELD_INCLUDE_DIR ${SMARTFIELD_INCLUDE_SUBDIR})
+set(QT_ANDROID_APPLICATION_BINARY "smartfield")
 
 # set the default locations where the targets (executables, libraries) will land when compiled
-# this is to allow running QField directly from the build directory.
+# this is to allow running SmartField directly from the build directory.
 if (ANDROID)
-  set(QFIELD_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/android-build)
+  set(SMARTFIELD_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/android-build)
 else()
-  set(QFIELD_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
+  set(SMARTFIELD_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 endif()
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${QFIELD_OUTPUT_DIRECTORY}/${QFIELD_BIN_SUBDIR}/$<0:>)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${QFIELD_OUTPUT_DIRECTORY}/${QFIELD_LIB_SUBDIR}/$<0:>)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SMARTFIELD_OUTPUT_DIRECTORY}/${SMARTFIELD_BIN_SUBDIR}/$<0:>)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SMARTFIELD_OUTPUT_DIRECTORY}/${SMARTFIELD_LIB_SUBDIR}/$<0:>)
 
 set(WITH_CCACHE OFF CACHE BOOL "Build with ccache")
 if(WITH_CCACHE)
   include(ccache)
 endif()
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_INSTALL_DATADIR}/qfield)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${CMAKE_INSTALL_DATADIR}/smartfield)
 
 set(WITH_BLUETOOTH
     ON
@@ -98,7 +98,7 @@ else()
   set(WITH_SENTRY 0)
 endif()
 
-set(QT_MIN_VERSION 6.6.0)
+set(QT_MIN_VERSION 6.5.0)
 
 if (ANDROID)
   if(VCPKG_TARGET_TRIPLET STREQUAL "arm-android" OR VCPKG_TARGET_TRIPLET STREQUAL "arm-neon-android")
@@ -117,7 +117,7 @@ if (ANDROID)
   set(ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_BINARY_DIR}/android-template)
 endif()
 
-find_package(Qt6 COMPONENTS Concurrent Core Qml Gui Xml Positioning Widgets Network Quick Svg Sql Sensors WebView Multimedia Bluetooth Nfc WebSockets REQUIRED)
+find_package(Qt6 COMPONENTS Concurrent Core Qml Gui Xml Positioning Widgets Network Quick Svg Sql Sensors WebView Multimedia Bluetooth Nfc REQUIRED)
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
   find_package(Qt6 COMPONENTS PrintSupport REQUIRED)
@@ -162,7 +162,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  set(SHARE_DIR "${CMAKE_BINARY_DIR}/output/bin/qfield.app/Contents/share")
+  set(SHARE_DIR "${CMAKE_BINARY_DIR}/output/bin/smartfield.app/Contents/share")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
   set(SHARE_DIR "${ANDROID_PACKAGE_SOURCE_DIR}/assets")
 else()
@@ -266,20 +266,20 @@ if(WITH_VCPKG)
 
   copy_resource("${PROJ_DATA_PATH}" "proj")
   copy_resource("${VCPKG_BASE_DIR}/share/gdal" "gdal")
-  copy_resource("${CMAKE_SOURCE_DIR}/resources/" "qfield")
+  copy_resource("${CMAKE_SOURCE_DIR}/resources/" "smartfield")
   install(DIRECTORY "${VCPKG_BASE_DIR}/share/qgis/resources/" DESTINATION "${CMAKE_INSTALL_DATADIR}/qgis/resources")
   install(DIRECTORY "${VCPKG_BASE_DIR}/share/qgis/svg/" DESTINATION "${CMAKE_INSTALL_DATADIR}/qgis/svg")
   install(DIRECTORY "${PROJ_DATA_PATH}/" DESTINATION "${CMAKE_INSTALL_DATADIR}/proj/")
   install(DIRECTORY "${VCPKG_BASE_DIR}/share/gdal/" DESTINATION "${CMAKE_INSTALL_DATADIR}/gdal")
   install(FILES "${CMAKE_BINARY_DIR}/cacert.pem" DESTINATION ${CMAKE_INSTALL_DATADIR}/)
 
-  add_dependencies(qfield deploy)
+  add_dependencies(smartfield deploy)
 endif()
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  install(FILES ${CMAKE_SOURCE_DIR}/images/icons/qfield_logo.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/128x128/apps RENAME qfield.svg)
-  install(FILES ${CMAKE_SOURCE_DIR}/platform/linux/qfield.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/qfield)
-  install(FILES ${CMAKE_SOURCE_DIR}/platform/linux/qfield.metainfo.xml DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
+  install(FILES ${CMAKE_SOURCE_DIR}/images/icons/smartfield_logo.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/128x128/apps RENAME smartfield.svg)
+  install(FILES ${CMAKE_SOURCE_DIR}/platform/linux/smartfield.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/smartfield)
+  install(FILES ${CMAKE_SOURCE_DIR}/platform/linux/smartfield.metainfo.xml DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
 endif()
 
 include(Package)

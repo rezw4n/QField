@@ -16,7 +16,7 @@
 #ifndef PELIASGEOCODER_H
 #define PELIASGEOCODER_H
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 #include "qgis_core.h"
 #include "qgsgeocoder.h"
 
@@ -29,9 +29,9 @@
  * This geocoder utilizes the Pelias geocoding API in order to geocode
  * strings from an endpoint server.
  *
- * \since QField 1.9
+ * \since SmartField 1.9
 */
-class QFIELD_CORE_EXPORT PeliasGeocoder : public QgsGeocoderInterface
+class SMARTFIELD_CORE_EXPORT PeliasGeocoder : public QgsGeocoderInterface
 {
   public:
     /**

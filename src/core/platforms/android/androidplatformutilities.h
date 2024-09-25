@@ -1,5 +1,5 @@
 /***************************************************************************
-                            androidplatformutilities.h  -  utilities for qfield
+                            androidplatformutilities.h  -  utilities for smartfield
 
                               -------------------
               begin                : February 2016
@@ -82,7 +82,7 @@ class AndroidPlatformUtilities : public PlatformUtilities
 
     double systemFontPointSize() const override { return 16.0; }
 
-    void uploadPendingAttachments( QFieldCloudConnection *connection ) const override;
+    void uploadPendingAttachments( SmartCloudConnection *connection ) const override;
 
     bool isSystemDarkTheme() const override;
 

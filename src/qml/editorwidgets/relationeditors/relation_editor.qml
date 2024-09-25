@@ -1,11 +1,11 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
-import org.qfield
-import org.qgis
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Controls.Material.impl 2.14
+import org.smartfield 1.0
+import org.qgis 1.0
+import Theme 1.0
 import "../.."
 import ".."
 
@@ -17,8 +17,8 @@ EditorWidgetBase {
   property int maximumVisibleItems: 4
 
   Component.onCompleted: {
-    if (currentLayer && currentLayer.customProperty('QFieldSync/relationship_maximum_visible') !== undefined) {
-      var value = JSON.parse(currentLayer.customProperty('QFieldSync/relationship_maximum_visible'))[relationId];
+    if (currentLayer && currentLayer.customProperty('SmartFieldSync/relationship_maximum_visible') !== undefined) {
+      var value = JSON.parse(currentLayer.customProperty('SmartFieldSync/relationship_maximum_visible'))[relationId];
       maximumVisibleItems = value !== undefined ? value : 4;
     } else {
       maximumVisibleItems = 4;
@@ -66,7 +66,16 @@ EditorWidgetBase {
       focus: true
       clip: true
       highlightRangeMode: ListView.ApplyRange
-      ScrollBar.vertical: QfScrollBar {
+
+      ScrollBar.vertical: ScrollBar {
+        width: 6
+        policy: ScrollBar.AlwaysOn
+
+        contentItem: Rectangle {
+          implicitWidth: 6
+          implicitHeight: itemHeight
+          color: Theme.mainColor
+        }
       }
     }
 
@@ -305,7 +314,7 @@ EditorWidgetBase {
     Label {
       width: parent.width
       wrapMode: Text.WordWrap
-      text: nmRelationId ? qsTr('Should the feature <b>%1 (%2)</b> of layer <b>%3</b> be unlinked?<br><i>(The connection will be deleted on layer <b>%4</b>)</i>').arg(deleteDialog.nmReferencedFeatureDisplayMessage).arg(deleteDialog.nmReferencedFeatureId).arg(deleteDialog.nmReferencedLayerName).arg(deleteDialog.referencingLayerName) : qsTr('Should the feature <b>%1 (%2)</b> on layer <b>%3</b> be deleted?').arg(deleteDialog.referencingFeatureDisplayMessage).arg(deleteDialog.referencingFeatureId).arg(deleteDialog.referencingLayerName)
+      text: nmRelationId ? qsTr('Should the feature <b>%1 (%2)</b> of layer <b>%3</b> be unlinked?<br><i>(The connection will be deleted on layer <b>%4</b>)</i>').arg(nmReferencedFeatureDisplayMessage).arg(deleteDialog.nmReferencedFeatureId).arg(deleteDialog.nmReferencedLayerName).arg(deleteDialog.referencingLayerName) : qsTr('Should the feature <b>%1 (%2)</b> on layer <b>%3</b> be deleted?').arg(deleteDialog.referencingFeatureDisplayMessage).arg(deleteDialog.referencingFeatureId).arg(deleteDialog.referencingLayerName)
     }
 
     standardButtons: Dialog.Ok | Dialog.Cancel

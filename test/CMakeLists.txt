@@ -3,12 +3,12 @@ find_package(Catch2 3 REQUIRED)
 include(CTest)
 include(Catch)
 
-# Set WITH_CATCH2_MAIN to TRUE when qgis or qfield specific initialization is NOT needed
+# Set WITH_CATCH2_MAIN to TRUE when qgis or smartfield specific initialization is NOT needed
 function(ADD_CATCH2_TEST TESTNAME TESTSRC WITH_CATCH2_MAIN)
   add_executable(${TESTNAME} ${TESTSRC})
   set_target_properties(${TESTNAME} PROPERTIES AUTOMOC TRUE)
   target_link_libraries(${TESTNAME} PRIVATE
-    qfield_core
+    smartfield_core
     Qt::Test
     Qt::Core
     Qt::Gui
@@ -27,20 +27,20 @@ function(ADD_CATCH2_TEST TESTNAME TESTSRC WITH_CATCH2_MAIN)
   catch_discover_tests(${TESTNAME})
 endfunction()
 
-macro (ADD_QFIELD_TEST TESTNAME TESTSRC)
+macro (ADD_SMARTFIELD_TEST TESTNAME TESTSRC)
   add_executable(${TESTNAME} ${TESTSRC})
   set_target_properties(${TESTNAME} PROPERTIES AUTOMOC TRUE)
   target_link_libraries(${TESTNAME} PRIVATE
-    qfield_core
+    smartfield_core
     Qt::Test
     Qt::Core
     Qt::Gui
     Qt::Widgets
     Qt::Xml
   )
-endmacro (ADD_QFIELD_TEST)
+endmacro (ADD_SMARTFIELD_TEST)
 
-macro (ADD_QFIELD_QML_TEST TESTNAME TESTSRC)
+macro (ADD_SMARTFIELD_QML_TEST TESTNAME TESTSRC)
   file(GLOB test_qmlfiles "${CMAKE_CURRENT_SOURCE_DIR}/qml/*.qml")
   add_executable(${TESTNAME} ${TESTSRC} ${test_qmlfiles})
   # This should be in src/qml/CMakeLists.txt but that's not possible with Qt5. Retry with Qt6
@@ -52,8 +52,8 @@ macro (ADD_QFIELD_QML_TEST TESTNAME TESTSRC)
 
     file(COPY ${test_qmlfiles}
          DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/qmldrop/test")
-    get_target_property(qfield_qmlfiles qfield_qml QML_FILES)
-    file(COPY ${qfield_qmlfiles}
+    get_target_property(smartfield_qmlfiles smartfield_qml QML_FILES)
+    file(COPY ${smartfield_qmlfiles}
          DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/qmldrop/app")
 
     if(NOT WITH_BLUETOOTH)
@@ -66,8 +66,8 @@ macro (ADD_QFIELD_QML_TEST TESTNAME TESTSRC)
 
   set_target_properties(${TESTNAME} PROPERTIES AUTOMOC TRUE)
   target_link_libraries(${TESTNAME} PRIVATE
-    qfield_core
-    qfield_qml
+    smartfield_core
+    smartfield_qml
     Qt::Test
     Qt::Core
     Qt::Gui
@@ -76,7 +76,7 @@ macro (ADD_QFIELD_QML_TEST TESTNAME TESTSRC)
     Qt::QuickTest
   )
   add_test(NAME ${TESTNAME} COMMAND ${TESTNAME} -import ${CMAKE_SOURCE_DIR}/src/qml/imports -input ${CMAKE_SOURCE_DIR}/test/qml)
-endmacro (ADD_QFIELD_QML_TEST)
+endmacro (ADD_SMARTFIELD_QML_TEST)
 
 if (WITH_SPIX)
   add_subdirectory(spix)
@@ -95,6 +95,5 @@ ADD_CATCH2_TEST(digitizingloggertest test_digitizinglogger.cpp FALSE)
 ADD_CATCH2_TEST(attributeformmodeltest test_attributeformmodel.cpp FALSE)
 ADD_CATCH2_TEST(orderedrelationmodeltest test_orderedrelationmodel.cpp FALSE)
 ADD_CATCH2_TEST(referencingfeaturelistmodeltest test_referencingfeaturelistmodel.cpp FALSE)
-ADD_CATCH2_TEST(expressionevaluatortest test_expressionevaluator.cpp TRUE)
 
-ADD_QFIELD_QML_TEST(qmltest test_qml.cpp)
+ADD_SMARTFIELD_QML_TEST(qmltest test_qml.cpp)

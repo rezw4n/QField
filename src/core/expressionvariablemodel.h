@@ -17,68 +17,40 @@
 #define EXPRESSIONVARIABLEMODEL_H
 
 #include <QStandardItemModel>
-#include <qgsproject.h>
 
 class ExpressionVariableModel : public QStandardItemModel
 {
     Q_OBJECT
 
-    Q_PROPERTY( QgsProject *currentProject READ currentProject WRITE setCurrentProject NOTIFY currentProjectChanged )
-
   public:
     enum Roles
     {
-      VariableEditableRole = Qt::EditRole,
-      VariableNameRole = Qt::UserRole,
-      VariableValueRole = Qt::UserRole + 1,
-      VariableScopeRole = Qt::UserRole + 2,
-      VariableOriginalNameRole = Qt::UserRole + 3,
+      VariableName = Qt::UserRole,
+      VariableValue
     };
-
-    enum class VariableScope
-    {
-      GlobalScope,
-      ProjectScope
-    };
-
-    Q_ENUM( VariableScope )
 
     explicit ExpressionVariableModel( QObject *parent = nullptr );
 
     bool setData( const QModelIndex &index, const QVariant &value, int role ) override;
 
-    Q_INVOKABLE int addVariable( VariableScope scope, const QString &name, const QString &value );
+    Q_INVOKABLE void addCustomVariable( const QString &varName, const QString &varVal );
 
-    Q_INVOKABLE void removeVariable( VariableScope scope, const QString &name );
+    Q_INVOKABLE void removeCustomVariable( int row );
 
     Q_INVOKABLE void save();
 
     Q_INVOKABLE void reloadVariables();
 
+    Q_INVOKABLE bool isEditable( int row );
+
+    Q_INVOKABLE void setName( int row, const QString &name );
+
+    Q_INVOKABLE void setValue( int row, const QString &value );
+
     QHash<int, QByteArray> roleNames() const override;
-
-    /**
-     * Returns the current project used to retrieve variables from.
-     */
-    QgsProject *currentProject() const;
-
-    /**
-     * Sets the project used to retrieve variables from.
-     */
-    void setCurrentProject( QgsProject *project );
-
-  signals:
-    void currentProjectChanged();
 
   private slots:
     void onDataChanged( const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles );
-
-  private:
-    void appendVariable( VariableScope scope, const QString &name, const QString &value, bool editable );
-
-    QgsProject *mCurrentProject = nullptr;
-
-    QList<QPair<VariableScope, QString>> mRemovedVariables;
 };
 
 #endif // EXPRESSIONVARIABLEMODEL_H

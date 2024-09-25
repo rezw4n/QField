@@ -15,7 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#define QFIELDTEST_MAIN
+#define SMARTFIELDTEST_MAIN
 #include "attributeformmodel.h"
 #include "catch2.h"
 #include "featuremodel.h"

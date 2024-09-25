@@ -14,10 +14,10 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-import QtQuick
-import QtQuick.Controls
-import QtQml
-import org.qgis
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQml 2.15
+import org.qgis 1.0
 
 Item {
   id: mapArea
@@ -95,7 +95,7 @@ Item {
     id: stylusTapHandler
     enabled: interactive
     grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByAnything | PointerHandler.ApprovesCancellation
-    acceptedDevices: !qfieldSettings.mouseAsTouchScreen ? PointerDevice.Stylus | PointerDevice.Mouse : PointerDevice.Stylus
+    acceptedDevices: !smartfieldSettings.mouseAsTouchScreen ? PointerDevice.Stylus | PointerDevice.Mouse : PointerDevice.Stylus
     acceptedButtons: Qt.LeftButton | Qt.RightButton
 
     property bool longPressActive: false
@@ -128,7 +128,7 @@ Item {
     enabled: interactive && !freehandDigitizing
     target: null
     grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
-    acceptedDevices: !qfieldSettings.mouseAsTouchScreen ? PointerDevice.Stylus | PointerDevice.Mouse : PointerDevice.Stylus
+    acceptedDevices: !smartfieldSettings.mouseAsTouchScreen ? PointerDevice.Stylus | PointerDevice.Mouse : PointerDevice.Stylus
     acceptedButtons: Qt.NoButton | Qt.LeftButton
     dragThreshold: 5
 
@@ -191,7 +191,7 @@ Item {
     enabled: interactive && !hovered
     acceptedButtons: Qt.NoButton | Qt.LeftButton | Qt.RightButton
     grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
-    acceptedDevices: !qfieldSettings.mouseAsTouchScreen ? PointerDevice.TouchScreen : PointerDevice.TouchScreen | PointerDevice.Mouse
+    acceptedDevices: !smartfieldSettings.mouseAsTouchScreen ? PointerDevice.TouchScreen : PointerDevice.TouchScreen | PointerDevice.Mouse
 
     property bool longPressActive: false
     property bool doublePressed: false
@@ -238,7 +238,7 @@ Item {
     target: null
     acceptedButtons: Qt.NoButton | Qt.LeftButton
     grabPermissions: PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByHandlersOfDifferentType
-    acceptedDevices: !qfieldSettings.mouseAsTouchScreen ? PointerDevice.TouchScreen : PointerDevice.TouchScreen | PointerDevice.Mouse
+    acceptedDevices: !smartfieldSettings.mouseAsTouchScreen ? PointerDevice.TouchScreen : PointerDevice.TouchScreen | PointerDevice.Mouse
     dragThreshold: 5
 
     property var oldPos

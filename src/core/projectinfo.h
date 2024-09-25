@@ -19,7 +19,7 @@
 #define PROJECTINFO_H
 
 #include "layertreemodel.h"
-#include "qfieldcloudutils.h"
+#include "smartcloudutils.h"
 #include "qgsquickmapcanvasmap.h"
 #include "qgsquickmapsettings.h"
 #include "trackingmodel.h"
@@ -169,18 +169,11 @@ class ProjectInfo : public QObject
      */
     void setCloudUserInformation( const CloudUserInformation cloudUserInformation );
 
-    /**
-     * Restores last saved cloud user information details attached to the current project
-     */
-    Q_INVOKABLE void restoreCloudUserInformation();
-
     //! Save an ongoing vector \a layer tracking session details
     Q_INVOKABLE void saveTracker( QgsVectorLayer *layer );
 
     //! Restore the last tracking session that occured within a vector \a layer.
     Q_INVOKABLE QModelIndex restoreTracker( QgsVectorLayer *layer );
-
-    Q_INVOKABLE void saveVariable( const QString &name, const QString &value );
 
     //! Restore various project settings
     static void restoreSettings( QString &projectFilePath, QgsProject *project, QgsQuickMapCanvasMap *mapCanvas, FlatLayerTreeModel *layerTree );

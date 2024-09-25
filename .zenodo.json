@@ -26,9 +26,9 @@
         "name": "Bernasocchi, Marco"
       }
     ],
-    "description": "QField is the leading GIS data collection app. It integrates perfectly with QGIS.",
+    "description": "SmartField is the leading GIS data collection app. It integrates perfectly with QGIS.",
     "keywords": [
-        "QField",
+        "SmartField",
         "QGIS",
         "cartography",
         "coordinates",
@@ -38,5 +38,5 @@
     "license": {
         "id": "GPL"
     },
-    "title": "QField"
+    "title": "SmartField"
 }

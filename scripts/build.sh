@@ -23,11 +23,11 @@ else
 	install_qt_arch="android_arm64_v8a"
 fi
 
-DOCKER_BUILDKIT=1 docker build ${SRC_DIR}/.docker/android_dev -t qfield_and_dev
+DOCKER_BUILDKIT=1 docker build ${SRC_DIR}/.docker/android_dev -t smartfield_and_dev
 
-docker run -it --rm qfield_and_dev env
+docker run -it --rm smartfield_and_dev env
 docker run -it --rm \
-	-v "$SRC_DIR":/usr/src/qfield:Z \
+	-v "$SRC_DIR":/usr/src/smartfield:Z \
 	$(if [ -n "$CACHE_DIR" ]; then echo "-v $CACHE_DIR:/io/.cache:Z"; fi) \
 	-e triplet=${triplet} \
 	-e install_qt_version=${install_qt_version} \
@@ -46,5 +46,5 @@ docker run -it --rm \
 	-e USER_GID=$(stat -c "%g" .) \
 	-e USER_UID=$(stat -c "%u" .) \
 	-e VCPKG_BINARY_SOURCES=clear\;files,/io/.cache,readwrite \
-	qfield_and_dev \
-	/usr/src/qfield/scripts/build-vcpkg.sh
+	smartfield_and_dev \
+	/usr/src/smartfield/scripts/build-vcpkg.sh

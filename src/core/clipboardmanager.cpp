@@ -52,7 +52,7 @@ void ClipboardManager::dataChanged()
     if ( !nodes.isEmpty() )
     {
       const QDomElement table = nodes.at( 0 ).toElement();
-      if ( table.hasAttribute( QStringLiteral( "qfield" ) ) )
+      if ( table.hasAttribute( QStringLiteral( "smartfield" ) ) )
       {
         holdsFeature = true;
       }
@@ -103,7 +103,7 @@ void ClipboardManager::copyFeatureToClipboard( const QgsFeature &feature, bool i
   <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"/>
  </head>
  <body>
-  <table border=\"1\" qfield=\"1\"><tr>%1</tr></table>
+  <table border=\"1\" smartfield=\"1\"><tr>%1</tr></table>
  </body>
 </html>)""" )
                        .arg( htmlLines.join( QStringLiteral( "</tr><tr>" ) ) ) );
@@ -141,7 +141,7 @@ QgsFeature ClipboardManager::pasteFeatureFromClipboard()
     if ( !nodes.isEmpty() )
     {
       const QDomElement table = nodes.at( 0 ).toElement();
-      if ( table.hasAttribute( QStringLiteral( "qfield" ) ) )
+      if ( table.hasAttribute( QStringLiteral( "smartfield" ) ) )
       {
         const QDomNodeList trs = table.elementsByTagName( QStringLiteral( "tr" ) );
         for ( int i = 0; trs.size(); i++ )

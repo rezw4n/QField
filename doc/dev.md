@@ -10,19 +10,19 @@ The following commands will fetch the latest code.
 # We will refer to that as `dev`.
 #
 # I usually have a folder called `dev` in my user folder and inside a subfolder
-# for each software project, here that would be `/home/user/dev/qfield`.
+# for each software project, here that would be `/home/user/dev/smartfield`.
 # You are free to choose yours.
 
-git clone git@github.com:opengisch/QField.git
+git clone git@github.com:opengisch/SmartField.git
 # Alternatively you can use the following URL in case you have not set up SSH keys for github
-#   https://github.com/opengisch/QField.git
+#   https://github.com/opengisch/SmartField.git
 ```
 
 ## Linux
 
 You need to have cmake installed.
 
-You have two options to build QField. Using system packages which will
+You have two options to build SmartField. Using system packages which will
 reuse packages installed from your package manager. Or using vcpkg which
 will build all the packages from source.
 
@@ -35,16 +35,17 @@ This is much faster to build than the using vcpkg and often the preferred
 development method.
 
 Installing all [QGIS development packages](https://github.com/qgis/QGIS/blob/master/INSTALL.md#33-install-build-dependencies)
-is a good start. The next step is to install QField specific dependencies,
-here is a non-exhaustive list of them on Ubuntu 24.10.
+is a good start. The next step is to install SmartField specific dependencies,
+here is a non-exhaustive list of them on Ubuntu.
 
 ```
-sudo apt install build-essential cmake qt6-sensors-dev qt6-declarative-dev qt6-positioning-dev qt6-svg-dev qt6-webview-dev qt6-multimedia-dev qt6-connectivity-dev libzxing-dev libqt6charts6 qml6-module-qtcharts qml6-module-qtlocation qml6-module-qtwebengine qml6-module-qt-labs-settings qml6-module-qtquick-controls qml6-module-qtquick-layouts qml6-module-qtwebview qml6-module-qtmultimedia qml6-module-qtquick-shapes qml6-module-qtsensors qml6-module-qtquick-particles zipcmp zipmerge ziptool
+# TODO: update to qt6 as soon as distros start to ship qt6.5
+sudo apt install libqt5sensors5-dev libqt5webview5-dev libqt5multimedia5-plugins libqt5multimedia5 qtmultimedia5-dev libzxingcore-dev libqt5bluetooth5 libqt5charts5 qml-module-qtcharts qtconnectivity5-dev qml-module-qtbluetooth qml-module-qtlocation qml-module-qtwebengine qml-module-qtgraphicaleffects qml-module-qt-labs-settings qml-module-qtquick-controls2 qml-module-qtquick-layouts qml-module-qtwebview qml-module-qtmultimedia qml-module-qtquick-shapes qml-module-qtsensors qml-module-qt-labs-calendar qml-module-qtquick-particles2 zipcmp zipmerge ziptool
 ```
 
 ### Configure
 ```sh
-cmake -S QField -B build
+cmake -S SmartField -B build
 ```
 
 If you use a locally built QGIS installed to a different
@@ -55,7 +56,7 @@ location, use `-DQGIS_ROOT=` to specify this path.
 This will build the complete dependency chain from scratch.
 
 ```sh
-cmake -S QField -B build -DWITH_VCPKG=ON
+cmake -S SmartField -B build -DWITH_VCPKG=ON
 ```
 
 Since this is now building a lot, grab yourself a cold or hot drink
@@ -84,11 +85,11 @@ The following line will configure the build.
 
 ```sh
 # We call this from the `dev` folder again
-cmake -S QField -B build -GXcode -Tbuildsystem=1 -DWITH_VCPKG=ON
+cmake -S SmartField -B build -GXcode -Tbuildsystem=1 -DWITH_VCPKG=ON
 ```
 
 Please note that this will download and build the complete dependency
-chain of QField. If you ever wanted to read a good book, you will have
+chain of SmartField. If you ever wanted to read a good book, you will have
 a couple of hours to get started.
 
 ```sh
@@ -104,14 +105,14 @@ You need to have the following tools available to build
 
 ### Configure
 
-QField on Windows is always built using vcpkg.
+SmartField on Windows is always built using vcpkg.
 A couple of specific variables should be specified.
 The `x-buildtrees-root` flag needs to point to a short path
 in order to avoid running into [issues with long paths](https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file#enable-long-paths-in-windows-10-version-1607-and-later).
 
 
 ```sh
-cmake -S QField -B build \
+cmake -S SmartField -B build \
   -D VCPKG_TARGET_TRIPLET=x64-windows-static \
   -D CMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded$<$<CONFIG:Debug>:Debug>" \
   -D PKG_CONFIG_EXECUTABLE=build/vcpkg_installed/x64-windows-static/tools/pkgconf/pkgconf.exe \
@@ -155,7 +156,7 @@ Make sure you have the following tools installed
 
 ```sh
 export ANDROID_NDK_HOME=[path to your android ndk]
-cmake -S QField \
+cmake -S SmartField \
       -B build \
       -D VCPKG_TARGET_TRIPLET=arm64-android
 ```
@@ -236,48 +237,3 @@ Before commiting, install pre-commit to auto-format your code.
 pip install pre-commit
 pre-commit install
 ```
-
-## Developer Walkthrough for Linux
-
-The commands below are using `apt`, so they are written for Debian based systems like Ubuntu. Adapt accordingly for other distributions.
-
-### Initial Setup
-
-1. **Clone the Source Code:**
-   - Use `git` to clone the repository from GitHub.
-
-2. **Install Required Tools:**
-   - Install Qt Creator, a compiler, and other dependencies:
-     ```bash
-     sudo apt update
-     sudo apt install qtcreator build-essential
-     ```
-
-#### Build
-
-1. **Build from Command Line:**
-   - Run the convenience script to build the project:
-     ```bash
-     ./scripts/build-for-linux.sh
-     ```
-
-2. **Resolve Dependencies:**
-   - If the build fails, check the error output for missing dependencies and install them as recommended.
-
-#### Setup the IDE
-
-1. **Open Qt Creator:**
-   - Launch Qt Creator from your application menu or terminal.
-
-2. **Setup Qt Installation:**
-   - Go to `Preferences -> Kits -> Qt Versions -> Add`.
-   - Select `qmake` from `build-x64-linux/vcpkg_installed/x64-linux/tools/Qt6/bin/qmake`.
-
-3. **Create a New Kit:**
-   - Add a new kit in the `Kits` tab, selecting the newly added Qt version.
-
-4. **Create a New Project:**
-   - Open the `CMakeLists.txt` file from the source code directory.
-   - Select the newly created kit with a Debug configuration, pointing to the `build-x64-linux` directory.
-
-You are now ready to develop and run the project using Qt Creator!

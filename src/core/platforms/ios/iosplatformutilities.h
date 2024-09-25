@@ -1,5 +1,5 @@
 /***************************************************************************
-    iosplatformutilities.h  -  utilities for qfield
+    iosplatformutilities.h  -  utilities for smartfield
 
       -------------------
     begin                : November 2020

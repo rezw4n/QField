@@ -2,14 +2,14 @@
 
 echo "building for ${triplet} on Qt ${install_qt_version} (${install_qt_arch})"
 
-export SOURCE_DIR=/usr/src/qfield
+export SOURCE_DIR=/usr/src/smartfield
 
-CMAKE_BUILD_DIR=/usr/src/qfield/build-${triplet}
+CMAKE_BUILD_DIR=/usr/src/smartfield/build-${triplet}
 ANDROID_NDK_VERSION=$(sed -En -e 's/^Pkg.Revision\s*=\s*([0-9a-f]+)/\1/p' ${ANDROID_NDK_HOME}/source.properties)
 
-[[ -z ${APP_NAME} ]] && APP_NAME="QField Home"
-[[ -z ${APP_PACKAGE_NAME} ]] && APP_PACKAGE_NAME="qfield_home"
-[[ -z ${APP_ICON} ]] && APP_ICON="qfield_logo_beta"
+[[ -z ${APP_NAME} ]] && APP_NAME="Smart Field"
+[[ -z ${APP_PACKAGE_NAME} ]] && APP_PACKAGE_NAME="smartfield_home"
+[[ -z ${APP_ICON} ]] && APP_ICON="smartfield_logo_beta"
 
 echo "Package name ${APP_PACKAGE_NAME}"
 

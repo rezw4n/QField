@@ -7,10 +7,10 @@ if(MSVC)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  set(qfield_ICON ${CMAKE_SOURCE_DIR}/platform/macos/qfield_logo.icns)
-  set_source_files_properties(${qfield_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION
+  set(smartfield_ICON ${CMAKE_SOURCE_DIR}/platform/macos/smartfield_logo.icns)
+  set_source_files_properties(${smartfield_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION
                                                         "Resources")
-  list(APPEND RESOURCES ${qfield_ICON})
+  list(APPEND RESOURCES ${smartfield_ICON})
 endif()
 
 # lrelease .ts files
@@ -30,13 +30,13 @@ find_package(
 function(create_executable)
   cmake_parse_arguments(exe "" "TARGET" "EXTRA_ARGS" "" ${ARGN})
 
-  set(QFIELD_SOURCES
+  set(SMARTFIELD_SOURCES
       main.cpp ${RESOURCES} ${CMAKE_SOURCE_DIR}/images/images.qrc
       ${CMAKE_BINARY_DIR}/images/logo.qrc
       ${CMAKE_SOURCE_DIR}/resources/resources.qrc ${ICON_SRC})
 
   if(ANDROID)
-    qt_add_executable(${exe_TARGET} ${QFIELD_SOURCES})
+    qt_add_executable(${exe_TARGET} ${SMARTFIELD_SOURCES})
     set_property(TARGET ${exe_TARGET} PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
                                                ${ANDROID_PACKAGE_SOURCE_DIR})
     set_property(TARGET ${exe_TARGET} PROPERTY QT_QML_IMPORT_PATH
@@ -46,7 +46,7 @@ function(create_executable)
 
     set(PROJECT_NAME ${exe_TARGET})
   else()
-    add_executable(${exe_TARGET} ${exe_EXTRA_ARGS} ${QFIELD_SOURCES})
+    add_executable(${exe_TARGET} ${exe_EXTRA_ARGS} ${SMARTFIELD_SOURCES})
   endif()
 
   file(GLOB TS_FILES ${CMAKE_SOURCE_DIR}/i18n/*.ts)
@@ -65,14 +65,14 @@ function(create_executable)
     FILES
     ${QM_FILES})
 
-  target_link_libraries(${exe_TARGET} PRIVATE qfield_core qfield_qml)
+  target_link_libraries(${exe_TARGET} PRIVATE smartfield_core smartfield_qml)
 
   if(ANDROID)
-    target_link_libraries(${exe_TARGET} PRIVATE qfield_service)
+    target_link_libraries(${exe_TARGET} PRIVATE smartfield_service)
   endif()
 
   if(WITH_SENTRY)
-    target_link_libraries(${exe_TARGET} PRIVATE qfield_sentry)
+    target_link_libraries(${exe_TARGET} PRIVATE smartfield_sentry)
   endif()
 
   get_target_property(QT_TARGET_TYPE Qt::Core TYPE)
@@ -82,8 +82,8 @@ function(create_executable)
   if(${QT_TARGET_TYPE} STREQUAL "STATIC_LIBRARY")
     find_package(Qt6 COMPONENTS QmlImportScanner)
 
-    get_target_property(qfield_qmlfiles qfield_qml QML_FILES)
-    file(COPY ${qfield_qmlfiles}
+    get_target_property(smartfield_qmlfiles smartfield_qml QML_FILES)
+    file(COPY ${smartfield_qmlfiles}
          DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/qmldrop/app")
 
     if(NOT WITH_BLUETOOTH)
@@ -125,7 +125,7 @@ function(create_executable)
       ${exe_TARGET}
       PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "${PROJECT_NAME}"
                  MACOSX_BUNDLE_INFO_STRING "${PROJECT_NAME} OPENGIS.ch"
-                 MACOSX_BUNDLE_ICON_FILE "qfield_logo.icns"
+                 MACOSX_BUNDLE_ICON_FILE "smartfield_logo.icns"
                  MACOSX_BUNDLE_GUI_IDENTIFIER "${PROJECT_NAME}"
                  MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
                  MACOSX_BUNDLE_SHORT_VERSION_STRING
@@ -138,36 +138,36 @@ endfunction()
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(EXTRA_ARGS MACOSX_BUNDLE)
 endif()
-create_executable(TARGET qfield EXTRA_ARGS ${EXTRA_ARGS})
+create_executable(TARGET smartfield EXTRA_ARGS ${EXTRA_ARGS})
 
 if(WITH_SPIX)
-  create_executable(TARGET qfield_spix)
-  target_link_libraries(qfield_spix PRIVATE Spix::Spix)
-  target_compile_definitions(qfield_spix PUBLIC WITH_SPIX)
+  create_executable(TARGET smartfield_spix)
+  target_link_libraries(smartfield_spix PRIVATE Spix::Spix)
+  target_compile_definitions(smartfield_spix PUBLIC WITH_SPIX)
 endif()
 
 install(
-  TARGETS qfield
-  BUNDLE DESTINATION ${QFIELD_BIN_DIR}
-  RUNTIME DESTINATION ${QFIELD_BIN_DIR}
-  LIBRARY DESTINATION ${QFIELD_LIB_DIR}
-  ARCHIVE DESTINATION ${QFIELD_LIB_DIR}
-  FRAMEWORK DESTINATION ${QFIELD_FW_SUBDIR}
-  PUBLIC_HEADER DESTINATION ${QFIELD_INCLUDE_DIR})
+  TARGETS smartfield
+  BUNDLE DESTINATION ${SMARTFIELD_BIN_DIR}
+  RUNTIME DESTINATION ${SMARTFIELD_BIN_DIR}
+  LIBRARY DESTINATION ${SMARTFIELD_LIB_DIR}
+  ARCHIVE DESTINATION ${SMARTFIELD_LIB_DIR}
+  FRAMEWORK DESTINATION ${SMARTFIELD_FW_SUBDIR}
+  PUBLIC_HEADER DESTINATION ${SMARTFIELD_INCLUDE_DIR})
 
 if(IOS)
-  # QFIELD_APP_ICON_SUFFIX should be set from command line to either _pr or
+  # SMARTFIELD_APP_ICON_SUFFIX should be set from command line to either _pr or
   # _beta
 
   include("${CMAKE_SOURCE_DIR}/cmake/AddQtIosApp.cmake")
   add_qt_ios_app(
-    qfield
-    NAME "QField"
+    smartfield
+    NAME "SmartField"
     VERSION "${APK_VERSION_CODE}"
     SHORT_VERSION "${APK_VERSION_CODE}"
     LONG_VERSION "${APK_VERSION_CODE}"
     ASSET_DIR "${PROJECT_SOURCE_DIR}/platform/ios/Assets.xcassets"
-    CATALOG_APPICON "AppIcon${QFIELD_APP_ICON_SUFFIX}"
+    CATALOG_APPICON "AppIcon${SMARTFIELD_APP_ICON_SUFFIX}"
     LAUNCHSCREEN_STORYBOARD
       "${PROJECT_SOURCE_DIR}/platform/ios/LaunchScreen.storyboard"
     RESOURCE_FILES "${SHARE_DIR}"

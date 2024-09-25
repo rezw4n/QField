@@ -1,9 +1,9 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import org.qfield
-import org.qgis
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import org.smartfield 1.0
+import org.qgis 1.0
+import Theme 1.0
 
 Item {
   id: relationCombobox
@@ -69,15 +69,15 @@ Item {
 
     onOpened: {
       if (searchableText.typedFilter != '') {
-        searchBar.searchTerm = searchableText.typedFilter;
+        searchField.text = searchableText.typedFilter;
       }
       if (resultsList.contentHeight > resultsList.height) {
-        searchBar.focusOnTextField();
+        searchField.forceActiveFocus();
       }
     }
 
     onClosed: {
-      searchBar.clear();
+      searchField.text = '';
     }
 
     Page {
@@ -91,22 +91,59 @@ Item {
         onCancel: searchFeaturePopup.close()
       }
 
-      QfSearchBar {
-        id: searchBar
+      TextField {
+        id: searchField
         z: 1
         anchors.left: parent.left
         anchors.right: parent.right
-        height: childrenRect.height
 
-        onSearchTermChanged: {
-          featureListModel.searchTerm = searchTerm;
+        placeholderText: !focus && displayText === '' ? qsTr("Search…") : ''
+        placeholderTextColor: Theme.mainColor
+
+        height: fontMetrics.height * 2.5
+        padding: 24
+        bottomPadding: 9
+        font: Theme.defaultFont
+        selectByMouse: true
+        verticalAlignment: TextInput.AlignVCenter
+
+        inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData
+
+        onDisplayTextChanged: {
+          featureListModel.searchTerm = searchField.displayText;
         }
 
-        onReturnPressed: {
-          if (featureListModel.rowCount() === 1) {
-            resultsList.itemAtIndex(0).performClick();
-            searchFeaturePopup.close();
+        Keys.onPressed: event => {
+          if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+            if (featureListModel.rowCount() === 1) {
+              resultsList.itemAtIndex(0).performClick();
+              searchFeaturePopup.close();
+            }
           }
+        }
+      }
+
+      QfToolButton {
+        id: clearButton
+        z: 1
+        width: fontMetrics.height
+        height: fontMetrics.height
+        anchors {
+          top: searchField.top
+          right: searchField.right
+          topMargin: height - 7
+          rightMargin: height - 7
+        }
+
+        padding: 0
+        iconSource: Theme.getThemeIcon("ic_clear_black_18dp")
+        iconColor: Theme.mainTextColor
+        bgcolor: "transparent"
+
+        opacity: searchField.displayText.length > 0 ? 1 : 0.25
+
+        onClicked: {
+          searchField.text = '';
         }
       }
 
@@ -114,13 +151,22 @@ Item {
         id: resultsList
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.top: searchBar.bottom
+        anchors.top: searchField.bottom
         model: featureListModel
         width: parent.width
-        height: searchFeaturePopup.height - searchBar.height - 50
+        height: searchFeaturePopup.height - searchField.height - 50
         clip: true
-        ScrollBar.vertical: QfScrollBar {
+
+        ScrollBar.vertical: ScrollBar {
+          policy: ScrollBar.AsNeeded
+          width: 6
+          contentItem: Rectangle {
+            implicitWidth: 6
+            implicitHeight: 25
+            color: Theme.mainColor
+          }
         }
+
         section.property: featureListModel.groupField != "" ? "groupFieldValue" : ""
         section.labelPositioning: ViewSection.CurrentLabelAtStart | ViewSection.InlineLabels
         section.delegate: Component {
@@ -147,7 +193,9 @@ Item {
           id: delegateRect
 
           property int idx: index
-          property string itemText: StringUtils.highlightText(displayString, featureListModel.searchTerm, Theme.mainTextColor)
+          property string itemText: featureListModel.searchTerm != '' ? displayString.replace(new RegExp('(' + featureListModel.searchTerm + ')', "i"), '<span style="text-decoration:underline;' + Theme.toInlineStyles({
+                "color": Theme.mainTextColor
+              }) + '">$1</span>') : displayString
 
           anchors.margins: 10
           height: radioButton.visible ? radioButton.height : checkBoxButton.height

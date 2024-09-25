@@ -1,5 +1,5 @@
-import QtQuick
-import QtQuick.Controls
+import QtQuick 2.14
+import QtQuick.Controls 2.14
 
 Item {
   id: nyukiContainer
@@ -39,7 +39,7 @@ Item {
     fillMode: Image.PreserveAspectFit
     smooth: true
     opacity: 1
-    source: "qrc:/images/qfieldcloud_logo.svg"
+    source: "qrc:/images/smartcloud_logo.svg"
     sourceSize.width: 1024
     sourceSize.height: 1024
 

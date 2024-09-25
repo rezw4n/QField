@@ -1,14 +1,14 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Controls.Material
-import QtQuick.Layouts
-import QtQml.Models
-import QtQml
-import QtCharts
-import QtWebView
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Layouts 1.14
+import QtQml.Models 2.14
+import QtQml 2.14
+import QtCharts 2.14 // Not actually used here but added so the android deploy script adds the relevant package
+import QtWebView 1.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 
 Page {
   id: form
@@ -39,7 +39,7 @@ Page {
   property double bottomMargin: 0.0
 
   function requestCancel() {
-    if (!qfieldSettings.autoSave) {
+    if (!smartfieldSettings.autoSave) {
       cancelDialog.open();
     } else {
       cancel();
@@ -160,7 +160,15 @@ Page {
           contentHeight: content.height
           bottomMargin: form.bottomMargin
           clip: true
-          ScrollBar.vertical: QfScrollBar {
+
+          ScrollBar.vertical: ScrollBar {
+            policy: content.height > contentView.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+            width: 6
+            contentItem: Rectangle {
+              implicitWidth: 6
+              implicitHeight: 25
+              color: Theme.mainColor
+            }
           }
 
           Rectangle {
@@ -319,7 +327,7 @@ Page {
 
       onHtmlCodeChanged: {
         if (htmlItem === undefined) {
-          htmlItem = Qt.createQmlObject('import QtWebView;
+          htmlItem = Qt.createQmlObject('import QtWebView 1.14;
             WebView {
               id: htmlItem;
               height: 0;
@@ -453,7 +461,7 @@ Page {
           property string itemType: Type
 
           active: (Type === 'container' && GroupIndex !== undefined && GroupIndex.valid) || ((Type === 'text' || Type === 'html' || Type === 'qml') && form.model.featureModel.modelMode != FeatureModel.MultiFeatureModel)
-          height: status == Loader.Ready ? item.childrenRect.height : 0
+          height: active ? item.childrenRect.height : 0
           anchors {
             left: parent.left
             right: parent.right
@@ -553,7 +561,7 @@ Page {
               property bool constraintsSoftValid: form.model.constraintsSoftValid
               property var currentFeature: form.model.featureModel.feature
               property var currentLayer: form.model.featureModel.currentLayer
-              property bool autoSave: qfieldSettings.autoSave
+              property bool autoSave: smartfieldSettings.autoSave
 
               active: widget !== 'Hidden'
               source: {
@@ -604,7 +612,7 @@ Page {
                   if (!AttributeAllowEdit && form.model.featureModel.modelMode == FeatureModel.MultiFeatureModel) {
                     AttributeAllowEdit = true;
                   }
-                  if (qfieldSettings.autoSave && !setupOnly && !master.ignoreChanges) {
+                  if (smartfieldSettings.autoSave && !setupOnly && !master.ignoreChanges) {
                     // indirect action, no need to check for success and display a toast, the log is enough
                     save();
                   }

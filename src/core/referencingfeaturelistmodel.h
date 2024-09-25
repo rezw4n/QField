@@ -23,7 +23,7 @@
 #include <QPair>
 
 //used for gatherer
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 
 #include <QThread>
 
@@ -31,7 +31,7 @@ class QgsVectorLayer;
 class FeatureGatherer;
 class OrderedRelationModel;
 
-class QFIELD_CORE_EXPORT ReferencingFeatureListModel : public QAbstractItemModel
+class SMARTFIELD_CORE_EXPORT ReferencingFeatureListModel : public QAbstractItemModel
 {
     Q_OBJECT
 

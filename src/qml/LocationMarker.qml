@@ -1,8 +1,9 @@
-import QtQuick
-import QtQuick.Shapes
-import QtQuick.Window
-import org.qgis
-import Theme
+import QtQuick 2.14
+import QtQuick.Shapes 1.14
+import QtQuick.Window 2.14
+import org.qgis 1.0
+import Theme 1.0
+import "."
 
 Item {
   id: locationMarker

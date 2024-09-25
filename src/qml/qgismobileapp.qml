@@ -14,18 +14,17 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Controls.Material
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Controls.Material 2.14
 import QtQuick.Effects
-import QtQuick.Window
-import QtQml
-import QtSensors
+import QtQuick.Window 2.14
+import QtQml 2.14
+import QtSensors 5.14
 import QtCore
-import QtWebSockets // Not used here but added so QML registers its dependencies for plugins to use
-import org.qgis
-import org.qfield
-import Theme
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 
 ApplicationWindow {
   id: mainWindow
@@ -180,7 +179,7 @@ ApplicationWindow {
       break;
     case 'digitize':
       projectInfo.stateMode = mode;
-      platformUtilities.setHandleVolumeKeys(qfieldSettings.digitizingVolumeKeys);
+      platformUtilities.setHandleVolumeKeys(smartfieldSettings.digitizingVolumeKeys);
       dashBoard.ensureEditableLayerSelected();
       if (dashBoard.activeLayer) {
         displayToast(qsTr('You are now in digitize mode on layer %1').arg(dashBoard.activeLayer.name));
@@ -189,7 +188,7 @@ ApplicationWindow {
       }
       break;
     case 'measure':
-      platformUtilities.setHandleVolumeKeys(qfieldSettings.digitizingVolumeKeys);
+      platformUtilities.setHandleVolumeKeys(smartfieldSettings.digitizingVolumeKeys);
       informationDrawer.elevationProfile.populateLayersFromProject();
       displayToast(qsTr('You are now in measure mode'));
       break;
@@ -292,7 +291,7 @@ ApplicationWindow {
       id: freehandHandler
       property bool isDigitizing: false
       enabled: freehandButton.visible && freehandButton.freehandDigitizing && !digitizingToolbar.rubberbandModel.frozen && (!featureForm.visible || digitizingToolbar.geometryRequested)
-      acceptedDevices: !qfieldSettings.mouseAsTouchScreen ? PointerDevice.Stylus | PointerDevice.Mouse : PointerDevice.Stylus
+      acceptedDevices: !smartfieldSettings.mouseAsTouchScreen ? PointerDevice.Stylus | PointerDevice.Mouse : PointerDevice.Stylus
       grabPermissions: PointerHandler.CanTakeOverFromHandlersOfSameType | PointerHandler.CanTakeOverFromHandlersOfDifferentType | PointerHandler.ApprovesTakeOverByAnything
 
       onActiveChanged: {
@@ -301,7 +300,7 @@ ApplicationWindow {
         } else {
           geometryEditorsToolbar.canvasFreehandEnd();
           var screenLocation = centroid.position;
-          var screenFraction = settings.value("/QField/Digitizing/FreehandRecenterScreenFraction", 5);
+          var screenFraction = settings.value("/SmartField/Digitizing/FreehandRecenterScreenFraction", 5);
           var threshold = Math.min(mainWindow.width, mainWindow.height) / screenFraction;
           if (screenLocation.x < threshold || screenLocation.x > mainWindow.width - threshold || screenLocation.y < threshold || screenLocation.y > mainWindow.height - threshold) {
             mapCanvas.mapSettings.setCenter(mapCanvas.mapSettings.screenToCoordinate(screenLocation));
@@ -324,7 +323,7 @@ ApplicationWindow {
     HoverHandler {
       id: hoverHandler
       enabled: !(positionSource.active && positioningSettings.positioningCoordinateLock) && (!digitizingToolbar.rubberbandModel || !digitizingToolbar.rubberbandModel.frozen)
-      acceptedDevices: !qfieldSettings.mouseAsTouchScreen ? PointerDevice.Stylus | PointerDevice.Mouse : PointerDevice.Stylus
+      acceptedDevices: !smartfieldSettings.mouseAsTouchScreen ? PointerDevice.Stylus | PointerDevice.Mouse : PointerDevice.Stylus
       grabPermissions: PointerHandler.TakeOverForbidden
 
       property bool hasBeenHovered: false
@@ -403,7 +402,7 @@ ApplicationWindow {
 
     HoverHandler {
       id: dummyHoverHandler
-      enabled: !qfieldSettings.mouseAsTouchScreen && !(positionSource.active && positioningSettings.positioningCoordinateLock)
+      enabled: !smartfieldSettings.mouseAsTouchScreen && !(positionSource.active && positioningSettings.positioningCoordinateLock)
       acceptedDevices: PointerDevice.TouchScreen
       grabPermissions: PointerHandler.TakeOverForbidden
 
@@ -415,7 +414,7 @@ ApplicationWindow {
           // Unfortunately, Qt fails to set the hovered property to false when stylus leaves proximity
           // of the screen, we've got to compensate for that
           mapCanvasMap.hovered = false;
-          if (!qfieldSettings.fingerTapDigitizing) {
+          if (!smartfieldSettings.fingerTapDigitizing) {
             coordinateLocator.sourceLocation = undefined;
           }
         }
@@ -447,11 +446,11 @@ ApplicationWindow {
     MapCanvas {
       id: mapCanvasMap
 
-      property bool isEnabled: !dashBoard.opened && !welcomeScreen.visible && !qfieldSettings.visible && !qfieldLocalDataPickerScreen.visible && !qfieldCloudScreen.visible && !qfieldCloudPopup.visible && !codeReader.visible && !sketcher.visible && !overlayFeatureFormDrawer.visible
+      property bool isEnabled: !dashBoard.opened && !welcomeScreen.visible && !smartfieldSettings.visible && !smartfieldLocalDataPickerScreen.visible && !smartfieldCloudScreen.visible && !smartfieldCloudPopup.visible && !codeReader.visible && !sketcher.visible && !overlayFeatureFormDrawer.visible
       interactive: isEnabled && !screenLocker.enabled
-      isMapRotationEnabled: qfieldSettings.enableMapRotation
+      isMapRotationEnabled: smartfieldSettings.enableMapRotation
       incrementalRendering: true
-      quality: qfieldSettings.quality
+      quality: smartfieldSettings.quality
       forceDeferredLayersRepaint: trackings.count > 0
       freehandDigitizing: freehandButton.freehandDigitizing && freehandHandler.active
 
@@ -515,7 +514,7 @@ ApplicationWindow {
           }
           return;
         }
-        if (qfieldSettings.fingerTapDigitizing && ((stateMachine.state === "digitize" && digitizingFeature.currentLayer) || stateMachine.state === "measure")) {
+        if (smartfieldSettings.fingerTapDigitizing && ((stateMachine.state === "digitize" && digitizingFeature.currentLayer) || stateMachine.state === "measure")) {
           if (!positionLocked && (!featureForm.visible || digitizingToolbar.geometryRequested)) {
             coordinateLocator.sourceLocation = point;
           }
@@ -918,53 +917,11 @@ ApplicationWindow {
     anchors.fill: mapCanvas
     anchors.bottomMargin: informationDrawer.height
 
-    ExpressionEvaluator {
-      id: decorationExpressionEvaluator
-      mode: ExpressionEvaluator.ExpressionTemplateMode
-      mapSettings: mapCanvas.mapSettings
-      project: qgisProject
-      positionInformation: positionSource.positionInformation
-      cloudUserInformation: projectInfo.cloudUserInformation
-    }
-
-    Connections {
-      target: mapCanvasMap
-      enabled: titleDecoration.isExpressionTemplate || copyrightDecoration.isExpressionTemplate
-
-      function onIsRenderingChanged() {
-        if (mapCanvasMap.isRendering) {
-          if (titleDecoration.isExpressionTemplate) {
-            decorationExpressionEvaluator.expressionText = titleDecoration.decorationText;
-            titleDecoration.text = decorationExpressionEvaluator.evaluate();
-          }
-          if (copyrightDecoration.isExpressionTemplate) {
-            decorationExpressionEvaluator.expressionText = copyrightDecoration.decorationText;
-            copyrightDecoration.text = decorationExpressionEvaluator.evaluate();
-          }
-        }
-      }
-    }
-
-    Connections {
-      target: positionSource
-      enabled: titleDecoration.isExpressionPositioning || copyrightDecoration.isExpressionPositioning
-
-      function onPositionInformationChanged() {
-        if (titleDecoration.isExpressionPositioning) {
-          decorationExpressionEvaluator.expressionText = titleDecoration.decorationText;
-          titleDecoration.text = decorationExpressionEvaluator.evaluate();
-        }
-        if (copyrightDecoration.isExpressionPositioning) {
-          decorationExpressionEvaluator.expressionText = copyrightDecoration.decorationText;
-          copyrightDecoration.text = decorationExpressionEvaluator.evaluate();
-        }
-      }
-    }
-
     Rectangle {
       id: titleDecorationBackground
 
       visible: titleDecoration.text != ''
+
       anchors.left: parent.left
       anchors.leftMargin: 56
       anchors.top: parent.top
@@ -978,10 +935,6 @@ ApplicationWindow {
 
       Text {
         id: titleDecoration
-
-        property string decorationText: ''
-        property bool isExpressionTemplate: decorationText.match('\[%.*%\]')
-        property bool isExpressionPositioning: isExpressionTemplate && decorationText.match('\[%.*(@gnss_|@position_).*%\]')
 
         width: parent.width - 4
         height: parent.height
@@ -1019,10 +972,6 @@ ApplicationWindow {
 
       Text {
         id: copyrightDecoration
-
-        property string decorationText: ''
-        property bool isExpressionTemplate: decorationText.match('\[%.*%\]')
-        property bool isExpressionPositioning: isExpressionTemplate && decorationText.match('\[%.*(@gnss_|@position_).*%\]')
 
         anchors.bottom: parent.bottom
 
@@ -1089,7 +1038,7 @@ ApplicationWindow {
 
       textFormat: Text.PlainText
       text: {
-        if ((qfieldSettings.numericalDigitizingInformation && stateMachine.state === "digitize") || stateMachine.state === 'measure') {
+        if ((smartfieldSettings.numericalDigitizingInformation && stateMachine.state === "digitize") || stateMachine.state === 'measure') {
           var point = GeometryUtils.reprojectPoint(coordinateLocator.currentCoordinate, coordinateLocator.mapSettings.destinationCrs, projectInfo.coordinateDisplayCrs);
           var coordinates;
           if (coordinatesIsXY) {
@@ -1123,7 +1072,7 @@ ApplicationWindow {
     }
 
     ScaleBar {
-      visible: qfieldSettings.showScaleBar
+      visible: smartfieldSettings.showScaleBar
       mapSettings: mapCanvas.mapSettings
       anchors.left: parent.left
       anchors.bottom: parent.bottom
@@ -1427,11 +1376,11 @@ ApplicationWindow {
               positioningSettings.positioningCoordinateLock = false;
             }
             displayToast(freehandDigitizing ? qsTr("Freehand digitizing turned on") : qsTr("Freehand digitizing turned off"));
-            settings.setValue("/QField/Digitizing/FreehandActive", freehandDigitizing);
+            settings.setValue("/SmartField/Digitizing/FreehandActive", freehandDigitizing);
           }
 
           Component.onCompleted: {
-            freehandDigitizing = settings.valueBool("/QField/Digitizing/FreehandActive", false);
+            freehandDigitizing = settings.valueBool("/SmartField/Digitizing/FreehandActive", false);
           }
         }
 
@@ -1473,7 +1422,7 @@ ApplicationWindow {
 
           onClicked: {
             isSnapToCommonAngleEnabled = !isSnapToCommonAngleEnabled;
-            settings.setValue("/QField/Digitizing/SnapToCommonAngleIsEnabled", isSnapToCommonAngleEnabled);
+            settings.setValue("/SmartField/Digitizing/SnapToCommonAngleIsEnabled", isSnapToCommonAngleEnabled);
             displayToast(isSnapToCommonAngleEnabled ? qsTr("Snap to %1° angle turned on").arg(snapToCommonAngleDegrees) : qsTr("Snap to common angle turned off"));
           }
 
@@ -1482,9 +1431,9 @@ ApplicationWindow {
           }
 
           Component.onCompleted: {
-            isSnapToCommonAngleEnabled = settings.valueBool("/QField/Digitizing/SnapToCommonAngleIsEnabled", false);
-            isSnapToCommonAngleRelative = settings.valueBool("/QField/Digitizing/SnapToCommonAngleIsRelative", true);
-            snapToCommonAngleDegrees = settings.valueInt("/QField/Digitizing/SnapToCommonAngleDegrees", snapToCommonAngleDegrees);
+            isSnapToCommonAngleEnabled = settings.valueBool("/SmartField/Digitizing/SnapToCommonAngleIsEnabled", false);
+            isSnapToCommonAngleRelative = settings.valueBool("/SmartField/Digitizing/SnapToCommonAngleIsRelative", true);
+            snapToCommonAngleDegrees = settings.valueInt("/SmartField/Digitizing/SnapToCommonAngleDegrees", snapToCommonAngleDegrees);
           }
 
           Menu {
@@ -1501,7 +1450,7 @@ ApplicationWindow {
 
               onTriggered: {
                 snapToCommonAngleButton.isSnapToCommonAngleRelative = checked;
-                settings.setValue("/QField/Digitizing/SnapToCommonAngleIsRelative", snapToCommonAngleButton.isSnapToCommonAngleRelative);
+                settings.setValue("/SmartField/Digitizing/SnapToCommonAngleIsRelative", snapToCommonAngleButton.isSnapToCommonAngleRelative);
               }
             }
 
@@ -1531,7 +1480,7 @@ ApplicationWindow {
                   }
                   snapToCommonAngleButton.isSnapToCommonAngleEnabled = true;
                   snapToCommonAngleButton.snapToCommonAngleDegrees = modelData;
-                  settings.setValue("/QField/Digitizing/SnapToCommonAngleDegrees", snapToCommonAngleButton.snapToCommonAngleDegrees);
+                  settings.setValue("/SmartField/Digitizing/SnapToCommonAngleDegrees", snapToCommonAngleButton.snapToCommonAngleDegrees);
                   displayToast(qsTr("Snap to %1° angle turned on").arg(modelData));
                   snapToCommonAngleMenu.close();
                 }
@@ -1581,11 +1530,11 @@ ApplicationWindow {
             informationDrawer.elevationProfile.profileCurve = GeometryUtils.lineFromRubberband(digitizingToolbar.rubberbandModel, informationDrawer.elevationProfile.crs);
             informationDrawer.elevationProfile.refresh();
           }
-          settings.setValue("/QField/Measuring/ElevationProfile", elevationProfileActive);
+          settings.setValue("/SmartField/Measuring/ElevationProfile", elevationProfileActive);
         }
 
         Component.onCompleted: {
-          elevationProfileActive = settings.valueBool("/QField/Measuring/ElevationProfile", false);
+          elevationProfileActive = settings.valueBool("/SmartField/Measuring/ElevationProfile", false);
         }
       }
     }
@@ -1627,7 +1576,7 @@ ApplicationWindow {
         onClicked: {
           if (positionSource.active && gnssButton.followActive) {
             followIncludeDestination = !followIncludeDestination;
-            settings.setValue("/QField/Navigation/FollowIncludeDestination", followIncludeDestination);
+            settings.setValue("/SmartField/Navigation/FollowIncludeDestination", followIncludeDestination);
             gnssButton.followLocation(true);
           } else {
             mapCanvas.mapSettings.setCenter(navigation.destination);
@@ -1639,7 +1588,7 @@ ApplicationWindow {
         }
 
         Component.onCompleted: {
-          followIncludeDestination = settings.valueBool("/QField/Navigation/FollowIncludeDestination", true);
+          followIncludeDestination = settings.valueBool("/SmartField/Navigation/FollowIncludeDestination", true);
         }
       }
 
@@ -1786,7 +1735,7 @@ ApplicationWindow {
 
         property int followLocationMinScale: 125
         property int followLocationMinMargin: 40
-        property int followLocationScreenFraction: settings ? settings.value("/QField/Positioning/FollowScreenFraction", 5) : 5
+        property int followLocationScreenFraction: settings ? settings.value("/SmartField/Positioning/FollowScreenFraction", 5) : 5
 
         function followLocation(forceRecenter) {
           var screenLocation = mapCanvas.mapSettings.coordinateToScreen(positionSource.projectedPosition);
@@ -1875,7 +1824,7 @@ ApplicationWindow {
 
         stateVisible: !screenLocker.enabled && (!positioningSettings.geofencingPreventDigitizingDuringAlert || !geofencer.isAlerting) && ((stateMachine.state === "digitize" && dashBoard.activeLayer && !dashBoard.activeLayer.readOnly &&
             // unfortunately there is no way to call QVariant::toBool in QML so the value is a string
-            dashBoard.activeLayer.customProperty('QFieldSync/is_geometry_locked') !== 'true' && !geometryEditorsToolbar.stateVisible && !moveFeaturesToolbar.stateVisible && (projectInfo.editRights || projectInfo.insertRights)) || stateMachine.state === 'measure' || (stateMachine.state === "digitize" && digitizingToolbar.geometryRequested))
+            dashBoard.activeLayer.customProperty('SmartFieldSync/is_geometry_locked') !== 'true' && !geometryEditorsToolbar.stateVisible && !moveFeaturesToolbar.stateVisible && (projectInfo.editRights || projectInfo.insertRights)) || stateMachine.state === 'measure' || (stateMachine.state === "digitize" && digitizingToolbar.geometryRequested))
         rubberbandModel: currentRubberband ? currentRubberband.model : null
         mapSettings: mapCanvas.mapSettings
         showConfirmButton: stateMachine.state === "digitize"
@@ -1917,7 +1866,7 @@ ApplicationWindow {
               informationDrawer.elevationProfile.profileCurve = GeometryUtils.lineFromRubberband(rubberbandModel, informationDrawer.elevationProfile.crs);
               informationDrawer.elevationProfile.refresh();
             }
-          } else if (qfieldSettings.autoSave && stateMachine.state === "digitize") {
+          } else if (smartfieldSettings.autoSave && stateMachine.state === "digitize") {
             if (digitizingToolbar.geometryValid) {
               if (digitizingRubberband.model.geometryType === Qgis.GeometryType.Null) {
                 digitizingRubberband.model.reset();
@@ -2084,7 +2033,7 @@ ApplicationWindow {
     objectName: "dashBoard"
     allowActiveLayerChange: !digitizingToolbar.isDigitizing
     mapSettings: mapCanvas.mapSettings
-    interactive: !welcomeScreen.visible && !qfieldSettings.visible && !qfieldCloudScreen.visible && !qfieldLocalDataPickerScreen.visible && !codeReader.visible && !screenLocker.enabled
+    interactive: !welcomeScreen.visible && !smartfieldSettings.visible && !smartfieldCloudScreen.visible && !smartfieldLocalDataPickerScreen.visible && !codeReader.visible && !screenLocker.enabled
 
     onOpenedChanged: {
       if (!opened) {
@@ -2307,7 +2256,7 @@ ApplicationWindow {
         } else {
           mainMenu.close();
           toast.show(qsTr('No print layout available'), 'info', qsTr('Learn more'), function () {
-              Qt.openUrlExternally('https://docs.qfield.org/how-to/print-to-pdf/');
+              Qt.openUrlExternally('https://docs.smartfield.org/how-to/print-to-pdf/');
             });
         }
         highlighted = false;
@@ -2347,7 +2296,7 @@ ApplicationWindow {
         } else {
           mainMenu.close();
           toast.show(qsTr('No sensor available'), 'info', qsTr('Learn more'), function () {
-              Qt.openUrlExternally('https://docs.qfield.org/how-to/sensors/');
+              Qt.openUrlExternally('https://docs.smartfield.org/how-to/sensors/');
             });
         }
         highlighted = false;
@@ -2365,9 +2314,9 @@ ApplicationWindow {
 
       onTriggered: {
         dashBoard.close();
-        qfieldLocalDataPickerScreen.projectFolderView = true;
-        qfieldLocalDataPickerScreen.model.resetToPath(projectInfo.filePath);
-        qfieldLocalDataPickerScreen.visible = true;
+        smartfieldLocalDataPickerScreen.projectFolderView = true;
+        smartfieldLocalDataPickerScreen.model.resetToPath(projectInfo.filePath);
+        smartfieldLocalDataPickerScreen.visible = true;
       }
     }
 
@@ -2384,8 +2333,7 @@ ApplicationWindow {
 
       onTriggered: {
         dashBoard.close();
-        qfieldSettings.reset();
-        qfieldSettings.visible = true;
+        smartfieldSettings.visible = true;
         highlighted = false;
       }
     }
@@ -2405,7 +2353,7 @@ ApplicationWindow {
     }
 
     MenuItem {
-      text: qsTr("About QField")
+      text: qsTr("About SmartField")
 
       font: Theme.defaultFont
       height: 48
@@ -2676,13 +2624,13 @@ ApplicationWindow {
       leftPadding: Theme.menuItemCheckLeftPadding
       font: Theme.defaultFont
       checkable: true
-      checked: qfieldSettings.enableMapRotation
+      checked: smartfieldSettings.enableMapRotation
       indicator.height: 20
       indicator.width: 20
       indicator.implicitHeight: 24
       indicator.implicitWidth: 24
 
-      onTriggered: qfieldSettings.enableMapRotation = checked
+      onTriggered: smartfieldSettings.enableMapRotation = checked
     }
 
     MenuSeparator {
@@ -3126,8 +3074,8 @@ ApplicationWindow {
       font: Theme.defaultFont
 
       onTriggered: {
-        qfieldSettings.currentPanel = 1;
-        qfieldSettings.visible = true;
+        smartfieldSettings.currentPanel = 1;
+        smartfieldSettings.visible = true;
       }
     }
 
@@ -3325,8 +3273,8 @@ ApplicationWindow {
     function onImportEnded(path) {
       busyOverlay.state = "hidden";
       if (path !== '') {
-        qfieldLocalDataPickerScreen.model.currentPath = path;
-        qfieldLocalDataPickerScreen.visible = true;
+        smartfieldLocalDataPickerScreen.model.currentPath = path;
+        smartfieldLocalDataPickerScreen.visible = true;
         welcomeScreen.visible = false;
       } else {
         displayToast(qsTr('Import URL failed'));
@@ -3334,8 +3282,8 @@ ApplicationWindow {
     }
 
     function onLoadProjectTriggered(path, name) {
-      qfieldLocalDataPickerScreen.visible = false;
-      qfieldLocalDataPickerScreen.focus = false;
+      smartfieldLocalDataPickerScreen.visible = false;
+      smartfieldLocalDataPickerScreen.focus = false;
       welcomeScreen.visible = false;
       welcomeScreen.focus = false;
       if (changelogPopup.visible)
@@ -3354,7 +3302,7 @@ ApplicationWindow {
       busyOverlay.state = "hidden";
       projectInfo.filePath = path;
       stateMachine.state = projectInfo.stateMode;
-      platformUtilities.setHandleVolumeKeys(qfieldSettings.digitizingVolumeKeys && stateMachine.state != 'browse');
+      platformUtilities.setHandleVolumeKeys(smartfieldSettings.digitizingVolumeKeys && stateMachine.state != 'browse');
       let activeLayer = projectInfo.activeLayer;
       if (flatLayerTree.mapTheme != '') {
         const defaultActiveLayer = projectInfo.getDefaultActiveLayerForMapTheme(flatLayerTree.mapTheme);
@@ -3365,30 +3313,24 @@ ApplicationWindow {
       dashBoard.activeLayer = activeLayer;
       drawingTemplateModel.projectFilePath = path;
       mapCanvasBackground.color = mapCanvas.mapSettings.backgroundColor;
-      let titleDecorationConfiguration = projectInfo.getTitleDecorationConfiguration();
+      var titleDecorationConfiguration = projectInfo.getTitleDecorationConfiguration();
+      titleDecoration.text = titleDecorationConfiguration["text"];
       titleDecoration.color = titleDecorationConfiguration["color"];
       titleDecoration.style = titleDecorationConfiguration["hasOutline"] === true ? Text.Outline : Text.Normal;
       titleDecoration.styleColor = titleDecorationConfiguration["outlineColor"];
       titleDecorationBackground.color = titleDecorationConfiguration["backgroundColor"];
-      titleDecoration.decorationText = titleDecorationConfiguration["text"];
-      if (!titleDecoration.isExpressionTemplate) {
-        titleDecoration.text = titleDecorationConfiguration["text"];
-      }
-      let copyrightDecorationConfiguration = projectInfo.getCopyrightDecorationConfiguration();
+      var copyrightDecorationConfiguration = projectInfo.getCopyrightDecorationConfiguration();
+      copyrightDecoration.text = copyrightDecorationConfiguration["text"];
       copyrightDecoration.color = copyrightDecorationConfiguration["color"];
       copyrightDecoration.style = copyrightDecorationConfiguration["hasOutline"] === true ? Text.Outline : Text.Normal;
       copyrightDecoration.styleColor = copyrightDecorationConfiguration["outlineColor"];
       copyrightDecorationBackground.color = copyrightDecorationConfiguration["backgroundColor"];
-      copyrightDecoration.decorationText = copyrightDecorationConfiguration["text"];
-      if (!titleDecoration.isExpressionTemplate) {
-        copyrightDecoration.text = copyrightDecorationConfiguration["text"];
-      }
-      let imageDecorationConfiguration = projectInfo.getImageDecorationConfiguration();
+      var imageDecorationConfiguration = projectInfo.getImageDecorationConfiguration();
       imageDecoration.source = imageDecorationConfiguration["source"];
       imageDecoration.fillColor = imageDecorationConfiguration["fillColor"];
       imageDecoration.strokeColor = imageDecorationConfiguration["strokeColor"];
       recentProjectListModel.reloadModel();
-      const cloudProjectId = QFieldCloudUtils.getProjectId(qgisProject.fileName);
+      const cloudProjectId = SmartCloudUtils.getProjectId(qgisProject.fileName);
       cloudProjectsModel.currentProjectId = cloudProjectId;
       cloudProjectsModel.refreshProjectModification(cloudProjectId);
       if (cloudProjectId !== '') {
@@ -3415,13 +3357,10 @@ ApplicationWindow {
           break;
         }
         if (cloudProjectsModel.layerObserver.deltaFileWrapper.hasError()) {
-          qfieldCloudPopup.show();
+          smartfieldCloudPopup.show();
         }
-        if (cloudConnection.status === QFieldCloudConnection.LoggedIn) {
-          projectInfo.cloudUserInformation = cloudConnection.userInformation;
+        if (cloudConnection.status === SmartCloudConnection.LoggedIn) {
           cloudProjectsModel.refreshProjectFileOutdatedStatus(cloudProjectId);
-        } else {
-          projectInfo.restoreCloudUserInformation();
         }
       } else {
         projectInfo.hasInsertRights = true;
@@ -3441,7 +3380,7 @@ ApplicationWindow {
       }
       layoutListInstantiator.model.reloadModel();
       geofencer.applyProjectSettings(qgisProject);
-      positioningSettings.geofencingPreventDigitizingDuringAlert = iface.readProjectBoolEntry("qfieldsync", "/geofencingShouldPreventDigitizing", false);
+      positioningSettings.geofencingPreventDigitizingDuringAlert = iface.readProjectBoolEntry("smartfieldsync", "/geofencingShouldPreventDigitizing", false);
       mapCanvasTour.startOnFreshRun();
     }
 
@@ -3469,6 +3408,7 @@ ApplicationWindow {
     mapSettings: mapCanvas.mapSettings
     layerTree: dashBoard.layerTree
     trackingModel: trackings.model
+    cloudUserInformation: cloudConnection.userInformation
 
     property var distanceUnits: Qgis.DistanceUnit.Meters
     property var areaUnits: Qgis.AreaUnit.SquareMeters
@@ -3528,7 +3468,7 @@ ApplicationWindow {
 
       function onLoadProjectEnded() {
         dashBoard.layerTree.unfreeze(true);
-        if (!qfieldAuthRequestHandler.handleLayerLogins()) {
+        if (!smartfieldAuthRequestHandler.handleLayerLogins()) {
           //project loaded without more layer handling needed
           messageLogModel.unsuppress({
               "WFS": [],
@@ -3540,7 +3480,7 @@ ApplicationWindow {
     }
 
     Connections {
-      target: qfieldAuthRequestHandler
+      target: smartfieldAuthRequestHandler
 
       function onShowLoginDialog(realm, title) {
         loginDialog.realm = realm || "";
@@ -3569,7 +3509,7 @@ ApplicationWindow {
       target: browserPopup
 
       function onCancel() {
-        qfieldAuthRequestHandler.abortAuthBrowser();
+        smartfieldAuthRequestHandler.abortAuthBrowser();
         browserPopup.close();
       }
     }
@@ -3600,7 +3540,7 @@ ApplicationWindow {
         property string realm: ""
 
         onEnter: (username, password) => {
-          qfieldAuthRequestHandler.enterCredentials(loginDialog.realm, username, password);
+          smartfieldAuthRequestHandler.enterCredentials(loginDialog.realm, username, password);
           inCancelation = false;
           loginDialogPopup.close();
         }
@@ -3613,7 +3553,7 @@ ApplicationWindow {
 
       onClosed: {
         // handled here with parameter inCancelation because the loginDialog needs to be closed before the signal is fired
-        qfieldAuthRequestHandler.loginDialogClosed(loginDialog.realm, loginDialog.inCancelation);
+        smartfieldAuthRequestHandler.loginDialogClosed(loginDialog.realm, loginDialog.inCancelation);
       }
     }
   }
@@ -3639,8 +3579,8 @@ ApplicationWindow {
     id: trackerSettings
   }
 
-  QFieldSettings {
-    id: qfieldSettings
+  SmartFieldSettings {
+    id: smartfieldSettings
 
     anchors.fill: parent
     visible: false
@@ -3660,25 +3600,22 @@ ApplicationWindow {
     Component.onCompleted: focusstack.addFocusTaker(this)
   }
 
-  QFieldCloudConnection {
+  SmartCloudConnection {
     id: cloudConnection
 
-    property int previousStatus: QFieldCloudConnection.Disconnected
+    property int previousStatus: SmartCloudConnection.Disconnected
 
     onStatusChanged: {
-      if (cloudConnection.status === QFieldCloudConnection.Disconnected && previousStatus === QFieldCloudConnection.LoggedIn) {
+      if (cloudConnection.status === SmartCloudConnection.Disconnected && previousStatus === SmartCloudConnection.LoggedIn) {
         displayToast(qsTr('Signed out'));
-      } else if (cloudConnection.status === QFieldCloudConnection.Connecting) {
+      } else if (cloudConnection.status === SmartCloudConnection.Connecting) {
         displayToast(qsTr('Connecting...'));
-      } else if (cloudConnection.status === QFieldCloudConnection.LoggedIn) {
+      } else if (cloudConnection.status === SmartCloudConnection.LoggedIn) {
         displayToast(qsTr('Signed in'));
-        if (QFieldCloudUtils.hasPendingAttachments()) {
-          // Go ahead and upload pending attachments in the background
-          platformUtilities.uploadPendingAttachments(cloudConnection);
-        }
-        var cloudProjectId = QFieldCloudUtils.getProjectId(qgisProject.fileName);
+        // Go ahead and upload pending attachments in the background
+        platformUtilities.uploadPendingAttachments(cloudConnection);
+        var cloudProjectId = SmartCloudUtils.getProjectId(qgisProject.fileName);
         if (cloudProjectId) {
-          projectInfo.cloudUserInformation = userInformation;
           cloudProjectsModel.refreshProjectFileOutdatedStatus(cloudProjectId);
         }
       }
@@ -3689,7 +3626,7 @@ ApplicationWindow {
     }
   }
 
-  QFieldCloudProjectsModel {
+  SmartCloudProjectsModel {
     id: cloudProjectsModel
     cloudConnection: cloudConnection
     layerObserver: layerObserverAlias
@@ -3701,33 +3638,32 @@ ApplicationWindow {
 
     onPushFinished: function (projectId, hasError, errorString) {
       if (hasError) {
-        displayToast(qsTr("Changes failed to reach QFieldCloud: %1").arg(errorString), 'error');
+        displayToast(qsTr("Changes failed to reach SmartCloud: %1").arg(errorString), 'error');
         return;
       }
-      displayToast(qsTr("Changes successfully pushed to QFieldCloud"));
-      if (QFieldCloudUtils.hasPendingAttachments()) {
-        // Go ahead and upload pending attachments in the background
-        platformUtilities.uploadPendingAttachments(cloudConnection);
-      }
+      displayToast(qsTr("Changes successfully pushed to SmartCloud"));
+
+      // Go ahead and upload pending attachments in the background
+      platformUtilities.uploadPendingAttachments(cloudConnection);
     }
 
-    onWarning: message => displayToast(message)
+    onWarning: displayToast(message)
 
     onDeltaListModelChanged: function () {
-      qfieldCloudDeltaHistory.model = cloudProjectsModel.currentProjectData.DeltaList;
+      smartfieldCloudDeltaHistory.model = cloudProjectsModel.currentProjectData.DeltaList;
     }
   }
 
-  QFieldCloudDeltaHistory {
-    id: qfieldCloudDeltaHistory
+  SmartCloudDeltaHistory {
+    id: smartfieldCloudDeltaHistory
 
     modal: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
     parent: Overlay.overlay
   }
 
-  QFieldCloudScreen {
-    id: qfieldCloudScreen
+  SmartCloudScreen {
+    id: smartfieldCloudScreen
 
     anchors.fill: parent
     visible: false
@@ -3741,8 +3677,8 @@ ApplicationWindow {
     Component.onCompleted: focusstack.addFocusTaker(this)
   }
 
-  QFieldCloudPopup {
-    id: qfieldCloudPopup
+  SmartCloudPopup {
+    id: smartfieldCloudPopup
     visible: false
     focus: visible
     parent: Overlay.overlay
@@ -3751,7 +3687,7 @@ ApplicationWindow {
     height: parent.height
   }
 
-  QFieldCloudPackageLayersFeedback {
+  SmartCloudPackageLayersFeedback {
     id: cloudPackageLayersFeedback
     visible: false
     parent: Overlay.overlay
@@ -3760,8 +3696,8 @@ ApplicationWindow {
     height: parent.height
   }
 
-  QFieldLocalDataPickerScreen {
-    id: qfieldLocalDataPickerScreen
+  SmartFieldLocalDataPickerScreen {
+    id: smartfieldLocalDataPickerScreen
 
     anchors.fill: parent
     visible: false
@@ -3793,17 +3729,17 @@ ApplicationWindow {
     onOpenLocalDataPicker: {
       if (platformUtilities.capabilities & PlatformUtilities.CustomLocalDataPicker) {
         welcomeScreen.visible = false;
-        qfieldLocalDataPickerScreen.projectFolderView = false;
-        qfieldLocalDataPickerScreen.model.resetToRoot();
-        qfieldLocalDataPickerScreen.visible = true;
+        smartfieldLocalDataPickerScreen.projectFolderView = false;
+        smartfieldLocalDataPickerScreen.model.resetToRoot();
+        smartfieldLocalDataPickerScreen.visible = true;
       } else {
         __projectSource = platformUtilities.openProject(this);
       }
     }
 
-    onShowQFieldCloudScreen: {
+    onShowSmartCloudScreen: {
       welcomeScreen.visible = false;
-      qfieldCloudScreen.visible = true;
+      smartfieldCloudScreen.visible = true;
     }
 
     Keys.onReleased: event => {
@@ -3831,7 +3767,7 @@ ApplicationWindow {
     parent: Overlay.overlay
 
     property var expireDate: new Date(2038, 1, 19)
-    visible: settings && settings.value("/QField/ChangelogVersion", "") !== appVersion && expireDate > new Date()
+    visible: settings && settings.value("/SmartField/ChangelogVersion", "") !== appVersion && expireDate > new Date()
   }
 
   Toast {
@@ -3856,7 +3792,7 @@ ApplicationWindow {
     visible: false
   }
 
-  QFieldSketcher {
+  SmartFieldSketcher {
     id: sketcher
     visible: false
   }
@@ -3908,7 +3844,7 @@ ApplicationWindow {
     state: iface.hasProjectOnLaunch() ? "visible" : "hidden"
   }
 
-  property bool closeAlreadyRequested: false
+  property bool alreadyCloseRequested: false
 
   onClosing: close => {
     if (screenLocker.enabled) {
@@ -3916,9 +3852,9 @@ ApplicationWindow {
       displayToast(qsTr("Unlock the screen to to close project and app"));
       return;
     }
-    if (!closeAlreadyRequested) {
+    if (!alreadyCloseRequested) {
       close.accepted = false;
-      closeAlreadyRequested = true;
+      alreadyCloseRequested = true;
       displayToast(qsTr("Press back again to close project and app"));
       closingTimer.start();
     } else {
@@ -3930,7 +3866,7 @@ ApplicationWindow {
     id: closingTimer
     interval: 2000
     onTriggered: {
-      closeAlreadyRequested = false;
+      alreadyCloseRequested = false;
     }
   }
 
@@ -4017,7 +3953,7 @@ ApplicationWindow {
     }
   }
 
-  QFieldGuide {
+  SmartFieldGuide {
     id: mapCanvasTour
     baseRoot: mainWindow
     objectName: 'mapCanvasTour'
@@ -4041,11 +3977,11 @@ ApplicationWindow {
       }]
 
     function startOnFreshRun() {
-      const startupGuide = settings.valueBool("/QField/showMapCanvasGuide", true);
+      const startupGuide = settings.valueBool("/SmartField/showMapCanvasGuide", true);
       if (startupGuide) {
         runTour();
       }
-      settings.setValue("/QField/showMapCanvasGuide", false);
+      settings.setValue("/SmartField/showMapCanvasGuide", false);
     }
   }
 

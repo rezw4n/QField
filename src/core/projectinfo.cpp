@@ -15,7 +15,6 @@
  ***************************************************************************/
 
 
-#include "expressioncontextutils.h"
 #include "projectinfo.h"
 
 #include <QDateTime>
@@ -49,6 +48,7 @@ void ProjectInfo::setFilePath( const QString &filePath )
   emit filePathChanged();
   emit stateModeChanged();
   emit activeLayerChanged();
+  emit cloudUserInformationChanged();
 }
 
 QString ProjectInfo::filePath() const
@@ -227,7 +227,7 @@ void ProjectInfo::saveLayerStyle( QgsMapLayer *layer )
   if ( mFilePath.isEmpty() || !layer )
     return;
 
-  const bool isDataset = QgsProject::instance()->readBoolEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), false );
+  const bool isDataset = QgsProject::instance()->readBoolEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), false );
 
   // Prefix id with :: to avoid loss of slash on linux paths
   QString id( QStringLiteral( "::" ) );
@@ -255,12 +255,12 @@ void ProjectInfo::saveLayerTreeState()
   if ( mFilePath.isEmpty() || !mLayerTree )
     return;
 
-  const bool isDataset = QgsProject::instance()->readBoolEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), false );
+  const bool isDataset = QgsProject::instance()->readBoolEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), false );
   if ( !isDataset )
   {
     QgsMapThemeCollection mapCollection( QgsProject::instance() );
     const QgsMapThemeCollection::MapThemeRecord rec = QgsMapThemeCollection::createThemeFromCurrentState( mLayerTree->layerTreeModel()->rootGroup(), mLayerTree->layerTreeModel() );
-    mapCollection.insert( QStringLiteral( "::QFieldLayerTreeState" ), rec );
+    mapCollection.insert( QStringLiteral( "::SmartFieldLayerTreeState" ), rec );
 
     const QDomDocumentType documentType = QDomImplementation().createDocumentType( QStringLiteral( "qgis" ), QStringLiteral( "http://mrcc.com/qgis.dtd" ), QStringLiteral( "SYSTEM" ) );
     QDomDocument document( documentType );
@@ -323,11 +323,6 @@ void ProjectInfo::setCloudUserInformation( const CloudUserInformation cloudUserI
   emit cloudUserInformationChanged();
 }
 
-void ProjectInfo::restoreCloudUserInformation()
-{
-  emit cloudUserInformationChanged();
-}
-
 void ProjectInfo::saveLayerSnappingConfiguration( QgsMapLayer *layer )
 {
   if ( mFilePath.isEmpty() )
@@ -340,7 +335,7 @@ void ProjectInfo::saveLayerSnappingConfiguration( QgsMapLayer *layer )
   QgsSnappingConfig config = QgsProject::instance()->snappingConfig();
   QgsSnappingConfig::IndividualLayerSettings layerConfig = config.individualLayerSettings( vlayer );
 
-  const bool isDataset = QgsProject::instance()->readBoolEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), false );
+  const bool isDataset = QgsProject::instance()->readBoolEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), false );
 
   // Prefix id with :: to avoid loss of slash on linux paths
   QString id( QStringLiteral( "::" ) );
@@ -376,7 +371,7 @@ void ProjectInfo::saveLayerRememberedFields( QgsMapLayer *layer )
     rememberedFields.insert( fields.at( i ).name(), config.reuseLastValue( i ) );
   }
 
-  const bool isDataset = QgsProject::instance()->readBoolEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), false );
+  const bool isDataset = QgsProject::instance()->readBoolEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), false );
 
   // Prefix id with :: to avoid loss of slash on linux paths
   QString id( QStringLiteral( "::" ) );
@@ -446,14 +441,6 @@ void ProjectInfo::mapThemeChanged()
   mSettings.endGroup();
 }
 
-void ProjectInfo::saveVariable( const QString &name, const QString &value )
-{
-  if ( mFilePath.isEmpty() )
-    return;
-
-  mSettings.setValue( QStringLiteral( "/qgis/projectInfo/%1/variables/%2" ).arg( mFilePath, name ), value );
-}
-
 void ProjectInfo::restoreSettings( QString &projectFilePath, QgsProject *project, QgsQuickMapCanvasMap *mapCanvas, FlatLayerTreeModel *layerTree )
 {
   QSettings settings;
@@ -475,7 +462,7 @@ void ProjectInfo::restoreSettings( QString &projectFilePath, QgsProject *project
   QStringList ids = settings.childGroups();
   if ( !ids.isEmpty() )
   {
-    const bool isDataset = project->readBoolEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), false );
+    const bool isDataset = project->readBoolEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), false );
     const QList<QgsMapLayer *> mapLayers = isDataset ? project->layerStore()->mapLayers().values() : QList<QgsMapLayer *>();
 
     for ( QString id : std::as_const( ids ) )
@@ -523,7 +510,7 @@ void ProjectInfo::restoreSettings( QString &projectFilePath, QgsProject *project
   ids = settings.childGroups();
   if ( !ids.isEmpty() )
   {
-    const bool isDataset = project->readBoolEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), false );
+    const bool isDataset = project->readBoolEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), false );
     const QList<QgsMapLayer *> mapLayers = isDataset ? project->layerStore()->mapLayers().values() : QList<QgsMapLayer *>();
 
     for ( QString id : std::as_const( ids ) )
@@ -577,7 +564,7 @@ void ProjectInfo::restoreSettings( QString &projectFilePath, QgsProject *project
 
     QgsMapThemeCollection mapCollection( project );
     mapCollection.readXml( document );
-    mapCollection.applyTheme( QStringLiteral( "::QFieldLayerTreeState" ), layerTree->layerTreeModel()->rootGroup(), layerTree->layerTreeModel() );
+    mapCollection.applyTheme( QStringLiteral( "::SmartFieldLayerTreeState" ), layerTree->layerTreeModel()->rootGroup(), layerTree->layerTreeModel() );
   }
 
   settings.beginGroup( QStringLiteral( "/qgis/projectInfo/%1/layerSnapping" ).arg( projectFilePath ) );
@@ -593,7 +580,7 @@ void ProjectInfo::restoreSettings( QString &projectFilePath, QgsProject *project
     ids = settings.childGroups();
     if ( !ids.isEmpty() )
     {
-      const bool isDataset = project->readBoolEntry( QStringLiteral( "QField" ), QStringLiteral( "isDataset" ), false );
+      const bool isDataset = project->readBoolEntry( QStringLiteral( "SmartField" ), QStringLiteral( "isDataset" ), false );
       const QList<QgsMapLayer *> mapLayers = isDataset ? project->layerStore()->mapLayers().values() : QList<QgsMapLayer *>();
 
       for ( QString id : std::as_const( ids ) )
@@ -634,13 +621,6 @@ void ProjectInfo::restoreSettings( QString &projectFilePath, QgsProject *project
     project->setSnappingConfig( config );
   }
   settings.endGroup();
-
-  settings.beginGroup( QStringLiteral( "/qgis/projectInfo/%1/variables" ).arg( projectFilePath ) );
-  const QStringList variableNames = settings.allKeys();
-  for ( const QString &name : variableNames )
-  {
-    ExpressionContextUtils::setProjectVariable( project, name, settings.value( name ).toString() );
-  }
 }
 
 QVariantMap ProjectInfo::getTitleDecorationConfiguration()
@@ -781,7 +761,7 @@ QVariantMap ProjectInfo::getImageDecorationConfiguration()
     }
     else
     {
-      imagePath = QStringLiteral( ":/images/qfield_logo.svg" );
+      imagePath = QStringLiteral( ":/images/smartfield_logo.svg" );
     }
 
     QColor fillColor = QgsColorUtils::colorFromString( QgsProject::instance()->readEntry( configurationName, QStringLiteral( "/Color" ), QStringLiteral( "#000000" ) ) );
@@ -808,7 +788,7 @@ QgsMapLayer *ProjectInfo::getDefaultActiveLayerForMapTheme( const QString &mapTh
     return nullptr;
   }
 
-  const QString json = QgsProject::instance()->readEntry( QStringLiteral( "qfieldsync" ), QStringLiteral( "/mapThemesActiveLayers" ) );
+  const QString json = QgsProject::instance()->readEntry( QStringLiteral( "smartfieldsync" ), QStringLiteral( "/mapThemesActiveLayers" ) );
   const QJsonDocument document = QJsonDocument::fromJson( json.toUtf8() );
 
   QJsonObject entries = document.object();

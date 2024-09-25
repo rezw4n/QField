@@ -34,7 +34,7 @@ class QgsLocator;
  * LocatorActionsModel is a model used to dislay
  * additional actions from the result of a filter.
  * These are displayed as contextual menu in QGIS
- * while they are shown in a row of buttons in QField.
+ * while they are shown in a row of buttons in SmartField.
  */
 class LocatorActionsModel : public QStandardItemModel
 {
@@ -53,7 +53,7 @@ class LocatorActionsModel : public QStandardItemModel
 
 /**
  * LocatorModelSuperBridge reimplements QgsLocatorModelBridge
- * for specific needs of QField / QML implementation.
+ * for specific needs of SmartField / QML implementation.
  */
 class LocatorModelSuperBridge : public QgsLocatorModelBridge
 {

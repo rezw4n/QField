@@ -28,14 +28,14 @@
 #include <qgsmaplayerproxymodel.h>
 #include <qgsunittypes.h>
 
-// QField includes
+// SmartField includes
 #include "appcoordinateoperationhandlers.h"
 #include "bookmarkmodel.h"
 #include "clipboardmanager.h"
 #include "drawingtemplatemodel.h"
 #include "pluginmanager.h"
-#include "qfield_core_export.h"
-#include "qfieldappauthrequesthandler.h"
+#include "smartfield_core_export.h"
+#include "smartfieldappauthrequesthandler.h"
 #include "qgsgpkgflusher.h"
 #include "screendimmer.h"
 #include "settings.h"
@@ -64,7 +64,7 @@ class QgsPrintLayout;
 #define SUPPORTED_VECTOR_EXTENSIONS QStringList( { QStringLiteral( "gpkg" ), QStringLiteral( "shp" ), QStringLiteral( "kml" ), QStringLiteral( "kmz" ), QStringLiteral( "geojson" ), QStringLiteral( "json" ), QStringLiteral( "pdf" ), QStringLiteral( "gpx" ), QStringLiteral( "gml" ), QStringLiteral( "mif" ), QStringLiteral( "fgb" ), QStringLiteral( "db" ), QStringLiteral( "sqlite" ), QStringLiteral( "mbtiles" ), QStringLiteral( "vrt" ), QStringLiteral( "zip" ) } )
 #define SUPPORTED_RASTER_EXTENSIONS QStringList( { QStringLiteral( "tif" ), QStringLiteral( "tiff" ), QStringLiteral( "pdf" ), QStringLiteral( "jpg" ), QStringLiteral( "jpeg" ), QStringLiteral( "png" ), QStringLiteral( "gpkg" ), QStringLiteral( "jp2" ), QStringLiteral( "webp" ), QStringLiteral( "mbtiles" ), QStringLiteral( "vrt" ), QStringLiteral( "zip" ) } )
 
-class QFIELD_CORE_EXPORT QgisMobileapp : public QQmlApplicationEngine
+class SMARTFIELD_CORE_EXPORT QgisMobileapp : public QQmlApplicationEngine
 {
     Q_OBJECT
   public:
@@ -233,7 +233,7 @@ class QFIELD_CORE_EXPORT QgisMobileapp : public QQmlApplicationEngine
     std::unique_ptr<FeatureHistory> mFeatureHistory;
     std::unique_ptr<ClipboardManager> mClipboardManager;
 
-    QFieldAppAuthRequestHandler *mAuthRequestHandler = nullptr;
+    SmartFieldAppAuthRequestHandler *mAuthRequestHandler = nullptr;
 
     BookmarkModel *mBookmarkModel = nullptr;
     DrawingTemplateModel *mDrawingTemplateModel = nullptr;
@@ -256,6 +256,9 @@ class QFIELD_CORE_EXPORT QgisMobileapp : public QQmlApplicationEngine
 
 
 Q_DECLARE_METATYPE( QgsFeatureId )
+#if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+Q_DECLARE_METATYPE( QgsFeatureIds )
+#endif
 Q_DECLARE_METATYPE( QgsAttributes )
 Q_DECLARE_METATYPE( QgsFieldConstraints )
 

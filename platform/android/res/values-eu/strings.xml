@@ -1,21 +1,21 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="done_unpacking_msg">Despaketatzea amaitu da, abiarazi QGIS.</string>
-    <string name="unpacking_title">QField prestatzen ari da</string>
+    <string name="unpacking_title">SmartField prestatzen ari da</string>
     <string name="unpacking_msg_following">Amaitzen ari gara, itxaron momentutxo bat!</string>
     <string name="use_internal_storage">Erabili barneko biltegiratzea</string>
     <string name="external_storage_unavailable">Instalazio ondoko datuak despaketatzen. Horrek tartetxo bat beharko du.</string>
     <string name="noexternalstorage_dialog">Badirudi kanpoko biltegiratzea (/sdcard) ez dagoela erabilgarri. Hori gertatzen da zure gailua PCra USB bidez konektatu duzulako.\nQGIS barneko biltegiratzetik exekutatu daiteke, baina ez da gomendagarria hori egitea, txikiegia izan baitaiteke.\nHobe da UTZI aukeratzen baduzu, USB kablea deskonektatzen baduzu eta QGIS berrabiarazten baduzu.</string>
     <string name="primary_storage">Barneko biltegiratzea</string>
-    <string name="secondary_storage">QField fitxategien direktorioa</string>
+    <string name="secondary_storage">SmartField fitxategien direktorioa</string>
     <string name="secondary_storage_extra">Fitxategi gehigarrien direktorioa</string>
     <string name="secondary_storage_read_only">Kanpoko biltegiratzea (irakurtzeko soilik)</string>
     <string name="inaccessible">atziezina</string>
     <string name="loading">Kargatzen</string>
     <string name="select_project">Hautatu QGIS proiektu edo datu multzo bat</string>
     <string name="recent_projects">Azken proiektuak eta datu multzoak</string>
-    <string name="rate_title">Puntuatu QField</string>
-    <string name="rate_message">QField erabiltzea gustuko izan baduzu, har ezazu unetxo bat hura puntuatzeko. Eskerrik asko zure laguntzagatik!</string>
+    <string name="rate_title">Puntuatu SmartField</string>
+    <string name="rate_message">SmartField erabiltzea gustuko izan baduzu, har ezazu unetxo bat hura puntuatzeko. Eskerrik asko zure laguntzagatik!</string>
     <string name="rate_now">Puntuatu</string>
     <string name="remind_later">Gogoratu geroago</string>
     <string name="no_thanks">Ez, eskerrik asko!</string>
@@ -47,8 +47,8 @@
     <string name="storage_information_title">Biltegiratze-informazioa</string>
     <string name="storage_information_view">Erakutsi dokumentazioa</string>
     <string name="storage_information_dismiss">Geroago irakurriko dut</string>
-    <string name="import_project_wait">Itxaron QField-ek proiektua inportatu arte</string>
-    <string name="import_dataset_wait">Itxaron QField-ek datu multzoa(k) inportatu arte</string>
+    <string name="import_project_wait">Itxaron SmartField-ek proiektua inportatu arte</string>
+    <string name="import_dataset_wait">Itxaron SmartField-ek datu multzoa(k) inportatu arte</string>
     <string name="operation_unsupported">Eragiketa ez da onartzen</string>
     <string name="import_operation_unsupported">Zure gailuak ez du inportazio-eragiketa hau onartzen.</string>
     <string name="export_operation_unsupported">Zure gailuak ez du esportazio-eragiketa hau onartzen</string>

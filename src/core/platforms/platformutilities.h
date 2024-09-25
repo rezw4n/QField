@@ -1,5 +1,5 @@
 /***************************************************************************
-                            platformutilities.h  -  utilities for qfield
+                            platformutilities.h  -  utilities for smartfield
 
                               -------------------
               begin                : Wed Dec 04 10:48:28 CET 2015
@@ -19,22 +19,24 @@
 #ifndef PLATFORMUTILITIES_H
 #define PLATFORMUTILITIES_H
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 #include "viewstatus.h"
 
 #include <QObject>
-#include <QPermission>
 #include <qgsfield.h>
 
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 5, 0 )
+#include <QPermission>
+#endif
 
-class QFieldCloudConnection;
+class SmartCloudConnection;
 class ProjectSource;
 class ResourceSource;
 
 class QQuickItem;
 class QQuickWindow;
 
-class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
+class SMARTFIELD_CORE_EXPORT PlatformUtilities : public QObject
 {
     Q_OBJECT
 
@@ -81,7 +83,7 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
 
     /**
      * The path to share data location.
-     * Under this path, there should be the app specific directories qgis/ proj/ qfield/ ...
+     * Under this path, there should be the app specific directories qgis/ proj/ smartfield/ ...
      * Refers to /share or /usr/share on Linux.
      * This path is assumed to be read only.
      */
@@ -89,7 +91,7 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
 
     /**
      * \returns a directory where local data can be stored.
-     *          this includes local qfieldcloud data or sample projects.
+     *          this includes local smartcloud data or sample projects.
      *          A \a subDir is appended to the path.
      */
     virtual QString systemLocalDataLocation( const QString &subDir ) const;
@@ -134,11 +136,11 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
      */
     virtual QStringList rootDirectories() const;
 
-    //! Requests and imports a project folder into QField's application directory action
+    //! Requests and imports a project folder into SmartField's application directory action
     Q_INVOKABLE virtual void importProjectFolder() const;
-    //! Requests and imports a project archive into QField's application directory action
+    //! Requests and imports a project archive into SmartField's application directory action
     Q_INVOKABLE virtual void importProjectArchive() const;
-    //! Requests and imports one or more datasets into QField's application directory action
+    //! Requests and imports one or more datasets into SmartField's application directory action
     Q_INVOKABLE virtual void importDatasets() const;
 
     /**
@@ -227,7 +229,7 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
      * permissions.
      * It will return true, if at least coarse permissions are granted. It will
      * ask for fine permissions if none are granted.
-     * \deprecated Since QField 3.1
+     * \deprecated Since SmartField 3.1
      */
     Q_DECL_DEPRECATED Q_INVOKABLE virtual bool checkPositioningPermissions() const;
 
@@ -235,7 +237,7 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
      * Checks for camera permissions on the device.
      * If the permissions are not given, the user will be asked to grant
      * permissions.
-     * \deprecated Since QField 3.1
+     * \deprecated Since SmartField 3.1
      */
     Q_DECL_DEPRECATED Q_INVOKABLE virtual bool checkCameraPermissions() const;
 
@@ -243,7 +245,7 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
      * Checks for camera microphone on the device.
      * If the permissions are not given, the user will be asked to grant
      * permissions.
-     * \deprecated Since QField 3.1
+     * \deprecated Since SmartField 3.1
      */
     Q_DECL_DEPRECATED Q_INVOKABLE virtual bool checkMicrophonePermissions() const;
 
@@ -251,7 +253,7 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
      * Checks for permissions to write exeternal storage.
      * If the permissions are not given, the user will be asked to grant
      * permissions.
-     * \deprecated Since QField 3.1
+     * \deprecated Since SmartField 3.1
      */
     Q_DECL_DEPRECATED Q_INVOKABLE virtual bool checkWriteExternalStoragePermissions() const;
 
@@ -272,7 +274,7 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
     Q_INVOKABLE virtual void restoreBrightness() { return; };
 
     /**
-     * Sets whether the device volume keys are handled by QField.
+     * Sets whether the device volume keys are handled by SmartField.
      */
     Q_INVOKABLE virtual void setHandleVolumeKeys( const bool handle ) { Q_UNUSED( handle ); }
 
@@ -299,7 +301,7 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
     /**
      * Uploads any pending attachments linked to the logged in user account.
      */
-    Q_INVOKABLE virtual void uploadPendingAttachments( QFieldCloudConnection *connection ) const;
+    Q_INVOKABLE virtual void uploadPendingAttachments( SmartCloudConnection *connection ) const;
 
     /**
      * Returns TRUE is the system uses a dark theme.
@@ -313,10 +315,12 @@ class QFIELD_CORE_EXPORT PlatformUtilities : public QObject
 
     static PlatformUtilities *instance();
 
+#if QT_VERSION >= QT_VERSION_CHECK( 6, 5, 0 )
     virtual Qt::PermissionStatus checkCameraPermission() const;
     virtual void requestCameraPermission( std::function<void( Qt::PermissionStatus )> func );
     virtual Qt::PermissionStatus checkMicrophonePermission() const;
     virtual void requestMicrophonePermission( std::function<void( Qt::PermissionStatus )> func );
+#endif
 
   signals:
     //! Emitted when a resource has been received.

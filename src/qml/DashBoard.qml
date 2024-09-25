@@ -1,10 +1,10 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Controls.Material
-import QtQuick.Layouts
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Layouts 1.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 
 Drawer {
   id: dashBoard
@@ -43,7 +43,7 @@ Drawer {
   clip: true
 
   onShowMenu: mainMenu.popup(settingsButton.x + 2, mainWindow.sceneTopMargin + settingsButton.y + 2)
-  onShowCloudMenu: qfieldCloudPopup.show()
+  onShowCloudMenu: smartfieldCloudPopup.show()
 
   onActiveLayerChanged: {
     if (activeLayer && activeLayer.readOnly && stateMachine.state == "digitize")
@@ -100,23 +100,23 @@ Drawer {
           id: cloudButton
           anchors.verticalCenter: parent.verticalCenter
           iconSource: {
-            if (cloudConnection.status === QFieldCloudConnection.LoggedIn) {
+            if (cloudConnection.status === SmartCloudConnection.LoggedIn) {
               switch (cloudProjectsModel.currentProjectData.Status) {
-              case QFieldCloudProjectsModel.Downloading:
+              case SmartCloudProjectsModel.Downloading:
                 switch (cloudProjectsModel.currentProjectData.PackagingStatus) {
-                case QFieldCloudProjectsModel.PackagingFinishedStatus:
+                case SmartCloudProjectsModel.PackagingFinishedStatus:
                   return Theme.getThemeVectorIcon('ic_cloud_download_24dp');
                 default:
                   return Theme.getThemeVectorIcon('ic_cloud_active_24dp');
                 }
-              case QFieldCloudProjectsModel.Uploading:
+              case SmartCloudProjectsModel.Uploading:
                 switch (cloudProjectsModel.currentProjectData.UploadDeltaStatus) {
-                case QFieldCloudProjectsModel.DeltaFileLocalStatus:
+                case SmartCloudProjectsModel.DeltaFileLocalStatus:
                   return Theme.getThemeVectorIcon('ic_cloud_upload_24dp');
                 default:
                   return Theme.getThemeVectorIcon('ic_cloud_active_24dp');
                 }
-              case QFieldCloudProjectsModel.Idle:
+              case SmartCloudProjectsModel.Idle:
                 return cloudProjectsModel.currentProjectData.ProjectFileOutdated ? Theme.getThemeVectorIcon('ic_cloud_attention_24dp') : Theme.getThemeVectorIcon('ic_cloud_active_24dp');
               default:
                 Theme.getThemeVectorIcon('ic_cloud_24dp');
@@ -152,7 +152,7 @@ Drawer {
               duration: 2000
               target: cloudButton
             }
-            running: cloudProjectsModel.currentProjectData.Status === QFieldCloudProjectsModel.Downloading || cloudProjectsModel.currentProjectData.Status === QFieldCloudProjectsModel.Uploading
+            running: cloudProjectsModel.currentProjectData.Status === SmartCloudProjectsModel.Downloading || cloudProjectsModel.currentProjectData.Status === SmartCloudProjectsModel.Uploading
             loops: Animation.Infinite
             onStopped: {
               cloudButton.opacity = 1;

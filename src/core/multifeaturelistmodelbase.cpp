@@ -269,12 +269,12 @@ QVariant MultiFeatureListModelBase::data( const QModelIndex &index, int role ) c
     case MultiFeatureListModel::DeleteFeatureRole:
       return !feature->first->readOnly()
              && ( feature->first->dataProvider()->capabilities() & QgsVectorDataProvider::DeleteFeatures )
-             && !feature->first->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked" ), false ).toBool();
+             && !feature->first->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked" ), false ).toBool();
 
     case MultiFeatureListModel::EditGeometryRole:
       return !feature->first->readOnly()
              && ( feature->first->dataProvider()->capabilities() & QgsVectorDataProvider::ChangeGeometries )
-             && !feature->first->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked" ), false ).toBool();
+             && !feature->first->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked" ), false ).toBool();
   }
 
   return QVariant();
@@ -333,7 +333,7 @@ bool MultiFeatureListModelBase::canMergeSelection() const
     return false;
 
   QgsVectorLayer *vlayer = mSelectedFeatures[0].first;
-  return !vlayer->readOnly() && QgsWkbTypes::isMultiType( vlayer->wkbType() ) && ( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::DeleteFeatures ) && ( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::ChangeGeometries ) && !vlayer->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked" ), false ).toBool();
+  return !vlayer->readOnly() && QgsWkbTypes::isMultiType( vlayer->wkbType() ) && ( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::DeleteFeatures ) && ( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::ChangeGeometries ) && !vlayer->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked" ), false ).toBool();
 }
 
 bool MultiFeatureListModelBase::canDeleteSelection() const
@@ -342,7 +342,7 @@ bool MultiFeatureListModelBase::canDeleteSelection() const
     return false;
 
   QgsVectorLayer *vlayer = mSelectedFeatures[0].first;
-  return !vlayer->readOnly() && ( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::DeleteFeatures ) && !vlayer->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked" ), false ).toBool();
+  return !vlayer->readOnly() && ( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::DeleteFeatures ) && !vlayer->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked" ), false ).toBool();
 }
 
 bool MultiFeatureListModelBase::canDuplicateSelection() const
@@ -351,7 +351,7 @@ bool MultiFeatureListModelBase::canDuplicateSelection() const
     return false;
 
   QgsVectorLayer *vlayer = mSelectedFeatures[0].first;
-  return !vlayer->readOnly() && ( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::AddFeatures ) && !vlayer->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked" ), false ).toBool();
+  return !vlayer->readOnly() && ( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::AddFeatures ) && !vlayer->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked" ), false ).toBool();
 }
 
 bool MultiFeatureListModelBase::canMoveSelection() const
@@ -360,13 +360,13 @@ bool MultiFeatureListModelBase::canMoveSelection() const
     return false;
 
   QgsVectorLayer *vlayer = mSelectedFeatures[0].first;
-  if ( !vlayer || vlayer->readOnly() || !( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::ChangeGeometries ) || vlayer->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked" ), false ).toBool() )
+  if ( !vlayer || vlayer->readOnly() || !( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::ChangeGeometries ) || vlayer->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked" ), false ).toBool() )
     return false;
 
-  const bool geometryLockedExpressionActive = vlayer->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked_expression_active" ), false ).toBool();
+  const bool geometryLockedExpressionActive = vlayer->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked_expression_active" ), false ).toBool();
   if ( geometryLockedExpressionActive )
   {
-    const QString geometryLockedExpression = vlayer->customProperty( QStringLiteral( "QFieldSync/geometry_locked_expression" ), QString() ).toString().trimmed();
+    const QString geometryLockedExpression = vlayer->customProperty( QStringLiteral( "SmartFieldSync/geometry_locked_expression" ), QString() ).toString().trimmed();
     if ( !geometryLockedExpression.isEmpty() )
     {
       QgsExpressionContext expressionContext = vlayer->createExpressionContext();
@@ -392,13 +392,13 @@ bool MultiFeatureListModelBase::canProcessSelection() const
     return false;
 
   QgsVectorLayer *vlayer = mSelectedFeatures[0].first;
-  if ( !vlayer || vlayer->readOnly() || !( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::ChangeGeometries ) || vlayer->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked" ), false ).toBool() )
+  if ( !vlayer || vlayer->readOnly() || !( vlayer->dataProvider()->capabilities() & QgsVectorDataProvider::ChangeGeometries ) || vlayer->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked" ), false ).toBool() )
     return false;
 
-  const bool geometryLockedExpressionActive = vlayer->customProperty( QStringLiteral( "QFieldSync/is_geometry_locked_expression_active" ), false ).toBool();
+  const bool geometryLockedExpressionActive = vlayer->customProperty( QStringLiteral( "SmartFieldSync/is_geometry_locked_expression_active" ), false ).toBool();
   if ( geometryLockedExpressionActive )
   {
-    const QString geometryLockedExpression = vlayer->customProperty( QStringLiteral( "QFieldSync/geometry_locked_expression" ), QString() ).toString().trimmed();
+    const QString geometryLockedExpression = vlayer->customProperty( QStringLiteral( "SmartFieldSync/geometry_locked_expression" ), QString() ).toString().trimmed();
     if ( !geometryLockedExpression.isEmpty() )
     {
       QgsExpressionContext expressionContext = vlayer->createExpressionContext();
@@ -452,7 +452,7 @@ bool MultiFeatureListModelBase::mergeSelection()
   {
     if ( !vlayer->startEditing() )
     {
-      QgsMessageLog::logMessage( tr( "Cannot start editing" ), "QField", Qgis::Warning );
+      QgsMessageLog::logMessage( tr( "Cannot start editing" ), "SmartField", Qgis::Warning );
       return false;
     }
 
@@ -482,7 +482,7 @@ bool MultiFeatureListModelBase::mergeSelection()
     if ( !isSuccess )
     {
       if ( !vlayer->rollBack() )
-        QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( vlayer->name() ), "QField", Qgis::Critical );
+        QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( vlayer->name() ), "SmartField", Qgis::Critical );
     }
   }
 
@@ -505,7 +505,7 @@ bool MultiFeatureListModelBase::deleteSelection()
   QgsVectorLayer *vlayer = selectedLayer();
   if ( !vlayer->startEditing() )
   {
-    QgsMessageLog::logMessage( tr( "Cannot start editing" ), "QField", Qgis::Warning );
+    QgsMessageLog::logMessage( tr( "Cannot start editing" ), "SmartField", Qgis::Warning );
     return false;
   }
 
@@ -527,7 +527,7 @@ bool MultiFeatureListModelBase::deleteSelection()
   if ( !isSuccess )
   {
     if ( !vlayer->rollBack() )
-      QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( vlayer->name() ), "QField", Qgis::Critical );
+      QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( vlayer->name() ), "SmartField", Qgis::Critical );
   }
 
   return isSuccess;
@@ -591,7 +591,7 @@ bool MultiFeatureListModelBase::moveSelection( const double x, const double y )
   QgsVectorLayer *vlayer = mSelectedFeatures[0].first;
   if ( !vlayer->startEditing() )
   {
-    QgsMessageLog::logMessage( tr( "Cannot start editing" ), "QField", Qgis::Warning );
+    QgsMessageLog::logMessage( tr( "Cannot start editing" ), "SmartField", Qgis::Warning );
     return false;
   }
 
@@ -604,7 +604,7 @@ bool MultiFeatureListModelBase::moveSelection( const double x, const double y )
     isSuccess = vlayer->changeGeometry( pair.second.id(), geom );
     if ( !isSuccess )
     {
-      QgsMessageLog::logMessage( tr( "Cannot change geometry of feature %1 in %2" ).arg( pair.second.id() ).arg( vlayer->name() ), "QField", Qgis::Critical );
+      QgsMessageLog::logMessage( tr( "Cannot change geometry of feature %1 in %2" ).arg( pair.second.id() ).arg( vlayer->name() ), "SmartField", Qgis::Critical );
       break;
     }
   }
@@ -618,7 +618,7 @@ bool MultiFeatureListModelBase::moveSelection( const double x, const double y )
   if ( !isSuccess )
   {
     if ( !vlayer->rollBack() )
-      QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( vlayer->name() ), "QField", Qgis::Critical );
+      QgsMessageLog::logMessage( tr( "Cannot rollback layer changes in layer %1" ).arg( vlayer->name() ), "SmartField", Qgis::Critical );
   }
 
   return isSuccess;

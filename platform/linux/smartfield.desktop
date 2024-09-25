@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=SmartField
+GenericName=SmartField
+Comment=SmartField
+Icon=smartfield
+Terminal=false
+Exec=smartfield %F
+MimeType=application/x-qgis-project;image/tiff;image/jpeg;image/jp2;application/x-raster-aig;application/x-mapinfo-mif;application/x-esri-shape;
+Categories=Qt;Utility;

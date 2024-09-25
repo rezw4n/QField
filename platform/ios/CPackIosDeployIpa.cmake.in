@@ -1,9 +1,9 @@
-set(QT_IOS_TARGET_ARCHIVE_PATH @CMAKE_CURRENT_BINARY_DIR@/qfield.xcarchive)
-set(QT_IOS_TARGET_IPA_PATH @CMAKE_CURRENT_BINARY_DIR@/qfieldIpa)
+set(QT_IOS_TARGET_ARCHIVE_PATH @CMAKE_CURRENT_BINARY_DIR@/smartfield.xcarchive)
+set(QT_IOS_TARGET_IPA_PATH @CMAKE_CURRENT_BINARY_DIR@/smartfieldIpa)
 
 execute_process(COMMAND xcodebuild
             -project "@PROJECT_BINARY_DIR@/@CMAKE_PROJECT_NAME@.xcodeproj"
-            -scheme "qfield"
+            -scheme "smartfield"
             -archivePath "${QT_IOS_TARGET_ARCHIVE_PATH}"
             -destination "generic/platform=iOS"
             archive

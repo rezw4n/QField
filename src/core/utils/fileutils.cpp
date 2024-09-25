@@ -24,14 +24,9 @@
 #include <QImage>
 #include <QImageReader>
 #include <QMimeDatabase>
-#include <QPainter>
-#include <QPainterPath>
 #include <qgis.h>
 #include <qgsexiftools.h>
 #include <qgsfileutils.h>
-#include <qgsrendercontext.h>
-#include <qgstextformat.h>
-#include <qgstextrenderer.h>
 
 FileUtils::FileUtils( QObject *parent )
   : QObject( parent )
@@ -188,7 +183,7 @@ void FileUtils::restrictImageSize( const QString &imagePath, int maximumWidthHei
     QImage scaledImage = img.width() > img.height()
                            ? img.scaledToWidth( maximumWidthHeight, Qt::SmoothTransformation )
                            : img.scaledToHeight( maximumWidthHeight, Qt::SmoothTransformation );
-    scaledImage.save( imagePath, nullptr, 90 );
+    scaledImage.save( imagePath );
 
     for ( const QString &key : metadata.keys() )
     {
@@ -233,50 +228,11 @@ void FileUtils::addImageMetadata( const QString &imagePath, const GnssPositionIn
 
   metadata["Exif.GPSInfo.GPSSatellites"] = QString::number( positionInformation.satellitesUsed() ).rightJustified( 2, '0' );
 
-  metadata["Exif.Image.Make"] = QStringLiteral( "QField" );
-  metadata["Xmp.tiff.Make"] = QStringLiteral( "QField" );
+  metadata["Exif.Image.Make"] = QStringLiteral( "SmartField" );
+  metadata["Xmp.tiff.Make"] = QStringLiteral( "SmartField" );
 
   for ( const QString key : metadata.keys() )
   {
     QgsExifTools::tagImage( imagePath, key, metadata[key] );
-  }
-}
-
-void FileUtils::addImageStamp( const QString &imagePath, const QString &text )
-{
-  if ( !QFileInfo::exists( imagePath ) || text.isEmpty() )
-  {
-    return;
-  }
-
-  QVariantMap metadata = QgsExifTools::readTags( imagePath );
-  QImage img( imagePath );
-  if ( !img.isNull() )
-  {
-    QPainter painter( &img );
-    painter.setRenderHint( QPainter::Antialiasing );
-
-    QFont font = painter.font();
-    font.setPixelSize( std::min( img.width(), img.height() ) / 40 );
-    font.setBold( true );
-
-    QgsRenderContext context = QgsRenderContext::fromQPainter( &painter );
-    QgsTextFormat format;
-    format.setFont( font );
-    format.setSize( font.pixelSize() );
-    format.setSizeUnit( Qgis::RenderUnit::Pixels );
-    format.setColor( Qt::white );
-    format.buffer().setColor( Qt::black );
-    format.buffer().setSize( 2 );
-    format.buffer().setSizeUnit( Qgis::RenderUnit::Pixels );
-    format.buffer().setEnabled( true );
-    QgsTextRenderer::drawText( QRectF( 10, 10, img.width() - 20, img.height() - 20 ), 0, Qgis::TextHorizontalAlignment::Left, text.split( QStringLiteral( "\n" ) ), context, format, true, Qgis::TextVerticalAlignment::Bottom, Qgis::TextRendererFlag::WrapLines );
-
-    img.save( imagePath, nullptr, 90 );
-
-    for ( const QString &key : metadata.keys() )
-    {
-      QgsExifTools::tagImage( imagePath, key, metadata[key] );
-    }
   }
 }

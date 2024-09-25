@@ -14,14 +14,14 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Controls.Material.impl 2.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
 
 Rectangle {
   id: featureFormList
@@ -42,7 +42,7 @@ Rectangle {
   property bool allowDelete
 
   property bool multiSelection: false
-  property bool fullScreenView: qfieldSettings.fullScreenIdentifyView
+  property bool fullScreenView: smartfieldSettings.fullScreenIdentifyView
   property bool isVertical: parent.width < parent.height || parent.width < 300
 
   property bool canvasOperationRequested: digitizingToolbar.geometryRequested || moveFeaturesToolbar.moveFeaturesRequested
@@ -56,7 +56,7 @@ Rectangle {
 
   width: {
     if (props.isVisible || featureFormList.canvasOperationRequested) {
-      if (fullScreenView || parent.width <= parent.height || parent.width < 300) {
+      if (fullScreenView || parent.width < parent.height || parent.width < 300) {
         parent.width;
       } else {
         Math.min(Math.max(200, parent.width / 2.25), parent.width);
@@ -234,7 +234,6 @@ Rectangle {
   ListView {
     id: globalFeaturesList
 
-    clip: true
     anchors.top: featureListToolBar.bottom
     anchors.left: parent.left
     anchors.right: parent.right
@@ -242,7 +241,18 @@ Rectangle {
     anchors.bottomMargin: mainWindow.sceneBottomMargin
     height: parent.height - featureListToolBar.height
     visible: false
-    ScrollBar.vertical: QfScrollBar {
+
+    clip: true
+
+    ScrollBar.vertical: ScrollBar {
+      width: 6
+      policy: globalFeaturesList.childrenRect.height > globalFeaturesList.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+
+      contentItem: Rectangle {
+        implicitWidth: 6
+        implicitHeight: 25
+        color: Theme.mainColor
+      }
     }
 
     section.property: "layerName"
@@ -406,7 +416,7 @@ Rectangle {
       featureFormList.selection.focusedItemChanged();
       featureForm.model.featureModel.reset();
       featureFormList.state = featureFormList.selection.model.selectedCount > 0 ? "FeatureList" : "FeatureForm";
-      if (!qfieldSettings.autoSave) {
+      if (!smartfieldSettings.autoSave) {
         displayToast(qsTr("Changes discarded"), 'warning');
       }
     }
@@ -621,11 +631,7 @@ Rectangle {
 
     onProcessingRunClicked: {
       processingAlgorithm.run();
-      if (globalFeaturesList.model.count > 0) {
-        featureFormList.state = "FeatureList";
-      } else {
-        featureFormList.state = "Hidden";
-      }
+      featureFormList.state = "FeatureList";
     }
 
     CoordinateTransformer {
@@ -781,7 +787,7 @@ Rectangle {
   function hide() {
     props.isVisible = false;
     focus = false;
-    fullScreenView = qfieldSettings.fullScreenIdentifyView;
+    fullScreenView = smartfieldSettings.fullScreenIdentifyView;
     if (!featureFormList.canvasOperationRequested) {
       featureFormList.multiSelection = false;
       featureForm.model.featureModel.modelMode = FeatureModel.SingleFeatureModel;

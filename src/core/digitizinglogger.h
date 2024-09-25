@@ -17,7 +17,7 @@
 #define DIGITIZINGLOGGER_H
 
 #include "gnsspositioninformation.h"
-#include "qfieldcloudconnection.h"
+#include "smartcloudconnection.h"
 #include "qgsquickmapsettings.h"
 #include "snappingresult.h"
 

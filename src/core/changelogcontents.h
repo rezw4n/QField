@@ -18,7 +18,7 @@
 
 #include <QObject>
 
-//! Obtain the QField changelog contents from the GitHub releases API.
+//! Obtain the SmartField changelog contents from the GitHub releases API.
 class ChangelogContents : public QObject
 {
     Q_OBJECT

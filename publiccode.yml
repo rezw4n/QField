@@ -4,9 +4,9 @@
 # More info at https://github.com/italia/publiccode.yml
 
 publiccodeYmlVersion: '0.2'
-name: QField
-url: 'https://github.com/opengisch/QField'
-logo: https://raw.githubusercontent.com/opengisch/QField/master/images/icons/qfield_logo.svg
+name: SmartField
+url: 'https://github.com/opengisch/SmartField'
+logo: https://raw.githubusercontent.com/opengisch/SmartField/master/images/icons/smartfield_logo.svg
 softwareVersion: v2.0.0
 releaseDate: '2021-06-09'
 
@@ -26,9 +26,9 @@ description:
       - Spatial data management
       - Cartography
 
-    genericName: QField
+    genericName: SmartField
     longDescription: |
-      QField is the leading GIS data collection app.
+      SmartField is the leading GIS data collection app.
       It integrates perfectly with QGIS.
 
       ## Features
@@ -85,10 +85,10 @@ description:
 
       ### 4. Collaborative work
 
-      - Collaboratively work on datasets through [QFieldCloud](https://qfield.cloud)
+      - Collaboratively work on datasets through [SmartCloud](https://smartfield.cloud)
 
     shortDescription: |-
-      QField is the leading full-featured, user-friendly, free-and-open-source mobile data collection app that integrates perfectly with QGIS.
+      SmartField is the leading full-featured, user-friendly, free-and-open-source mobile data collection app that integrates perfectly with QGIS.
 intendedAudience:
   scope:
     - agriculture
@@ -114,7 +114,7 @@ it:
     cie: false
     pagopa: false
     spid: false
-landingURL: 'https://qfield.org'
+landingURL: 'https://smartfield.org'
 legal:
   license: GPL-2.0-or-later
 localisation:
@@ -163,8 +163,8 @@ localisation:
 
 maintenance:
   contacts:
-    - email: users@lists.qfield.org
-      name: QField user list
+    - email: users@lists.smartfield.org
+      name: SmartField user list
   type: community
 
 platforms:

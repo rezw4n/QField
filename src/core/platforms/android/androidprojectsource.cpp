@@ -54,7 +54,7 @@ void AndroidProjectSource::handleActivityResult( int receiverRequestCode, int re
 
     if ( !QFile( path ).exists() )
     {
-      QgsMessageLog::logMessage( tr( "File %1 does not exist" ).arg( path ), QStringLiteral( "QField" ), Qgis::Warning );
+      QgsMessageLog::logMessage( tr( "File %1 does not exist" ).arg( path ), QStringLiteral( "SmartField" ), Qgis::Warning );
     }
 
     emit projectOpened( path );

@@ -1,8 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import org.smartfield 1.0
+import Theme 1.0
 
 Page {
   id: badLayerPage
@@ -105,7 +105,7 @@ Page {
       Layout.fillHeight: false
       Layout.topMargin: 5
 
-      text: qsTr('You may check the %1Portable Project%2 documentation page for more help.').arg("<a href=\"https://docs.qfield.org/how-to/movable-project\">").arg("</a>")
+      text: qsTr('You may check the %1Portable Project%2 documentation page for more help.').arg("<a href=\"https://docs.smartfield.org/how-to/movable-project\">").arg("</a>")
       textFormat: Text.RichText
       font: Theme.tipFont
       color: Theme.secondaryTextColor

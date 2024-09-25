@@ -42,7 +42,7 @@ class AlgorithmItem
 
 
 /**
- * \brief A sort/filter proxy model for providers and algorithms available within QField
+ * \brief A sort/filter proxy model for providers and algorithms available within SmartField
  * which automatically sorts the toolbox in a logical fashion and supports filtering
  * the results.
  */
@@ -111,7 +111,7 @@ class ProcessingAlgorithmsModel : public QSortFilterProxyModel
 };
 
 /**
- * \brief A model for providers and algorithms available within QField
+ * \brief A model for providers and algorithms available within SmartField
  *
  * See ProcessingAlgorithmsProxyModel for a sorted, filterable version
  * of this model.

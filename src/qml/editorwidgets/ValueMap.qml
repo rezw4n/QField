@@ -1,11 +1,12 @@
-import QtQuick
-import QtQuick.Controls
+import QtQuick 2.14
+import QtQuick.Controls 2.14
 import QtQuick.Layouts
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
-import org.qfield
-import org.qgis
-import Theme
+import QtQuick.Controls.Material 2.14
+import QtQuick.Controls.Material.impl 2.14
+import org.smartfield 1.0
+import org.qgis 1.0
+import Theme 1.0
+import "."
 import ".."
 
 EditorWidgetBase {
@@ -63,7 +64,7 @@ EditorWidgetBase {
 
   // Using the search and comboBox when there are less than X items in the dropdown proves to be poor UI on normally
   // sized and oriented phones. Some empirical tests proved 6 to be a good number for now.
-  readonly property int toggleButtonsThreshold: currentLayer && currentLayer.customProperty('QFieldSync/value_map_button_interface_threshold') !== undefined ? currentLayer.customProperty('QFieldSync/value_map_button_interface_threshold') : 0
+  readonly property int toggleButtonsThreshold: currentLayer && currentLayer.customProperty('SmartFieldSync/value_map_button_interface_threshold') !== undefined ? currentLayer.customProperty('SmartFieldSync/value_map_button_interface_threshold') : 0
   state: currentItemCount < toggleButtonsThreshold ? "toggleButtonsView" : "comboBoxItemView"
 
   property real currentItemCount: comboBox.count
@@ -256,12 +257,12 @@ EditorWidgetBase {
 
       onOpened: {
         if (resultsList.contentHeight > resultsList.height) {
-          searchBar.focusOnTextField();
+          searchField.forceActiveFocus();
         }
       }
 
       onClosed: {
-        searchBar.clear();
+        searchField.text = '';
       }
 
       Page {
@@ -279,22 +280,57 @@ EditorWidgetBase {
           }
         }
 
-        QfSearchBar {
-          id: searchBar
+        TextField {
+          id: searchField
           z: 1
           anchors.left: parent.left
           anchors.right: parent.right
-          height: childrenRect.height
 
-          onSearchTermChanged: {
-            listModel.setFilterFixedString(searchTerm);
+          placeholderText: !focus && displayText === '' ? qsTr("Search…") : ''
+          placeholderTextColor: Theme.mainColor
+
+          height: fontMetrics.height * 2.5
+          padding: 24
+          bottomPadding: 9
+          font: Theme.defaultFont
+          selectByMouse: true
+          verticalAlignment: TextInput.AlignVCenter
+
+          inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData
+
+          onDisplayTextChanged: listModel.setFilterFixedString(displayText)
+
+          Keys.onPressed: event => {
+            if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+              if (listModel.rowCount() === 1) {
+                resultsList.itemAtIndex(0).performClick();
+                searchFeaturePopup.close();
+              }
+            }
+          }
+        }
+
+        QfToolButton {
+          id: clearButton
+          z: 1
+          width: fontMetrics.height
+          height: fontMetrics.height
+          anchors {
+            top: searchField.top
+            right: searchField.right
+            topMargin: height - 7
+            rightMargin: height - 7
           }
 
-          onReturnPressed: {
-            if (listModel.rowCount() === 1) {
-              resultsList.itemAtIndex(0).performClick();
-              searchFeaturePopup.close();
-            }
+          padding: 0
+          iconSource: Theme.getThemeIcon("ic_clear_black_18dp")
+          iconColor: Theme.mainTextColor
+          bgcolor: "transparent"
+
+          opacity: searchField.displayText.length > 0 ? 1 : 0.25
+
+          onClicked: {
+            searchField.text = '';
           }
         }
 
@@ -302,13 +338,23 @@ EditorWidgetBase {
           id: resultsList
           anchors.left: parent.left
           anchors.right: parent.right
-          anchors.top: searchBar.bottom
+          anchors.top: searchField.bottom
           model: listModel
+
           width: parent.width
-          height: searchFeaturePopup.height - searchBar.height - 50
+          height: searchFeaturePopup.height - searchField.height - 50
           clip: true
-          ScrollBar.vertical: QfScrollBar {
+
+          ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AsNeeded
+            width: 6
+            contentItem: Rectangle {
+              implicitWidth: 6
+              implicitHeight: 25
+              color: Theme.mainColor
+            }
           }
+
           delegate: Rectangle {
             id: delegateRect
 
@@ -335,7 +381,9 @@ EditorWidgetBase {
               indicator: Rectangle {
               }
 
-              text: StringUtils.highlightText(itemText, searchBar.searchTerm, Theme.mainTextColor)
+              text: searchField.displayText !== '' ? itemText.replace(new RegExp('(' + searchField.displayText + ')', "i"), '<span style="text-decoration:underline;' + Theme.toInlineStyles({
+                    "color": Theme.mainTextColor
+                  }) + '">$1</span>') : itemText
 
               contentItem: Text {
                 text: parent.text
@@ -344,7 +392,7 @@ EditorWidgetBase {
                 verticalAlignment: Text.AlignVCenter
                 leftPadding: parent.indicator.width + parent.spacing
                 elide: Text.ElideRight
-                color: searchBar.searchTerm !== '' ? Theme.secondaryTextColor : Theme.mainTextColor
+                color: searchField.displayText !== '' ? Theme.secondaryTextColor : Theme.mainTextColor
                 textFormat: Text.RichText
               }
             }

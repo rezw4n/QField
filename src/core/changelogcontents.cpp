@@ -15,7 +15,7 @@
  ***************************************************************************/
 
 #include "changelogcontents.h"
-#include "qfield.h"
+#include "smartfield.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -41,7 +41,7 @@ void ChangelogContents::request()
   mStatus = LoadingStatus;
   emit statusChanged();
 
-  QNetworkReply *reply = manager->get( QNetworkRequest( QUrl( QStringLiteral( "https://api.github.com/repos/opengisch/qfield/releases" ) ) ) );
+  QNetworkReply *reply = manager->get( QNetworkRequest( QUrl( QStringLiteral( "https://api.github.com/repos/opengisch/smartfield/releases" ) ) ) );
 
   connect( reply, &QNetworkReply::finished, this, [=]() {
     QJsonParseError error;
@@ -58,8 +58,8 @@ void ChangelogContents::request()
     bool shouldReverseOrder = false;
     QString changelog;
     QString versionNumbersOnly;
-    QList<int> qfieldVersion = parseVersion( qfield::appVersion );
-    QList<int> oldVersion = parseVersion( QSettings().value( QStringLiteral( "/QField/ChangelogVersion" ) ).toString() );
+    QList<int> smartfieldVersion = parseVersion( smartfield::appVersion );
+    QList<int> oldVersion = parseVersion( QSettings().value( QStringLiteral( "/SmartField/ChangelogVersion" ) ).toString() );
     const QJsonArray releases = json.array();
 
     for ( const QJsonValue &releaseValue : releases )
@@ -71,10 +71,10 @@ void ChangelogContents::request()
         continue;
 
       // most probably developer version with no proper version set
-      if ( qfieldVersion.isEmpty() )
-        qfieldVersion = releaseVersion;
+      if ( smartfieldVersion.isEmpty() )
+        smartfieldVersion = releaseVersion;
 
-      if ( qfieldVersion[0] != releaseVersion[0] || qfieldVersion[1] != releaseVersion[1] )
+      if ( smartfieldVersion[0] != releaseVersion[0] || smartfieldVersion[1] != releaseVersion[1] )
         continue;
 
       // first loop
@@ -84,7 +84,7 @@ void ChangelogContents::request()
 
         if ( !oldVersion.isEmpty() )
         {
-          shouldReverseOrder = oldVersion[0] == qfieldVersion[0] && oldVersion[1] == qfieldVersion[1];
+          shouldReverseOrder = oldVersion[0] == smartfieldVersion[0] && oldVersion[1] == smartfieldVersion[1];
         }
       }
 
@@ -103,7 +103,7 @@ void ChangelogContents::request()
                     : ( releaseChangelog + changelog );
     }
 
-    changelog += QStringLiteral( "\n" ) + QStringLiteral( "[" ) + tr( "Previous releases on GitHub" ) + QStringLiteral( "](https://github.com/opengisch/qfield/releases)" );
+    changelog += QStringLiteral( "\n" ) + QStringLiteral( "[" ) + tr( "Previous releases on GitHub" ) + QStringLiteral( "](https://github.com/opengisch/smartfield/releases)" );
 
     QRegularExpression regexpFirstTitle( QStringLiteral( "^\n#\n# " ) );
     changelog = changelog.replace( regexpFirstTitle, QStringLiteral( "\n# " ) );

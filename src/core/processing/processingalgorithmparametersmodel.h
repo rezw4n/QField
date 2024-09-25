@@ -30,7 +30,7 @@ class ProcessingAlgorithmParametersModelBase;
 
 
 /**
- * \brief A sort/filter proxy model for providers and algorithms available within QField
+ * \brief A sort/filter proxy model for providers and algorithms available within SmartField
  * which automatically sorts the toolbox in a logical fashion and supports filtering
  * the results.
  */

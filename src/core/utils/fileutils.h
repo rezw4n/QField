@@ -17,7 +17,7 @@
 #ifndef FILEUTILS_H
 #define FILEUTILS_H
 
-#include "qfield_core_export.h"
+#include "smartfield_core_export.h"
 
 #include <QCryptographicHash>
 #include <QObject>
@@ -25,7 +25,7 @@
 
 class GnssPositionInformation;
 
-class QFIELD_CORE_EXPORT FileUtils : public QObject
+class SMARTFIELD_CORE_EXPORT FileUtils : public QObject
 {
     Q_OBJECT
 
@@ -54,8 +54,6 @@ class QFIELD_CORE_EXPORT FileUtils : public QObject
     Q_INVOKABLE void restrictImageSize( const QString &imagePath, int maximumWidthHeight );
 
     Q_INVOKABLE void addImageMetadata( const QString &imagePath, const GnssPositionInformation &positionInformation );
-
-    Q_INVOKABLE void addImageStamp( const QString &imagePath, const QString &text );
 
     static bool copyRecursively( const QString &sourceFolder, const QString &destFolder, QgsFeedback *feedback = nullptr, bool wipeDestFolder = true );
     /**

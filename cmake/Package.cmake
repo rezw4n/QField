@@ -6,11 +6,10 @@ find_program(MACDEPLOYQT_EXECUTABLE macdeployqt HINTS "${QT_HOST_LIBEXECS}" NO_D
 find_program(ANDROIDDEPLOYQT_EXECUTABLE androiddeployqt HINTS "${QT_HOST_PATH}/tools/Qt6/bin")
 
 set(CPACK_GENERATOR)
-set(CPACK_PACKAGE_EXECUTABLES qfield;QField)
-set(CPACK_PACKAGE_HOMEPAGE_URL "https://qfield.org")
-# set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/images/icons/qfield_logo.png")
+set(CPACK_PACKAGE_EXECUTABLES smartfield;SmartField)
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://smartfield.org")
+# set(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/images/icons/smartfield_logo.png")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_VENDOR "OPENGIS.ch")
 # set(CPACK_STRIP_FILES TRUE)
 set(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_PROJECT_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_PROJECT_VERSION_MINOR})
@@ -27,15 +26,13 @@ if(WIN32)
     # message(STATUS "   + WIX                             YES ")
     # set(CPACK_WIX_UPGRADE_GUID 357E1535-9094-4550-8B42-D01EFD885686)
     # set(CPACK_WIX_PRODUCT_ICON we need a ico)
-    # set(CPACK_WIX_PRODUCT_LOGO "${CMAKE_SOURCE_DIR}/images/icons/qfield_logo.png")
+    # set(CPACK_WIX_PRODUCT_LOGO "${CMAKE_SOURCE_DIR}/images/icons/smartfield_logo.png")
     # set(CPACK_WIX_TEMPLATE "${CMAKE_SOURCE_DIR}/cmake/windows/template.wxs.in")
     # set(CPACK_WIX_EXTRA_SOURCES "${CMAKE_SOURCE_DIR}/cmake/windows/shortcuts.wxs")
     # set(CPACK_GENERATOR "WIX")
+    set(CPACK_NSIS_EXECUTABLES_DIRECTORY "usr\\\\bin")
 
     message(STATUS "   + NSIS                             YES ")
-    set(CPACK_NSIS_EXECUTABLES_DIRECTORY "usr\\\\bin")
-    set(CPACK_NSIS_DISPLAY_NAME "QField")
-
     list(APPEND CPACK_GENERATOR "NSIS")
 endif()
 
@@ -50,7 +47,7 @@ set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
 add_custom_target(bundle
                   COMMAND ${CMAKE_CPACK_COMMAND} "--config" "${CMAKE_BINARY_DIR}/BundleConfig.cmake"
                   COMMENT "Running CPACK. Please wait..."
-                  DEPENDS qfield)
+                  DEPENDS smartfield)
 
 # Qt IFW packaging framework
 if(BINARYCREATOR_EXECUTABLE)
@@ -76,7 +73,7 @@ if(ANDROID AND ANDROIDDEPLOYQT_EXECUTABLE)
     set(AT "@")
     set(WITH_ALL_FILES_ACCESS OFF CACHE STRING "[ANDROID] Enable All Files Access to be able to work with data anywhere on your device. If this is enabled, publishing via Google Play requires a permissions declaration and a review approval by Google.")
     if(WITH_ALL_FILES_ACCESS)
-      set(QFIELD_EXTRA_PERMISSIONS "<uses-permission android:name=\"android.permission.MANAGE_EXTERNAL_STORAGE\" />")
+      set(SMARTFIELD_EXTRA_PERMISSIONS "<uses-permission android:name=\"android.permission.MANAGE_EXTERNAL_STORAGE\" />")
     endif()
     configure_file(${CMAKE_SOURCE_DIR}/platform/android/AndroidManifest.xml.in ${CMAKE_SOURCE_DIR}/platform/android/AndroidManifest.xml @ONLY)
     configure_file(${CMAKE_SOURCE_DIR}/platform/android/generated.xml.in ${CMAKE_SOURCE_DIR}/platform/android/generated.xml @ONLY)
@@ -86,15 +83,15 @@ if(ANDROID AND ANDROIDDEPLOYQT_EXECUTABLE)
     set(ANDROID_TEMPLATE_FOLDER "${CMAKE_BINARY_DIR}/android-template")
     file(COPY ${CMAKE_SOURCE_DIR}/platform/android/ DESTINATION ${ANDROID_TEMPLATE_FOLDER}/)
     set(SRC_FOLDER "${ANDROID_TEMPLATE_FOLDER}/src/ch/opengis/${APP_PACKAGE_NAME}")
-    if (NOT APP_PACKAGE_NAME STREQUAL "qfield")
+    if (NOT APP_PACKAGE_NAME STREQUAL "smartfield")
         file(REMOVE_RECURSE ${SRC_FOLDER}) # remove any pre-existing content
-        file(RENAME "${ANDROID_TEMPLATE_FOLDER}/src/ch/opengis/qfield" ${SRC_FOLDER})
+        file(RENAME "${ANDROID_TEMPLATE_FOLDER}/src/ch/opengis/smartfield" ${SRC_FOLDER})
     endif()
     file(GLOB JAVA_FILES "${SRC_FOLDER}/*.java")
     foreach(JAVA_FILE ${JAVA_FILES})
       message(STATUS ${JAVA_FILE})
       file(READ ${JAVA_FILE} CONTENT)
-      string(REGEX REPLACE "ch.opengis.qfield" "ch.opengis.${APP_PACKAGE_NAME}"
+      string(REGEX REPLACE "ch.opengis.smartfield" "ch.opengis.${APP_PACKAGE_NAME}"
                            CONTENT "${CONTENT}")
       file(WRITE ${JAVA_FILE} "${CONTENT}")
     endforeach()
@@ -115,7 +112,7 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
     message(STATUS "   + iOS IPA                              YES ")
     set(CPACK_GENERATOR "External;${CPACK_GENERATOR}")
-    set(QT_IOS_EXPORT_OPTIONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/QFieldExportOptions.plist")
+    set(QT_IOS_EXPORT_OPTIONS_FILE "${CMAKE_CURRENT_BINARY_DIR}/SmartFieldExportOptions.plist")
     # Generate IPA
     set(QT_IOS_EXPORT_SIGNING_TYPE "manual")
 

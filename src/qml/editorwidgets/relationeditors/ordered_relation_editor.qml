@@ -1,12 +1,12 @@
-import QtQuick
-import QtQuick.Controls
-import QtQml.Models
-import QtQuick.Layouts
-import QtQuick.Controls.Material
-import QtQuick.Controls.Material.impl
-import org.qfield
-import org.qgis
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQml.Models 2.14
+import QtQuick.Layouts 1.14
+import QtQuick.Controls.Material 2.14
+import QtQuick.Controls.Material.impl 2.14
+import org.smartfield 1.0
+import org.qgis 1.0
+import Theme 1.0
 import "../.."
 import ".."
 
@@ -251,7 +251,7 @@ EditorWidgetBase {
 
           Image {
             id: featureImage
-            source: ImagePath ? UrlUtils.fromString(ImagePath) : Theme.getThemeIcon("ic_photo_notavailable_black_24dp")
+            source: ImagePath ? ('file://' + ImagePath) : Theme.getThemeIcon("ic_photo_notavailable_black_24dp")
             width: parent.height
             height: parent.height
             fillMode: Image.PreserveAspectFit
@@ -399,7 +399,7 @@ EditorWidgetBase {
     Label {
       width: parent.width
       wrapMode: Text.WordWrap
-      text: nmRelationId ? qsTr('Should the feature <b>%1 (%2)</b> of layer <b>%3</b> be unlinked?<br><i>(The connection will be deleted on layer <b>%4</b>)</i>').arg(deleteDialog.nmReferencedFeatureDisplayMessage).arg(deleteDialog.nmReferencedFeatureId).arg(deleteDialog.nmReferencedLayerName).arg(deleteDialog.referencingLayerName) : qsTr('Should the feature <b>%1 (%2)</b> on layer <b>%3</b> be deleted?').arg(deleteDialog.referencingFeatureDisplayMessage).arg(deleteDialog.referencingFeatureId).arg(deleteDialog.referencingLayerName)
+      text: nmRelationId ? qsTr('Should the feature <b>%1 (%2)</b> of layer <b>%3</b> be unlinked?<br><i>(The connection will be deleted on layer <b>%4</b>)</i>').arg(nmReferencedFeatureDisplayMessage).arg(deleteDialog.nmReferencedFeatureId).arg(deleteDialog.nmReferencedLayerName).arg(deleteDialog.referencingLayerName) : qsTr('Should the feature <b>%1 (%2)</b> on layer <b>%3</b> be deleted?').arg(deleteDialog.referencingFeatureDisplayMessage).arg(deleteDialog.referencingFeatureId).arg(deleteDialog.referencingLayerName)
     }
 
     standardButtons: Dialog.Ok | Dialog.Cancel

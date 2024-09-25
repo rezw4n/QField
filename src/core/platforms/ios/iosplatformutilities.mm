@@ -1,5 +1,5 @@
 /***************************************************************************
-                            iosplatformutilities.mm  -  utilities for qfield
+                            iosplatformutilities.mm  -  utilities for smartfield
 
                               -------------------
               begin                : November 2020
@@ -19,7 +19,7 @@
 #include "iosplatformutilities.h"
 #include "iosprojectsource.h"
 #include "iosresourcesource.h"
-#include "qfield.h"
+#include "smartfield.h"
 
 #include <AVFoundation/AVFoundation.h>
 #include <CoreLocation/CoreLocation.h>
@@ -77,11 +77,11 @@ void IosPlatformUtilities::afterUpdate() {
   QDir appDir(applicationDirectory());
   appDir.mkdir(QStringLiteral("Imported Projects"));
   appDir.mkdir(QStringLiteral("Imported Datasets"));
-  appDir.mkpath(QStringLiteral("QField/proj"));
-  appDir.mkpath(QStringLiteral("QField/auth"));
-  appDir.mkpath(QStringLiteral("QField/fonts"));
-  appDir.mkpath(QStringLiteral("QField/basemaps"));
-  appDir.mkpath(QStringLiteral("QField/logs"));
+  appDir.mkpath(QStringLiteral("SmartField/proj"));
+  appDir.mkpath(QStringLiteral("SmartField/auth"));
+  appDir.mkpath(QStringLiteral("SmartField/fonts"));
+  appDir.mkpath(QStringLiteral("SmartField/basemaps"));
+  appDir.mkpath(QStringLiteral("SmartField/logs"));
 }
 
 QString IosPlatformUtilities::systemSharedDataLocation() const {
@@ -96,7 +96,7 @@ QString IosPlatformUtilities::applicationDirectory() const {
 }
 
 QStringList IosPlatformUtilities::appDataDirs() const {
-  return QStringList() << QStringLiteral("%1/QField/")
+  return QStringList() << QStringLiteral("%1/SmartField/")
                               .arg(QStandardPaths::writableLocation(
                                   QStandardPaths::DocumentsLocation));
 }

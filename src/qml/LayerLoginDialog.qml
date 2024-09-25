@@ -1,8 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import org.smartfield 1.0
+import Theme 1.0
 
 Page {
   signal enter(string usr, string pw)
@@ -28,7 +28,10 @@ Page {
     Layout.fillHeight: true
     contentHeight: content.height
     clip: true
-    ScrollBar.vertical: QfScrollBar {
+
+    ScrollBar.vertical: ScrollBar {
+      width: 8
+      policy: height < flickable.contentHeight ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
     }
 
     ColumnLayout {

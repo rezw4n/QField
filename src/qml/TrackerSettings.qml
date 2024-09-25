@@ -1,9 +1,10 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import org.qgis
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
+import "."
 
 Popup {
   id: trackInformationPopup
@@ -98,8 +99,7 @@ Popup {
         Layout.fillHeight: true
         padding: 10
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-        ScrollBar.vertical: QfScrollBar {
-        }
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
         contentWidth: trackerSettingsGrid.width
         contentHeight: trackerSettingsGrid.height
         clip: true

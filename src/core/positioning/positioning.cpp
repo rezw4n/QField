@@ -55,7 +55,11 @@ void Positioning::setActive( bool active )
       setupDevice();
     }
     mReceiver->connectDevice();
+#if QT_VERSION > QT_VERSION_CHECK( 6, 0, 0 )
     if ( !QSensor::sensorsForType( QCompass::sensorType ).isEmpty() )
+#else
+    if ( !QSensor::sensorsForType( QCompass::type ).isEmpty() )
+#endif
     {
       mCompass.setActive( true );
       mCompassTimer.start();
@@ -321,13 +325,7 @@ void Positioning::processCompassReading()
       default:
         break;
     }
-
     orientation += mCompass.reading()->azimuth();
-    if ( orientation < 0.0 )
-    {
-      orientation = 360 + orientation;
-    }
-
     if ( mOrientation != orientation )
     {
       mOrientation = orientation;

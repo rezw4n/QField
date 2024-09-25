@@ -158,9 +158,9 @@ void ProcessingAlgorithmsModelBase::addProvider( QgsProcessingProvider *provider
   const QList<const QgsProcessingAlgorithm *> algorithms = provider->algorithms();
   for ( const QgsProcessingAlgorithm *algorithm : algorithms )
   {
-    const static QStringList sSupportedParameters = { QStringLiteral( "number" ), QStringLiteral( "distance" ), QStringLiteral( "enum" ), QStringLiteral( "boolean" ), QStringLiteral( "sink" ), QStringLiteral( "source" ) };
+    const static QStringList sSupportedParameters = { QStringLiteral( "number" ), QStringLiteral( "distance" ), QStringLiteral( "enum" ), QStringLiteral( "sink" ), QStringLiteral( "source" ) };
     const QgsProcessingFeatureBasedAlgorithm *featureBasedAlgorithm = dynamic_cast<const QgsProcessingFeatureBasedAlgorithm *>( algorithm );
-    if ( algorithm->flags() & Qgis::ProcessingAlgorithmFlag::SupportsInPlaceEdits )
+    if ( featureBasedAlgorithm )
     {
       bool isSupported = true;
       for ( const QgsProcessingParameterDefinition *parameter : algorithm->parameterDefinitions() )
@@ -171,7 +171,7 @@ void ProcessingAlgorithmsModelBase::addProvider( QgsProcessingProvider *provider
           break;
         }
 
-        if ( parameter->type() == QStringLiteral( "source" ) && ( featureBasedAlgorithm && parameter->name() != featureBasedAlgorithm->inputParameterName() || parameter->name() != QStringLiteral( "INPUT" ) ) )
+        if ( parameter->type() == QStringLiteral( "source" ) && parameter->name() != featureBasedAlgorithm->inputParameterName() )
         {
           isSupported = false;
           break;

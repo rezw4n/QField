@@ -1,8 +1,8 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import org.qfield
-import Theme
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import Theme 1.0
+import org.smartfield 1.0
 
 Item {
   id: aboutPanel
@@ -25,8 +25,7 @@ Item {
       Layout.fillWidth: true
       Layout.fillHeight: true
       ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-      ScrollBar.vertical: QfScrollBar {
-      }
+      ScrollBar.vertical.policy: ScrollBar.AsNeeded
       contentItem: information
       contentWidth: information.width
       contentHeight: information.height
@@ -41,10 +40,10 @@ Item {
         id: information
         spacing: 6
         width: aboutPanel.width - 40
-        height: Math.max(mainWindow.height - linksButton.height * 2 - qfieldAppDirectoryLabel.height - aboutContainer.spacing * 3 - aboutContainer.anchors.topMargin - aboutContainer.anchors.bottomMargin, qfieldPart.height + opengisPart.height + spacing)
+        height: Math.max(mainWindow.height - linksButton.height * 2 - smartfieldAppDirectoryLabel.height - aboutContainer.spacing * 3 - aboutContainer.anchors.topMargin - aboutContainer.anchors.bottomMargin, smartfieldPart.height + opengisPart.height + spacing)
 
         ColumnLayout {
-          id: qfieldPart
+          id: smartfieldPart
           Layout.fillHeight: true
           Layout.alignment: Qt.AlignHCenter
 
@@ -52,14 +51,14 @@ Item {
             Layout.preferredWidth: 138
             Layout.preferredHeight: 138
             Image {
-              id: qfieldLogo
+              id: smartfieldLogo
               width: parent.width
               height: parent.height
-              source: "qrc:/images/qfield_logo.svg"
+              source: "qrc:/images/smartfield_logo.svg"
               sourceSize.width: width * screen.devicePixelRatio
               sourceSize.height: height * screen.devicePixelRatio
             }
-            onClicked: Qt.openUrlExternally("https://qfield.org/")
+            onClicked: Qt.openUrlExternally("https://smartfield.org/")
           }
 
           Label {
@@ -71,10 +70,10 @@ Item {
             color: Theme.light
             textFormat: Text.RichText
             text: {
-              var links = '<a href="https://github.com/opengisch/QField/commit/' + gitRev + '">' + gitRev.substr(0, 6) + '</a>';
+              var links = '<a href="https://github.com/rezw4n/' + gitRev + '">' + gitRev.substr(0, 6) + '</a>';
               if (appVersion && appVersion !== '1.0.0')
-                links += ' <a href="https://github.com/opengisch/QField/releases/tag/' + appVersion + '">' + appVersion + '</a>';
-              return "QField<br>" + appVersionStr + " (" + links + ")<br>Qt " + qVersion;
+                links += ' <a href="https://github.com/rezw4n' + appVersion + '">' + appVersion + '</a>';
+              return "SmartField<br>" + appVersionStr + " (" + links + ")<br>Qt " + qVersion;
             }
             onLinkActivated: link => Qt.openUrlExternally(link)
           }
@@ -96,7 +95,6 @@ Item {
               sourceSize.width: width * screen.devicePixelRatio
               sourceSize.height: height * screen.devicePixelRatio
             }
-            onClicked: Qt.openUrlExternally("https://opengis.ch")
           }
 
           Label {
@@ -107,7 +105,7 @@ Item {
             font: Theme.strongFont
             color: Theme.light
             textFormat: Text.RichText
-            text: qsTr("Developed by") + '<br><a href="https://opengis.ch">OPENGIS.ch</a>'
+            text: qsTr("Developed by") + '<br><a href="">AstroTech</a>'
             onLinkActivated: link => Qt.openUrlExternally(link)
           }
         }
@@ -115,7 +113,7 @@ Item {
     }
 
     Label {
-      id: qfieldAppDirectoryLabel
+      id: smartfieldAppDirectoryLabel
       Layout.fillWidth: true
       Layout.maximumWidth: parent.width
       Layout.alignment: Qt.AlignCenter
@@ -129,16 +127,6 @@ Item {
         let label = '';
         let isDesktopPlatform = Qt.platform.os !== "ios" && Qt.platform.os !== "android";
         let dataDirs = platformUtilities.appDataDirs();
-        if (dataDirs.length > 0) {
-          label = dataDirs.length > 1 ? qsTr('QField app directories') : qsTr('QField app directory');
-          for (let dataDir of dataDirs) {
-            if (isDesktopPlatform) {
-              label += '<br><a href="' + UrlUtils.fromString(dataDir) + '">' + dataDir + '</a>';
-            } else {
-              label += '<br>' + dataDir;
-            }
-          }
-        }
         return label;
       }
 
@@ -150,8 +138,7 @@ Item {
       Layout.fillWidth: true
       icon.source: Theme.getThemeVectorIcon('ic_sponsor_white_24dp')
 
-      text: qsTr('Support QField')
-      onClicked: Qt.openUrlExternally("https://github.com/sponsors/opengisch")
+      text: qsTr('Made with Love')
     }
 
     QfButton {
@@ -163,7 +150,7 @@ Item {
       text: qsTr('Documentation')
 
       onClicked: {
-        Qt.openUrlExternally("https://docs.qfield.org/");
+        Qt.openUrlExternally("https://docs.smartfield.org/");
       }
 
       onDropdownClicked: {

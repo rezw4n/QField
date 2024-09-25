@@ -17,7 +17,7 @@
 
 #include "appinterface.h"
 #include "platformutilities.h"
-#include "qfield.h"
+#include "smartfield.h"
 #include "qgismobileapp.h"
 #if WITH_SENTRY
 #include "sentry_wrapper.h"
@@ -111,9 +111,9 @@ bool AppInterface::hasProjectOnLaunch() const
   }
   else
   {
-    if ( QSettings().value( "/QField/loadProjectOnLaunch", true ).toBool() )
+    if ( QSettings().value( "/SmartField/loadProjectOnLaunch", true ).toBool() )
     {
-      const QString lastProjectFilePath = QSettings().value( QStringLiteral( "QField/lastProjectFilePath" ), QString() ).toString();
+      const QString lastProjectFilePath = QSettings().value( QStringLiteral( "SmartField/lastProjectFilePath" ), QString() ).toString();
       if ( !lastProjectFilePath.isEmpty() && QFileInfo::exists( lastProjectFilePath ) )
       {
         return true;
@@ -192,7 +192,7 @@ QVariantMap AppInterface::availableLanguages() const
   while ( it.hasNext() )
   {
     it.next();
-    if ( it.fileName().startsWith( "qfield_" ) )
+    if ( it.fileName().startsWith( "smartfield_" ) )
     {
       const qsizetype delimiter = it.fileName().indexOf( '.' );
       const QString languageCode = it.fileName().mid( 7, delimiter - 7 );
@@ -228,15 +228,15 @@ bool AppInterface::isFileExtensionSupported( const QString &filename ) const
 
 void AppInterface::logMessage( const QString &message )
 {
-  QgsMessageLog::logMessage( message, QStringLiteral( "QField" ) );
+  QgsMessageLog::logMessage( message, QStringLiteral( "SmartField" ) );
 }
 
 void AppInterface::logRuntimeProfiler()
 {
 #if _QGIS_VERSION_INT >= 33299
-  QgsMessageLog::logMessage( QgsApplication::profiler()->asText(), QStringLiteral( "QField" ) );
+  QgsMessageLog::logMessage( QgsApplication::profiler()->asText(), QStringLiteral( "SmartField" ) );
 #else
-  QgsMessageLog::logMessage( QStringLiteral( "QField must be compiled against QGIS >= 3.34 to support logging of the runtime profiler" ), QStringLiteral( "QField" ) );
+  QgsMessageLog::logMessage( QStringLiteral( "SmartField must be compiled against QGIS >= 3.34 to support logging of the runtime profiler" ), QStringLiteral( "SmartField" ) );
 #endif
 }
 

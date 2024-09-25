@@ -1,5 +1,5 @@
 /***************************************************************************
-                            androidplatformutilities.cpp  -  utilities for qfield
+                            androidplatformutilities.cpp  -  utilities for smartfield
 
                               -------------------
               begin                : February 2016
@@ -22,9 +22,9 @@
 #include "androidviewstatus.h"
 #include "appinterface.h"
 #include "fileutils.h"
-#include "qfield.h"
-#include "qfield_android.h"
-#include "qfieldcloudconnection.h"
+#include "smartfield.h"
+#include "smartfield_android.h"
+#include "smartcloudconnection.h"
 
 
 #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
@@ -85,7 +85,7 @@ inline void runOnAndroidMainThread( const std::function<void()> &runnable )
 #include <android/log.h>
 #include <jni.h>
 
-const char *const applicationName = "QField";
+const char *const applicationName = "SmartField";
 
 #define GLUE_HELPER( u, v, w, x, y, z ) u##v##w##x##y##z
 #define JNI_FUNCTION_NAME( package_name, class_name, function_name ) GLUE_HELPER( Java_ch_opengis_, package_name, _, class_name, _, function_name )
@@ -116,9 +116,9 @@ void AndroidPlatformUtilities::afterUpdate()
       if ( activity.isValid() )
       {
 #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
-        QAndroidJniObject messageJni = QAndroidJniObject::fromString( QObject::tr( "Please wait while QField installation finalizes." ) );
+        QAndroidJniObject messageJni = QAndroidJniObject::fromString( QObject::tr( "Please wait while SmartField installation finalizes." ) );
 #else
-        QJniObject messageJni = QJniObject::fromString( QObject::tr( "Please wait while QField installation finalizes." ) );
+        QJniObject messageJni = QJniObject::fromString( QObject::tr( "Please wait while SmartField installation finalizes." ) );
 #endif
         activity.callMethod<void>( "showBlockingProgressDialog", "(Ljava/lang/String;)V", messageJni.object<jstring>() );
       }
@@ -165,7 +165,7 @@ void AndroidPlatformUtilities::loadQgsProject() const
 
 QStringList AndroidPlatformUtilities::appDataDirs() const
 {
-  const QString dataDirs = getIntentExtra( "QFIELD_APP_DATA_DIRS" );
+  const QString dataDirs = getIntentExtra( "SMARTFIELD_APP_DATA_DIRS" );
   return ( !dataDirs.isEmpty() ? dataDirs.split( "--;--" ) : QStringList() );
 }
 
@@ -509,7 +509,7 @@ ResourceSource *AndroidPlatformUtilities::processCameraActivity( const QString &
         QJniObject filePathJni = QJniObject::fromString( filePath );
         QJniObject suffixJni = QJniObject::fromString( suffix );
 #endif
-        QSettings().setValue( QStringLiteral( "QField/nativeCameraLaunched" ), true );
+        QSettings().setValue( QStringLiteral( "SmartField/nativeCameraLaunched" ), true );
         activity.callMethod<void>( "getCameraResource", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V",
                                    prefixJni.object<jstring>(),
                                    filePathJni.object<jstring>(),
@@ -555,7 +555,7 @@ ResourceSource *AndroidPlatformUtilities::processGalleryActivity( const QString 
         QJniObject filePathJni = QJniObject::fromString( filePath );
         QJniObject mimeTypeJni = QJniObject::fromString( mimeType );
 #endif
-        QSettings().setValue( QStringLiteral( "QField/nativeCameraLaunched" ), true );
+        QSettings().setValue( QStringLiteral( "SmartField/nativeCameraLaunched" ), true );
         activity.callMethod<void>( "getGalleryResource", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
                                    prefixJni.object<jstring>(),
                                    filePathJni.object<jstring>(),
@@ -612,7 +612,7 @@ ResourceSource *AndroidPlatformUtilities::getFile( const QString &prefix, const 
         QJniObject filePathJni = QJniObject::fromString( filePath );
         QJniObject mimeTypeJni = QJniObject::fromString( mimeType );
 #endif
-        QSettings().setValue( QStringLiteral( "QField/nativeCameraLaunched" ), true );
+        QSettings().setValue( QStringLiteral( "SmartField/nativeCameraLaunched" ), true );
         activity.callMethod<void>( "getFilePickerResource", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
                                    prefixJni.object<jstring>(),
                                    filePathJni.object<jstring>(),
@@ -652,7 +652,7 @@ ViewStatus *AndroidPlatformUtilities::open( const QString &filePath, bool isEdit
         QJniObject filePathJni = QJniObject::fromString( filePath );
         QJniObject mimeTypeJni = QJniObject::fromString( mimeType );
 #endif
-        QSettings().setValue( QStringLiteral( "QField/nativeCameraLaunched" ), true );
+        QSettings().setValue( QStringLiteral( "SmartField/nativeCameraLaunched" ), true );
         activity.callMethod<void>( "openResource", "(Ljava/lang/String;Ljava/lang/String;Z)V",
                                    filePathJni.object<jstring>(),
                                    mimeTypeJni.object<jstring>(),
@@ -665,7 +665,7 @@ ViewStatus *AndroidPlatformUtilities::open( const QString &filePath, bool isEdit
 
 bool AndroidPlatformUtilities::checkPositioningPermissions() const
 {
-  // First check for coarse permissions. If the user configured QField to only get coarse permissions
+  // First check for coarse permissions. If the user configured SmartField to only get coarse permissions
   // it's his wish and we just let it be.
 #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
   QtAndroid::PermissionResult r = QtAndroid::checkPermission( "android.permission.ACCESS_COARSE_LOCATION" );
@@ -845,20 +845,20 @@ QVariantMap AndroidPlatformUtilities::sceneMargins( QQuickWindow *window ) const
   return margins;
 }
 
-void AndroidPlatformUtilities::uploadPendingAttachments( QFieldCloudConnection *connection ) const
+void AndroidPlatformUtilities::uploadPendingAttachments( SmartCloudConnection *connection ) const
 {
   QTimer::singleShot( 500, [connection]() {
     if ( connection )
     {
       qInfo() << "Launching service from main...";
 #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
-      QAndroidJniObject::callStaticMethod<void>( "ch/opengis/" APP_PACKAGE_NAME "/QFieldService",
-                                                 "startQFieldService",
+      QAndroidJniObject::callStaticMethod<void>( "ch/opengis/" APP_PACKAGE_NAME "/SmartFieldService",
+                                                 "startSmartFieldService",
                                                  "(Landroid/content/Context;)V",
                                                  qtAndroidContext().object() );
 #else
-      QJniObject::callStaticMethod<void>( "ch/opengis/" APP_PACKAGE_NAME "/QFieldService",
-                                          "startQFieldService",
+      QJniObject::callStaticMethod<void>( "ch/opengis/" APP_PACKAGE_NAME "/SmartFieldService",
+                                          "startSmartFieldService",
                                           "(Landroid/content/Context;)V",
                                           qtAndroidContext().object() );
 #endif
@@ -894,8 +894,8 @@ void AndroidPlatformUtilities::vibrate( int milliseconds ) const
 extern "C" {
 #endif
 
-// QFieldActivity class functions
-JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, openProject )( JNIEnv *env, jobject obj, jstring path )
+// SmartFieldActivity class functions
+JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, SmartFieldActivity, openProject )( JNIEnv *env, jobject obj, jstring path )
 {
   if ( AppInterface::instance() )
   {
@@ -906,7 +906,7 @@ JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, 
   return;
 }
 
-JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, openPath )( JNIEnv *env, jobject obj, jstring path )
+JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, SmartFieldActivity, openPath )( JNIEnv *env, jobject obj, jstring path )
 {
   if ( AppInterface::instance() )
   {
@@ -920,7 +920,7 @@ JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, 
 #define ANDROID_VOLUME_DOWN 25
 #define ANDROID_VOLUME_UP 24
 
-JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, volumeKeyDown )( JNIEnv *env, jobject obj, int volumeKeyCode )
+JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, SmartFieldActivity, volumeKeyDown )( JNIEnv *env, jobject obj, int volumeKeyCode )
 {
   if ( AppInterface::instance() )
   {
@@ -929,7 +929,7 @@ JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, 
   return;
 }
 
-JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, volumeKeyUp )( JNIEnv *env, jobject obj, int volumeKeyCode )
+JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, SmartFieldActivity, volumeKeyUp )( JNIEnv *env, jobject obj, int volumeKeyCode )
 {
   if ( AppInterface::instance() )
   {
@@ -938,7 +938,7 @@ JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, 
   return;
 }
 
-JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, resourceReceived )( JNIEnv *env, jobject obj, jstring path )
+JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, SmartFieldActivity, resourceReceived )( JNIEnv *env, jobject obj, jstring path )
 {
   if ( PlatformUtilities::instance() )
   {
@@ -949,7 +949,7 @@ JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, 
   return;
 }
 
-JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, resourceOpened )( JNIEnv *env, jobject obj, jstring path )
+JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, SmartFieldActivity, resourceOpened )( JNIEnv *env, jobject obj, jstring path )
 {
   if ( PlatformUtilities::instance() )
   {
@@ -960,7 +960,7 @@ JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, 
   return;
 }
 
-JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, QFieldActivity, resourceCanceled )( JNIEnv *env, jobject obj, jstring message )
+JNIEXPORT void JNICALL JNI_FUNCTION_NAME( APP_PACKAGE_JNI_NAME, SmartFieldActivity, resourceCanceled )( JNIEnv *env, jobject obj, jstring message )
 {
   if ( PlatformUtilities::instance() )
   {

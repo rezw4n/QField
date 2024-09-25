@@ -148,24 +148,24 @@ void NavigationModel::save()
       pointWkts << point.asWkt();
     }
 
-    settings.beginGroup( QStringLiteral( "/QField/navigation" ) );
+    settings.beginGroup( QStringLiteral( "/SmartField/navigation" ) );
     settings.setValue( QStringLiteral( "crs" ), mCrs.toWkt() );
     settings.setValue( QStringLiteral( "points" ), pointWkts );
     settings.endGroup();
   }
   else
   {
-    settings.remove( QStringLiteral( "/QField/navigation" ) );
+    settings.remove( QStringLiteral( "/SmartField/navigation" ) );
   }
 }
 
 void NavigationModel::restore()
 {
   QSettings settings;
-  if ( settings.contains( QStringLiteral( "/QField/navigation/points" ) ) )
+  if ( settings.contains( QStringLiteral( "/SmartField/navigation/points" ) ) )
   {
     beginResetModel();
-    settings.beginGroup( QStringLiteral( "/QField/navigation" ) );
+    settings.beginGroup( QStringLiteral( "/SmartField/navigation" ) );
     mCrs.createFromWkt( settings.value( QStringLiteral( "crs" ), QString() ).toString() );
     mPoints.clear();
     const QStringList pointWkts( settings.value( QStringLiteral( "points" ), QString() ).toStringList() );

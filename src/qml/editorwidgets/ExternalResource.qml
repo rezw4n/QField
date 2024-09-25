@@ -1,11 +1,12 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import QtQuick.Window
+import QtQuick 2.14
+import QtQuick.Controls 2.14
+import QtQuick.Layouts 1.14
+import QtQuick.Window 2.14
 import QtMultimedia
-import org.qgis
-import org.qfield
-import Theme
+import org.qgis 1.0
+import org.smartfield 1.0
+import Theme 1.0
+import "."
 import ".."
 
 EditorWidgetBase {
@@ -16,7 +17,6 @@ EditorWidgetBase {
 
   ExpressionEvaluator {
     id: rootPathEvaluator
-    project: qgisProject
   }
   property string prefixToRelativePath: {
     if (qgisProject == undefined)
@@ -47,7 +47,7 @@ EditorWidgetBase {
       }
     }
 
-    // since we've hardcoded the project path by default so far, let's maintain that until we improve things in qfieldsync
+    // since we've hardcoded the project path by default so far, let's maintain that until we improve things in smartfieldsync
     if (path == "") {
       path = qgisProject.homePath;
       if (!path.endsWith("/"))
@@ -89,15 +89,11 @@ EditorWidgetBase {
         image.hasImage = true;
         image.opacity = 1;
         image.anchors.topMargin = 0;
-        image.source = UrlUtils.fromString(fullValue);
+        image.source = (!isHttp ? 'file://' : '') + fullValue;
         geoTagBadge.hasGeoTag = ExifTools.hasGeoTag(fullValue);
       } else if (isAudio || isVideo) {
-        mediaFrame.height = 48;
-        image.visible = false;
-        image.opacity = 0.5;
-        image.source = '';
         player.firstFrameDrawn = false;
-        player.sourceUrl = UrlUtils.fromString(fullValue);
+        player.sourceUrl = (!isHttp ? 'file://' : '') + fullValue;
       }
     } else {
       image.source = '';
@@ -112,15 +108,14 @@ EditorWidgetBase {
     id: expressionEvaluator
     feature: currentFeature
     layer: currentLayer
-    project: qgisProject
     expressionText: {
       var value;
-      if (currentLayer && currentLayer.customProperty('QFieldSync/attachment_naming') !== undefined) {
-        value = JSON.parse(currentLayer.customProperty('QFieldSync/attachment_naming'))[field.name];
+      if (currentLayer && currentLayer.customProperty('SmartFieldSync/attachment_naming') !== undefined) {
+        value = JSON.parse(currentLayer.customProperty('SmartFieldSync/attachment_naming'))[field.name];
         return value !== undefined ? value : '';
-      } else if (currentLayer && currentLayer.customProperty('QFieldSync/photo_naming') !== undefined) {
+      } else if (currentLayer && currentLayer.customProperty('SmartFieldSync/photo_naming') !== undefined) {
         // Fallback to old configuration key
-        value = JSON.parse(currentLayer.customProperty('QFieldSync/photo_naming'))[field.name];
+        value = JSON.parse(currentLayer.customProperty('SmartFieldSync/photo_naming'))[field.name];
         return value !== undefined ? value : '';
       }
       return '';
@@ -263,7 +258,7 @@ EditorWidgetBase {
       id: player
       active: isAudio || isVideo
 
-      property url sourceUrl: ''
+      property string sourceUrl: ''
       property bool firstFrameDrawn: false
 
       anchors.left: parent.left
@@ -323,7 +318,7 @@ EditorWidgetBase {
       id: sketchButton
       anchors.top: image.top
       anchors.right: image.right
-      visible: image.source != '' && image.status === Image.Ready && isEnabled
+      visible: image.status === Image.Ready && isEnabled
 
       round: true
       iconSource: Theme.getThemeVectorIcon("ic_freehand_white_24dp")
@@ -444,7 +439,7 @@ EditorWidgetBase {
     width: visible ? 48 : 0
     height: 48
 
-    // QField has historically handled no viewer type as image, let's carry that on
+    // SmartField has historically handled no viewer type as image, let's carry that on
     visible: documentViewer == document_IMAGE && isEnabled
 
     anchors.right: cameraVideoButton.left
@@ -524,7 +519,7 @@ EditorWidgetBase {
   Component {
     id: audioRecorderComponent
 
-    QFieldAudioRecorder {
+    SmartFieldAudioRecorder {
       z: 10000
       visible: false
 
@@ -554,16 +549,16 @@ EditorWidgetBase {
   Component {
     id: cameraComponent
 
-    QFieldCamera {
-      id: qfieldCamera
+    SmartFieldCamera {
+      id: smartfieldCamera
       visible: false
 
       Component.onCompleted: {
         if (isVideo) {
-          qfieldCamera.state = 'VideoCapture';
+          smartfieldCamera.state = 'VideoCapture';
           open();
         } else {
-          qfieldCamera.state = 'PhotoCapture';
+          smartfieldCamera.state = 'PhotoCapture';
           open();
         }
       }
@@ -574,7 +569,7 @@ EditorWidgetBase {
         filepath = filepath.replace('{extension}', FileUtils.fileSuffix(path));
         platformUtilities.renameFile(path, prefixToRelativePath + filepath);
         if (!cameraLoader.isVideo) {
-          var maximumWidhtHeight = iface.readProjectNumEntry("qfieldsync", "maximumImageWidthHeight", 0);
+          var maximumWidhtHeight = iface.readProjectNumEntry("smartfieldsync", "maximumImageWidthHeight", 0);
           if (maximumWidhtHeight > 0) {
             FileUtils.restrictImageSize(prefixToRelativePath + filepath, maximumWidhtHeight);
           }
@@ -597,7 +592,7 @@ EditorWidgetBase {
     target: __resourceSource
     function onResourceReceived(path) {
       if (path) {
-        var maximumWidhtHeight = iface.readProjectNumEntry("qfieldsync", "maximumImageWidthHeight", 0);
+        var maximumWidhtHeight = iface.readProjectNumEntry("smartfieldsync", "maximumImageWidthHeight", 0);
         if (maximumWidhtHeight > 0) {
           FileUtils.restrictImageSize(prefixToRelativePath + path, maximumWidhtHeight);
         }
@@ -647,7 +642,7 @@ EditorWidgetBase {
 
   function capturePhoto() {
     Qt.inputMethod.hide();
-    if (platformUtilities.capabilities & PlatformUtilities.NativeCamera && settings.valueBool("nativeCamera2", true)) {
+    if (platformUtilities.capabilities & PlatformUtilities.NativeCamera && settings.valueBool("nativeCamera", true)) {
       var filepath = getResourceFilePath();
       // Pictures taken by cameras will always be JPG
       filepath = filepath.replace('{extension}', 'JPG');
@@ -661,7 +656,7 @@ EditorWidgetBase {
 
   function captureVideo() {
     Qt.inputMethod.hide();
-    if (platformUtilities.capabilities & PlatformUtilities.NativeCamera && settings.valueBool("nativeCamera2", true)) {
+    if (platformUtilities.capabilities & PlatformUtilities.NativeCamera && settings.valueBool("nativeCamera", true)) {
       var filepath = getResourceFilePath();
       // Video taken by cameras will always be MP4
       filepath = filepath.replace('{extension}', 'MP4');
@@ -692,93 +687,89 @@ EditorWidgetBase {
     hasMenu = true;
   }
 
-  Item {
-    visible: false
+  MenuItem {
+    id: capturePhotoMenuItem
+    text: qsTr('Take a photo')
 
-    MenuItem {
-      id: capturePhotoMenuItem
-      text: qsTr('Take a photo')
+    font: Theme.defaultFont
+    icon.source: Theme.getThemeVectorIcon("ic_camera_photo_black_24dp")
+    height: 48
+    leftPadding: Theme.menuItemLeftPadding
 
-      font: Theme.defaultFont
-      icon.source: Theme.getThemeVectorIcon("ic_camera_photo_black_24dp")
-      height: 48
-      leftPadding: Theme.menuItemLeftPadding
+    onTriggered: capturePhoto()
+  }
 
-      onTriggered: capturePhoto()
-    }
+  MenuItem {
+    id: captureVideoMenuItem
+    text: qsTr('Take a video')
 
-    MenuItem {
-      id: captureVideoMenuItem
-      text: qsTr('Take a video')
+    font: Theme.defaultFont
+    icon.source: Theme.getThemeVectorIcon("ic_camera_video_black_24dp")
+    height: 48
+    leftPadding: Theme.menuItemLeftPadding
 
-      font: Theme.defaultFont
-      icon.source: Theme.getThemeVectorIcon("ic_camera_video_black_24dp")
-      height: 48
-      leftPadding: Theme.menuItemLeftPadding
+    onTriggered: captureVideo()
+  }
 
-      onTriggered: captureVideo()
-    }
+  MenuItem {
+    id: captureAudioMenuItem
+    text: qsTr('Record an audio clip')
 
-    MenuItem {
-      id: captureAudioMenuItem
-      text: qsTr('Record an audio clip')
+    font: Theme.defaultFont
+    icon.source: Theme.getThemeVectorIcon("ic_microphone_black_24dp")
+    height: 48
+    leftPadding: Theme.menuItemLeftPadding
 
-      font: Theme.defaultFont
-      icon.source: Theme.getThemeVectorIcon("ic_microphone_black_24dp")
-      height: 48
-      leftPadding: Theme.menuItemLeftPadding
+    onTriggered: captureAudio()
+  }
 
-      onTriggered: captureAudio()
-    }
+  MenuSeparator {
+    id: separatorGalleryItem
+    width: parent.width
+  }
 
-    MenuSeparator {
-      id: separatorGalleryItem
-      width: parent.width
-    }
+  MenuItem {
+    id: attachGalleryMenuItem
+    text: qsTr('Attach a gallery item')
 
-    MenuItem {
-      id: attachGalleryMenuItem
-      text: qsTr('Attach a gallery item')
+    font: Theme.defaultFont
+    icon.source: Theme.getThemeVectorIcon("ic_gallery_black_24dp")
+    height: 48
+    leftPadding: Theme.menuItemLeftPadding
 
-      font: Theme.defaultFont
-      icon.source: Theme.getThemeVectorIcon("ic_gallery_black_24dp")
-      height: 48
-      leftPadding: Theme.menuItemLeftPadding
+    onTriggered: attachGallery()
+  }
 
-      onTriggered: attachGallery()
-    }
+  MenuItem {
+    id: attachFileMenuItem
+    text: qsTr('Attach a file')
 
-    MenuItem {
-      id: attachFileMenuItem
-      text: qsTr('Attach a file')
+    font: Theme.defaultFont
+    icon.source: Theme.getThemeVectorIcon("ic_file_black_24dp")
+    height: 48
+    leftPadding: Theme.menuItemLeftPadding
 
-      font: Theme.defaultFont
-      icon.source: Theme.getThemeVectorIcon("ic_file_black_24dp")
-      height: 48
-      leftPadding: Theme.menuItemLeftPadding
+    onTriggered: attachFile()
+  }
 
-      onTriggered: attachFile()
-    }
+  MenuSeparator {
+    id: separatorDrawingItem
+    width: parent.width
+  }
 
-    MenuSeparator {
-      id: separatorDrawingItem
-      width: parent.width
-    }
+  MenuItem {
+    id: attachDrawingMenuItem
+    text: qsTr('Draw a sketch')
 
-    MenuItem {
-      id: attachDrawingMenuItem
-      text: qsTr('Draw a sketch')
+    font: Theme.defaultFont
+    icon.source: Theme.getThemeVectorIcon("ic_freehand_white_24dp")
+    height: 48
+    leftPadding: Theme.menuItemLeftPadding
 
-      font: Theme.defaultFont
-      icon.source: Theme.getThemeVectorIcon("ic_freehand_white_24dp")
-      height: 48
-      leftPadding: Theme.menuItemLeftPadding
-
-      onTriggered: {
-        sketcherConnection.enabled = true;
-        sketcher.clear();
-        sketcher.open();
-      }
+    onTriggered: {
+      sketcherConnection.enabled = true;
+      sketcher.clear();
+      sketcher.open();
     }
   }
 }

@@ -110,7 +110,7 @@ namespace sentry_wrapper
     sentry_add_breadcrumb( crumb );
 
 #if ANDROID
-    static const char *const applicationName = "QField";
+    static const char *const applicationName = "SmartField";
     QString report = msg;
     if ( context.file && !QString( context.file ).isEmpty() )
     {
